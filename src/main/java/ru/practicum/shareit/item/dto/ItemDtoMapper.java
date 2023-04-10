@@ -1,14 +1,16 @@
 package ru.practicum.shareit.item.dto;
 
-import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Component;
 import ru.practicum.shareit.item.Item;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
-public class ItemDtoMapper implements RowMapper<Item> {
-	@Override
-	public Item mapRow(ResultSet rs, int rowNum) throws SQLException {
-		return null;
-	}
+@Component
+public class ItemDtoMapper {
+    public static ItemDto toItemDto(Item item) {
+        return new ItemDto(
+                item.getName(),
+                item.getDescription(),
+                item.isAvailable(),
+                item.getRequest() != null ? item.getRequest().getId() : null
+        );
+    }
 }
