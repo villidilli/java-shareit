@@ -8,9 +8,18 @@ import ru.practicum.shareit.user.User;
 @Component
 public class UserDtoMapper {
     public static UserDto toUserDto(User user) {
-        return new UserDto(
-                user.getName(),
-                user.getEmail()
-        );
+        UserDto userDto = new UserDto();
+        userDto.setId(user.getId());
+        userDto.setName(user.getName());
+        userDto.setEmail(user.getEmail());
+        return userDto;
+    }
+
+    public static User toUser(UserDto userDto) {
+        User user = new User();
+        user.setId(userDto.getId());
+        user.setName(userDto.getName());
+        user.setEmail(userDto.getEmail());
+        return user;
     }
 }

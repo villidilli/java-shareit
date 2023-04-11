@@ -13,18 +13,31 @@ import java.util.Map;
 @Slf4j
 public class UserStorageInMemory implements UserStorage{
     private final Map<Long, User> users = new HashMap<>();
+    private static Long countId = 1L;
 
     @Override
     public User add(User user) {
         log.debug("/add");
-        long newId = generateId();
-        user.setId(newId);
-        users.put(newId, user);
+        user.setId(countId);
+        users.put(countId, user);
+        countId++;
         return user;
     }
 
     @Override
-    public User getById(long userId) {
+    public User update(Long userId, User user) {
+        log.debug("/update");
+        users.put(userId, user);
+        return users.get(userId);
+    }
+
+    @Override
+    public void delete(Long userId) {
+        users.remove(userId);
+    }
+
+    @Override
+    public User get(long userId) {
         return users.get(userId);
     }
 
@@ -33,12 +46,12 @@ public class UserStorageInMemory implements UserStorage{
         return new ArrayList<>(users.values());
     }
 
-    private long generateId() {
-        log.debug("/generateId");
-        long maxId = users.values().stream()
-                .mapToLong(User::getId)
-                .max()
-                .orElse(0);
-        return maxId + 1;
-    }
+//    private long generateId() {
+//        log.debug("/generateId");
+//        long maxId = users.values().stream()
+//                .mapToLong(User::getId)
+//                .max()
+//                .orElse(0);
+//        return maxId + 1;
+//    }
 }
