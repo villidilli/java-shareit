@@ -14,16 +14,12 @@ import javax.validation.constraints.Positive;
 @NoArgsConstructor
 @Getter
 @Setter
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode
 public class Item {
-    @EqualsAndHashCode.Include
-    @Positive
-    private long id;
-    @NotBlank
-    private User owner;
-    @NotBlank
+    private Long id;
+    private Long owner;
     private String name;
     private String description;
-    private boolean isAvailable;
-    private ItemRequest request;
+    private Boolean available;
+    private Long request;
 }

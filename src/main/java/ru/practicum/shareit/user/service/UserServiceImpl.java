@@ -7,20 +7,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 import ru.practicum.shareit.exception.FieldConflictException;
+import ru.practicum.shareit.exception.GlobalExceptionHandler;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidateException;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.storage.UserStorage;
-import ru.practicum.shareit.utils.Converter;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static ru.practicum.shareit.exception.NotFoundException.NOT_FOUND_BY_ID;
+import static ru.practicum.shareit.exception.NotFoundException.USER_NOT_FOUND;
 import static ru.practicum.shareit.exception.ValidateException.DUPLICATE_EMAIL;
+import static ru.practicum.shareit.exception.ValidateException.EMAIL_NOT_BLANK;
 
 @Service
 @Slf4j
@@ -32,7 +32,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public User create(User user, BindingResult br) {
         log.debug("/create");
-        customEmailValidate(user.getEmail(), user.getId());
+        EmailDuplicateValidate(user.getEmail(), user.getId());
+        EmailNotBlankValidate(user.getEmail());
         annotationValidate(br);
         return userStorage.add(user);
     }
@@ -41,12 +42,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public User update(Long userId, User userFromDto) {
         log.debug("/update");
+        EmailDuplicateValidate(userFromDto.getEmail(), userId);
         User savedUser = get(userId);
         Map<String, String> userMap = objectMapper.convertValue(userFromDto, Map.class);
         Map<String, String> valuesToUpdate = userMap.entrySet().stream()
                 .filter(entry -> entry.getValue() != null)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        customEmailValidate(userFromDto.getEmail(), userId);
         objectMapper.updateValue(savedUser, valuesToUpdate);
         return userStorage.update(userId, savedUser);
     }
@@ -54,7 +55,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User get(Long userId) throws NotFoundException {
         User returnedUser = userStorage.get(userId);
-        if(returnedUser == null) throw new NotFoundException(NOT_FOUND_BY_ID);
+        if(returnedUser == null) throw new NotFoundException(USER_NOT_FOUND);
         return returnedUser;
     }
 
@@ -69,7 +70,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void customEmailValidate(String email, Long userId) throws FieldConflictException {
+    public void EmailDuplicateValidate(String email, Long userId) throws FieldConflictException {
         log.debug("/customValidate");
         boolean isHaveDuplicateEmail = userStorage.getAll().stream()
                 .filter(savedUser -> !Objects.equals(userId, savedUser.getId()))
@@ -79,8 +80,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void EmailNotBlankValidate(String email) {
+        if(email == null || email.isBlank()) throw new ValidateException(EMAIL_NOT_BLANK);
+    }
+
+    @Override
     public void annotationValidate(BindingResult br) {
         log.debug("/annotationValidate");
-        if(br.hasErrors()) throw new ValidateException(Converter.bindingResultToString(br));
+        if(br.hasErrors()) throw new ValidateException(GlobalExceptionHandler.bindingResultToString(br));
     }
 }

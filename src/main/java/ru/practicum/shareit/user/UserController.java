@@ -11,7 +11,6 @@ import ru.practicum.shareit.user.service.UserService;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -34,9 +33,8 @@ public class UserController {
     }
 
     @PatchMapping("/{userId}")
-    public UserDto update(@PathVariable Long userId, @RequestBody UserDto userDto) {
+    public UserDto update(@PathVariable Long userId, @Valid @RequestBody UserDto userDto) {
         log.debug("/update");
-        log.debug("Так смапился USER DTO " + userDto.toString());//TODO удалить
         User updUser = userService.update(userId, UserDtoMapper.toUser(userDto));
         return UserDtoMapper.toUserDto(updUser);
     }

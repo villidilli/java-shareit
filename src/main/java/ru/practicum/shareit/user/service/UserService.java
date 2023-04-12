@@ -4,13 +4,13 @@ import org.springframework.validation.BindingResult;
 import ru.practicum.shareit.user.User;
 
 import java.util.List;
-import java.util.Map;
 
 public interface UserService {
 
     User create(User user, BindingResult br);
 
-    void customEmailValidate(String email, Long userId);
+    void EmailDuplicateValidate(String email, Long userId);
+    void EmailNotBlankValidate(String email);
 
     void annotationValidate(BindingResult br);
 
