@@ -10,6 +10,7 @@ public interface UserService {
     User create(User user, BindingResult br);
 
     void EmailDuplicateValidate(String email, Long userId);
+
     void EmailNotBlankValidate(String email);
 
     void annotationValidate(BindingResult br);

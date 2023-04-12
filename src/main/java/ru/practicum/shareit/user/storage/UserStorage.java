@@ -5,6 +5,7 @@ import ru.practicum.shareit.user.User;
 import java.util.List;
 
 public interface UserStorage {
+
     User add(User user);
 
     User get(long userId);

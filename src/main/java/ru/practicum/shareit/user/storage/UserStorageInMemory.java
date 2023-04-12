@@ -11,9 +11,9 @@ import java.util.Map;
 
 @Repository
 @Slf4j
-public class UserStorageInMemory implements UserStorage{
-    private final Map<Long, User> users = new HashMap<>();
+public class UserStorageInMemory implements UserStorage {
     private static Long countId = 1L;
+    private final Map<Long, User> users = new HashMap<>();
 
     @Override
     public User add(User user) {
@@ -33,16 +33,19 @@ public class UserStorageInMemory implements UserStorage{
 
     @Override
     public void delete(Long userId) {
+        log.debug("/delete");
         users.remove(userId);
     }
 
     @Override
     public User get(long userId) {
+        log.debug("/get");
         return users.get(userId);
     }
 
     @Override
     public List<User> getAll() {
+        log.debug("/getAll");
         return new ArrayList<>(users.values());
     }
 }

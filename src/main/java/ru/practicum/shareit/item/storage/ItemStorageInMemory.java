@@ -12,15 +12,14 @@ import java.util.Map;
 @Repository
 @Slf4j
 public class ItemStorageInMemory implements ItemStorage {
-    private final Map<Long, Item> items = new HashMap<>();
-//    private final Map<Long, Long> itemOwner = new HashMap<>();
     private static Long countId = 1L;
+    private final Map<Long, Item> items = new HashMap<>();
+
     @Override
     public Item add(Item item) {
         log.debug("/add");
         item.setId(countId);
         items.put(countId, item);
-//        itemOwner.put(item.getId(), item.getOwner());
         countId++;
         return item;
     }
@@ -34,11 +33,13 @@ public class ItemStorageInMemory implements ItemStorage {
 
     @Override
     public Item get(Long itemId) {
+        log.debug("/get");
         return items.get(itemId);
     }
 
     @Override
     public List<Item> getAll() {
+        log.debug("/getAll");
         return new ArrayList<>(items.values());
     }
 }

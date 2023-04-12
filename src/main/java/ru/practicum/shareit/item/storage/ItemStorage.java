@@ -5,6 +5,7 @@ import ru.practicum.shareit.item.Item;
 import java.util.List;
 
 public interface ItemStorage {
+
     Item add(Item item);
 
     Item update(Long itemId, Item savedItem);

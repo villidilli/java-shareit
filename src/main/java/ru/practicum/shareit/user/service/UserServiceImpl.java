@@ -1,15 +1,15 @@
 package ru.practicum.shareit.user.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
-import ru.practicum.shareit.exception.FieldConflictException;
-import ru.practicum.shareit.exception.GlobalExceptionHandler;
-import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.ValidateException;
+
+import ru.practicum.shareit.exception.*;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.storage.UserStorage;
 
@@ -55,44 +55,49 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User get(Long userId) throws NotFoundException {
+        log.debug("/get");
         isExist(userId);
         return userStorage.get(userId);
     }
 
     @Override
     public void delete(Long userId) {
+        log.debug("/delete");
         isExist(userId);
         userStorage.delete(userId);
     }
 
     @Override
     public List<User> getAll() {
+        log.debug("/getAll");
         return userStorage.getAll();
     }
 
     @Override
     public void isExist(Long userId) {
-        if(userStorage.get(userId) == null) throw new NotFoundException(USER_NOT_FOUND);
+        log.debug("/isExist");
+        if (userStorage.get(userId) == null) throw new NotFoundException(USER_NOT_FOUND);
     }
 
     @Override
     public void EmailDuplicateValidate(String email, Long userId) throws FieldConflictException {
-        log.debug("/customValidate");
+        log.debug("/emailDuplicateValid");
         boolean isHaveDuplicateEmail = userStorage.getAll().stream()
                 .filter(savedUser -> !Objects.equals(userId, savedUser.getId()))
                 .map(User::getEmail)
                 .anyMatch(s -> s.equals(email));
-        if(isHaveDuplicateEmail) throw new FieldConflictException(DUPLICATE_EMAIL);
+        if (isHaveDuplicateEmail) throw new FieldConflictException(DUPLICATE_EMAIL);
     }
 
     @Override
     public void EmailNotBlankValidate(String email) {
-        if(email == null || email.isBlank()) throw new ValidateException(EMAIL_NOT_BLANK);
+        log.debug("/emailNotBlankValid");
+        if (email == null || email.isBlank()) throw new ValidateException(EMAIL_NOT_BLANK);
     }
 
     @Override
     public void annotationValidate(BindingResult br) {
         log.debug("/annotationValidate");
-        if(br.hasErrors()) throw new ValidateException(GlobalExceptionHandler.bindingResultToString(br));
+        if (br.hasErrors()) throw new ValidateException(GlobalExceptionHandler.bindingResultToString(br));
     }
 }
