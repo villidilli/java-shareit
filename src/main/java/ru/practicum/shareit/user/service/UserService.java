@@ -10,13 +10,11 @@ public interface UserService {
 
     User create(User user, BindingResult br);
 
-    void isExist(Long userId);
-
     void customEmailValidate(String email, Long userId);
 
     void annotationValidate(BindingResult br);
 
-    User update(Long userId, Map<String, String> valuesToUpdate);
+    User update(Long userId, User user);
 
     User get(Long userId);
 

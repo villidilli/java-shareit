@@ -45,13 +45,4 @@ public class UserStorageInMemory implements UserStorage{
     public List<User> getAll() {
         return new ArrayList<>(users.values());
     }
-
-//    private long generateId() {
-//        log.debug("/generateId");
-//        long maxId = users.values().stream()
-//                .mapToLong(User::getId)
-//                .max()
-//                .orElse(0);
-//        return maxId + 1;
-//    }
 }

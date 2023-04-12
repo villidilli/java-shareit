@@ -2,6 +2,7 @@ package ru.practicum.shareit.user.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
@@ -15,6 +16,8 @@ import ru.practicum.shareit.utils.Converter;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.exception.NotFoundException.NOT_FOUND_BY_ID;
 import static ru.practicum.shareit.exception.ValidateException.DUPLICATE_EMAIL;
@@ -34,40 +37,35 @@ public class UserServiceImpl implements UserService {
         return userStorage.add(user);
     }
 
+    @SneakyThrows
     @Override
-    public User update(Long userId, Map<String, String> valuesToUpdate) {
+    public User update(Long userId, User userFromDto) {
         log.debug("/update");
-        isExist(userId);
-        String emailToUpdate = valuesToUpdate.get("email");
-        if(emailToUpdate != null) customEmailValidate(emailToUpdate, userId);
-        User existedUser = userStorage.get(userId);
-        Map<String, String> existedUserMap = objectMapper.convertValue(existedUser, Map.class);
-        existedUserMap.putAll(valuesToUpdate);
-        User updatedUser = objectMapper.convertValue(existedUserMap, User.class);
-        return userStorage.update(userId, updatedUser);
+        User savedUser = get(userId);
+        Map<String, String> userMap = objectMapper.convertValue(userFromDto, Map.class);
+        Map<String, String> valuesToUpdate = userMap.entrySet().stream()
+                .filter(entry -> entry.getValue() != null)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        customEmailValidate(userFromDto.getEmail(), userId);
+        objectMapper.updateValue(savedUser, valuesToUpdate);
+        return userStorage.update(userId, savedUser);
     }
 
     @Override
-    public User get(Long userId) {
-        isExist(userId);
-        return userStorage.get(userId);
+    public User get(Long userId) throws NotFoundException {
+        User returnedUser = userStorage.get(userId);
+        if(returnedUser == null) throw new NotFoundException(NOT_FOUND_BY_ID);
+        return returnedUser;
     }
 
     @Override
     public void delete(Long userId) {
-        isExist(userId);
-        userStorage.delete(userId);
+        userStorage.delete(get(userId).getId());
     }
 
     @Override
     public List<User> getAll() {
         return userStorage.getAll();
-    }
-
-    @Override
-    public void isExist(Long userId) {
-        log.debug("/isExist");
-        if(userStorage.get(userId) == null) throw new NotFoundException(NOT_FOUND_BY_ID);
     }
 
     @Override

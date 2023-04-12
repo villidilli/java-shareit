@@ -34,10 +34,11 @@ public class UserController {
     }
 
     @PatchMapping("/{userId}")
-    public UserDto update(@PathVariable Long userId, @RequestBody Map<String, String> values) {
+    public UserDto update(@PathVariable Long userId, @RequestBody UserDto userDto) {
         log.debug("/update");
-        User user = userService.update(userId, values);
-        return UserDtoMapper.toUserDto(user);
+        log.debug("Так смапился USER DTO " + userDto.toString());//TODO удалить
+        User updUser = userService.update(userId, UserDtoMapper.toUser(userDto));
+        return UserDtoMapper.toUserDto(updUser);
     }
 
     @GetMapping("/{userId}")
