@@ -32,8 +32,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public User create(User user, BindingResult br) {
         log.debug("/create");
-        EmailDuplicateValidate(user.getEmail(), user.getId());
-        EmailNotBlankValidate(user.getEmail());
+        emailDuplicateValidate(user.getEmail(), user.getId());
+        emailNotBlankValidate(user.getEmail());
         annotationValidate(br);
         return userStorage.add(user);
     }
@@ -42,7 +42,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User update(Long userId, User userFromDto) {
         log.debug("/update");
-        EmailDuplicateValidate(userFromDto.getEmail(), userId);
+        emailDuplicateValidate(userFromDto.getEmail(), userId);
         isExist(userId);
         User savedUser = get(userId);
         Map<String, String> userMap = objectMapper.convertValue(userFromDto, Map.class);
@@ -80,7 +80,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void EmailDuplicateValidate(String email, Long userId) throws FieldConflictException {
+    public void emailDuplicateValidate(String email, Long userId) throws FieldConflictException {
         log.debug("/emailDuplicateValid");
         boolean isHaveDuplicateEmail = userStorage.getAll().stream()
                 .filter(savedUser -> !Objects.equals(userId, savedUser.getId()))
@@ -90,7 +90,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void EmailNotBlankValidate(String email) {
+    public void emailNotBlankValidate(String email) {
         log.debug("/emailNotBlankValid");
         if (email == null || email.isBlank()) throw new ValidateException(EMAIL_NOT_BLANK);
     }

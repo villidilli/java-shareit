@@ -9,9 +9,9 @@ public interface UserService {
 
     User create(User user, BindingResult br);
 
-    void EmailDuplicateValidate(String email, Long userId);
+    void emailDuplicateValidate(String email, Long userId);
 
-    void EmailNotBlankValidate(String email);
+    void emailNotBlankValidate(String email);
 
     void annotationValidate(BindingResult br);
 
