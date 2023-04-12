@@ -43,6 +43,7 @@ public class UserServiceImpl implements UserService {
     public User update(Long userId, User userFromDto) {
         log.debug("/update");
         EmailDuplicateValidate(userFromDto.getEmail(), userId);
+        isExist(userId);
         User savedUser = get(userId);
         Map<String, String> userMap = objectMapper.convertValue(userFromDto, Map.class);
         Map<String, String> valuesToUpdate = userMap.entrySet().stream()
@@ -54,19 +55,24 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User get(Long userId) throws NotFoundException {
-        User returnedUser = userStorage.get(userId);
-        if(returnedUser == null) throw new NotFoundException(USER_NOT_FOUND);
-        return returnedUser;
+        isExist(userId);
+        return userStorage.get(userId);
     }
 
     @Override
     public void delete(Long userId) {
-        userStorage.delete(get(userId).getId());
+        isExist(userId);
+        userStorage.delete(userId);
     }
 
     @Override
     public List<User> getAll() {
         return userStorage.getAll();
+    }
+
+    @Override
+    public void isExist(Long userId) {
+        if(userStorage.get(userId) == null) throw new NotFoundException(USER_NOT_FOUND);
     }
 
     @Override
