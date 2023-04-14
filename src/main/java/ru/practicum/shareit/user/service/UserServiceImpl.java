@@ -50,16 +50,12 @@ public class UserServiceImpl implements UserService {
         userStorage.isExist(userId);
         User user = UserDtoMapper.toUser(userDto);
         emailDuplicateValidate(user.getEmail(), userId);
-        Map<String, String> userMap = objectMapper.convertValue(user, Map.class);
-        Map<String, String> valuesToUpdate = userMap.entrySet().stream()
-                .filter(entry -> entry.getValue() != null)
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        Map<String, String> valuesToUpdate = generateMapUpdFields(user);
         User savedUser = userStorage.get(userId);
         Map<String, String> savedUserMap = objectMapper.convertValue(savedUser, Map.class);
         savedUserMap.putAll(valuesToUpdate);
-//        objectMapper.updateValue(savedUser, valuesToUpdate);
-        user = userStorage.update(userId, objectMapper.convertValue(savedUserMap, User.class));
-        return UserDtoMapper.toUserDto(user);
+        User updUser = objectMapper.convertValue(savedUserMap, User.class);
+        return UserDtoMapper.toUserDto(userStorage.update(userId, updUser));
     }
 
     @Override
@@ -91,23 +87,23 @@ public class UserServiceImpl implements UserService {
         if(!userStorage.get(userId).getEmail().equals(email)) {
             userStorage.isExist(email);
         }
-//        boolean isHaveDuplicateEmail = userStorage.getAll().stream()
-//                .filter(savedUser -> !Objects.equals(userId, savedUser.getId()))
-//                .map(User::getEmail)
-//                .anyMatch(s -> s.equals(email));
-//        if (isHaveDuplicateEmail) throw new FieldConflictException(DUPLICATE_EMAIL);
-
     }
 
-    @Override
-    public void emailNotBlankValidate(String email) {
+    private void emailNotBlankValidate(String email) {
         log.debug("/emailNotBlankValid");
         if (email == null || email.isBlank()) throw new ValidateException(EMAIL_NOT_BLANK);
     }
 
-    @Override
-    public void annotationValidate(BindingResult br) {
+    private void annotationValidate(BindingResult br) {
         log.debug("/annotationValidate");
         if (br.hasErrors()) throw new ValidateException(GlobalExceptionHandler.bindingResultToString(br));
+    }
+
+    private Map<String, String> generateMapUpdFields(User user) {
+        Map<String, String> mapWithNullFields = objectMapper.convertValue(user, Map.class);
+        Map<String, String> mapWithFieldsToUpd = mapWithNullFields.entrySet().stream()
+                .filter(entry -> entry.getValue() != null)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        return mapWithFieldsToUpd;
     }
 }

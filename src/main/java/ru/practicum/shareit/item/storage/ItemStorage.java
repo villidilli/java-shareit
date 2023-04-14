@@ -18,4 +18,6 @@ public interface ItemStorage {
     List<Item> getAll();
 
     void isExist(Long itemId);
+
+    List<Item> getByOwner(Long userId);
 }

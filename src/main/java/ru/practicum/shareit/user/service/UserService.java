@@ -10,10 +10,6 @@ public interface UserService {
 
     UserDto create(UserDto userDto, BindingResult br);
 
-    void emailNotBlankValidate(String email);
-
-    void annotationValidate(BindingResult br);
-
     UserDto update(Long userId, UserDto userDto);
 
     UserDto get(Long userId);

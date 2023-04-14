@@ -16,6 +16,8 @@ import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoMapper;
 import ru.practicum.shareit.item.storage.ItemStorage;
+import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.dto.UserDtoMapper;
 import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.storage.UserStorage;
 
@@ -52,13 +54,12 @@ public class ItemServiceImpl implements ItemService {
         checkItemOwner(itemId, ownerId);
         userStorage.isExist(ownerId);
         Item item = ItemDtoMapper.toItem(itemDto, ownerId);
+        Map<String, String> valuesToUpdate = generateMapUpdFields(item);
         Item savedItem = itemStorage.get(itemId);
-        Map<String, String> itemMap = objectMapper.convertValue(item, Map.class);
-        Map<String, String> valuesToUpdate = itemMap.entrySet().stream()
-                .filter(entry -> entry.getValue() != null)
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        objectMapper.updateValue(savedItem, valuesToUpdate);
-        return ItemDtoMapper.toItemDto(itemStorage.update(itemId, savedItem));
+        Map<String, String> savedItemMap = objectMapper.convertValue(savedItem, Map.class);
+        savedItemMap.putAll(valuesToUpdate);
+        Item updItem = objectMapper.convertValue(savedItemMap, Item.class);
+        return ItemDtoMapper.toItemDto(itemStorage.update(itemId, updItem));
     }
 
     @Override
@@ -71,10 +72,11 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemDto> getByOwner(Long ownerId) {
         log.debug("/getByOwner");
         userStorage.isExist(ownerId);
-        return itemStorage.getAll().stream()
-                .filter(item -> Objects.equals(item.getOwner(), ownerId))
-                .map(ItemDtoMapper::toItemDto)
-                .collect(Collectors.toList());
+        return itemStorage.getByOwner(ownerId).stream().map(ItemDtoMapper::toItemDto).collect(Collectors.toList());
+//        return itemStorage.getAll().stream()
+//                .filter(item -> Objects.equals(item.getOwner(), ownerId))
+//                .map(ItemDtoMapper::toItemDto)
+//                .collect(Collectors.toList());
     }
 
     @Override
@@ -99,5 +101,13 @@ public class ItemServiceImpl implements ItemService {
     private void annotationValidate(BindingResult br) {
         log.debug("/annotationValidate");
         if (br.hasErrors()) throw new ValidateException(GlobalExceptionHandler.bindingResultToString(br));
+    }
+
+    private Map<String, String> generateMapUpdFields(Item item) {
+        Map<String, String> mapWithNullFields = objectMapper.convertValue(item, Map.class);
+        Map<String, String> mapWithFieldsToUpd = mapWithNullFields.entrySet().stream()
+                .filter(entry -> entry.getValue() != null)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        return mapWithFieldsToUpd;
     }
 }
