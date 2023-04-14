@@ -47,16 +47,18 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto update(Long userId, UserDto userDto) {
         log.debug("/update");
-        User user = UserDtoMapper.toUser(userDto);
         userStorage.isExist(userId);
+        User user = UserDtoMapper.toUser(userDto);
         emailDuplicateValidate(user.getEmail(), userId);
-        User savedUser = userStorage.get(userId);
         Map<String, String> userMap = objectMapper.convertValue(user, Map.class);
         Map<String, String> valuesToUpdate = userMap.entrySet().stream()
                 .filter(entry -> entry.getValue() != null)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        objectMapper.updateValue(savedUser, valuesToUpdate);
-        user = userStorage.update(userId, savedUser);
+        User savedUser = userStorage.get(userId);
+        Map<String, String> savedUserMap = objectMapper.convertValue(savedUser, Map.class);
+        savedUserMap.putAll(valuesToUpdate);
+//        objectMapper.updateValue(savedUser, valuesToUpdate);
+        user = userStorage.update(userId, objectMapper.convertValue(savedUserMap, User.class));
         return UserDtoMapper.toUserDto(user);
     }
 
@@ -82,11 +84,19 @@ public class UserServiceImpl implements UserService {
 
     public void emailDuplicateValidate(String email, Long userId) throws FieldConflictException {
         log.debug("/emailDuplicateValid");
-        boolean isHaveDuplicateEmail = userStorage.getAll().stream()
-                .filter(savedUser -> !Objects.equals(userId, savedUser.getId()))
-                .map(User::getEmail)
-                .anyMatch(s -> s.equals(email));
-        if (isHaveDuplicateEmail) throw new FieldConflictException(DUPLICATE_EMAIL);
+        if(userId == null) {
+            userStorage.isExist(email);
+            return;
+        }
+        if(!userStorage.get(userId).getEmail().equals(email)) {
+            userStorage.isExist(email);
+        }
+//        boolean isHaveDuplicateEmail = userStorage.getAll().stream()
+//                .filter(savedUser -> !Objects.equals(userId, savedUser.getId()))
+//                .map(User::getEmail)
+//                .anyMatch(s -> s.equals(email));
+//        if (isHaveDuplicateEmail) throw new FieldConflictException(DUPLICATE_EMAIL);
+
     }
 
     @Override

@@ -17,4 +17,6 @@ public interface UserStorage {
     void delete(Long userId);
 
     void isExist(Long userId);
+
+    void isExist(String email);
 }

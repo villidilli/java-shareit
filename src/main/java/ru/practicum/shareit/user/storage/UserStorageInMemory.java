@@ -16,12 +16,14 @@ import static ru.practicum.shareit.exception.ValidateException.DUPLICATE_EMAIL;
 public class UserStorageInMemory implements UserStorage {
     private static Long countId = 1L;
     private final Map<Long, User> users = new HashMap<>();
+    private final Set<String> emails = new HashSet<>();
 
     @Override
     public User add(User user) {
         log.debug("/add");
         user.setId(countId);
         users.put(countId, user);
+        emails.add(user.getEmail());
         countId++;
         return user;
     }
@@ -29,6 +31,8 @@ public class UserStorageInMemory implements UserStorage {
     @Override
     public User update(Long userId, User user) {
         log.debug("/update");
+        emails.remove(users.get(userId).getEmail());
+        emails.add(user.getEmail());
         users.put(userId, user);
         return users.get(userId);
     }
@@ -36,6 +40,7 @@ public class UserStorageInMemory implements UserStorage {
     @Override
     public void delete(Long userId) {
         log.debug("/delete");
+        emails.remove(users.get(userId).getEmail());
         users.remove(userId);
     }
 
@@ -55,5 +60,10 @@ public class UserStorageInMemory implements UserStorage {
     public void isExist(Long userId) {
         log.debug("/isExistUser");
         if (users.get(userId) == null) throw new NotFoundException(USER_NOT_FOUND);
+    }
+
+    @Override
+    public void isExist(String email) {
+        if(emails.contains(email)) throw new FieldConflictException(DUPLICATE_EMAIL);
     }
 }
