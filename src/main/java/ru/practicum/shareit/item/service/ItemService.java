@@ -2,24 +2,19 @@ package ru.practicum.shareit.item.service;
 
 import org.springframework.validation.BindingResult;
 import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.item.dto.ItemDto;
 
 import java.util.List;
 
 public interface ItemService {
 
-    Item create(Item item, BindingResult br);
+    ItemDto create(ItemDto itemDto, Long ownerId, BindingResult br);
 
-    void annotationValidate(BindingResult br);
+    ItemDto update(Long itemId, ItemDto item, Long ownerID);
 
-    Item update(Long itemId, Item item);
+    ItemDto get(Long itemId);
 
-    Item get(Long itemId);
+    List<ItemDto> getByOwner(Long ownerId);
 
-    void checkItemOwner(Long itemId, Long ownerId);
-
-    void isExist(Long itemId);
-
-    List<Item> getByOwner(Long ownerId);
-
-    List<Item> search(String text);
+    List<ItemDto> search(String text);
 }

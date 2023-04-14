@@ -2,26 +2,23 @@ package ru.practicum.shareit.user.service;
 
 import org.springframework.validation.BindingResult;
 import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.dto.UserDto;
 
 import java.util.List;
 
 public interface UserService {
 
-    User create(User user, BindingResult br);
-
-    void emailDuplicateValidate(String email, Long userId);
+    UserDto create(UserDto userDto, BindingResult br);
 
     void emailNotBlankValidate(String email);
 
     void annotationValidate(BindingResult br);
 
-    User update(Long userId, User user);
+    UserDto update(Long userId, UserDto userDto);
 
-    User get(Long userId);
+    UserDto get(Long userId);
 
     void delete(Long userId);
 
-    List<User> getAll();
-
-    void isExist(Long userId);
+    List<UserDto> getAll();
 }

@@ -11,8 +11,11 @@ import org.springframework.validation.BindingResult;
 
 import ru.practicum.shareit.exception.*;
 import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.UserDtoMapper;
 import ru.practicum.shareit.user.storage.UserStorage;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -30,56 +33,53 @@ public class UserServiceImpl implements UserService {
     private final ObjectMapper objectMapper;
 
     @Override
-    public User create(User user, BindingResult br) {
+    public UserDto create(UserDto userDto, BindingResult br) {
         log.debug("/create");
+        User user = UserDtoMapper.toUser(userDto);
         emailDuplicateValidate(user.getEmail(), user.getId());
         emailNotBlankValidate(user.getEmail());
         annotationValidate(br);
-        return userStorage.add(user);
+        user = userStorage.add(user);
+        return UserDtoMapper.toUserDto(user);
     }
 
     @SneakyThrows
     @Override
-    public User update(Long userId, User userFromDto) {
+    public UserDto update(Long userId, UserDto userDto) {
         log.debug("/update");
-        emailDuplicateValidate(userFromDto.getEmail(), userId);
-        isExist(userId);
-        User savedUser = get(userId);
-        Map<String, String> userMap = objectMapper.convertValue(userFromDto, Map.class);
+        User user = UserDtoMapper.toUser(userDto);
+        userStorage.isExist(userId);
+        emailDuplicateValidate(user.getEmail(), userId);
+        User savedUser = userStorage.get(userId);
+        Map<String, String> userMap = objectMapper.convertValue(user, Map.class);
         Map<String, String> valuesToUpdate = userMap.entrySet().stream()
                 .filter(entry -> entry.getValue() != null)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         objectMapper.updateValue(savedUser, valuesToUpdate);
-        return userStorage.update(userId, savedUser);
+        user = userStorage.update(userId, savedUser);
+        return UserDtoMapper.toUserDto(user);
     }
 
     @Override
-    public User get(Long userId) throws NotFoundException {
+    public UserDto get(Long userId) throws NotFoundException {
         log.debug("/get");
-        isExist(userId);
-        return userStorage.get(userId);
+        userStorage.isExist(userId);
+        return UserDtoMapper.toUserDto(userStorage.get(userId));
     }
 
     @Override
     public void delete(Long userId) {
         log.debug("/delete");
-        isExist(userId);
+        userStorage.isExist(userId);
         userStorage.delete(userId);
     }
 
     @Override
-    public List<User> getAll() {
+    public List<UserDto> getAll() {
         log.debug("/getAll");
-        return userStorage.getAll();
+        return userStorage.getAll().stream().map(UserDtoMapper::toUserDto).collect(Collectors.toList());
     }
 
-    @Override
-    public void isExist(Long userId) {
-        log.debug("/isExist");
-        if (userStorage.get(userId) == null) throw new NotFoundException(USER_NOT_FOUND);
-    }
-
-    @Override
     public void emailDuplicateValidate(String email, Long userId) throws FieldConflictException {
         log.debug("/emailDuplicateValid");
         boolean isHaveDuplicateEmail = userStorage.getAll().stream()

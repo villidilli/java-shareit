@@ -2,12 +2,15 @@ package ru.practicum.shareit.item.storage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.Item;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static ru.practicum.shareit.exception.NotFoundException.ITEM_NOT_FOUND;
 
 @Repository
 @Slf4j
@@ -41,5 +44,11 @@ public class ItemStorageInMemory implements ItemStorage {
     public List<Item> getAll() {
         log.debug("/getAll");
         return new ArrayList<>(items.values());
+    }
+
+    @Override
+    public void isExist(Long itemId) {
+        log.debug("/isExist");
+        if (items.get(itemId) == null) throw new NotFoundException(ITEM_NOT_FOUND);
     }
 }

@@ -13,8 +13,11 @@ import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidateException;
 
 import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDtoMapper;
 import ru.practicum.shareit.item.storage.ItemStorage;
 import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.user.storage.UserStorage;
 
 import java.util.Collections;
 import java.util.List;
@@ -29,75 +32,72 @@ import static ru.practicum.shareit.exception.NotFoundException.*;
 @Slf4j
 public class ItemServiceImpl implements ItemService {
     private final ItemStorage itemStorage;
-    private final UserService userService;
+    private final UserStorage userStorage;
     private final ObjectMapper objectMapper;
 
     @Override
-    public Item create(Item item, BindingResult br) {
+    public ItemDto create(ItemDto itemDto, Long ownerId, BindingResult br) {
         log.debug("/create");
         annotationValidate(br);
-        userService.isExist(item.getOwner());
-        return itemStorage.add(item);
+        Item item = ItemDtoMapper.toItem(itemDto, ownerId);
+        userStorage.isExist(item.getOwner());
+        return ItemDtoMapper.toItemDto(itemStorage.add(item));
     }
 
     @SneakyThrows
     @Override
-    public Item update(Long itemId, Item itemFromDto) {
+    public ItemDto update(Long itemId, ItemDto itemDto, Long ownerId) {
         log.debug("/update");
-        isExist(itemId);
-        checkItemOwner(itemId, itemFromDto.getOwner());
-        Item savedItem = get(itemId);
-        userService.isExist(itemFromDto.getOwner());
-        Map<String, String> itemMap = objectMapper.convertValue(itemFromDto, Map.class);
+        itemStorage.isExist(itemId);
+        checkItemOwner(itemId, ownerId);
+        userStorage.isExist(ownerId);
+        Item item = ItemDtoMapper.toItem(itemDto, ownerId);
+        Item savedItem = itemStorage.get(itemId);
+        Map<String, String> itemMap = objectMapper.convertValue(item, Map.class);
         Map<String, String> valuesToUpdate = itemMap.entrySet().stream()
                 .filter(entry -> entry.getValue() != null)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         objectMapper.updateValue(savedItem, valuesToUpdate);
-        return itemStorage.update(itemId, savedItem);
+        return ItemDtoMapper.toItemDto(itemStorage.update(itemId, savedItem));
     }
 
     @Override
-    public Item get(Long itemId) {
+    public ItemDto get(Long itemId) {
         log.debug("/get");
-        return itemStorage.get(itemId);
+        return ItemDtoMapper.toItemDto(itemStorage.get(itemId));
     }
 
     @Override
-    public List<Item> getByOwner(Long ownerId) {
+    public List<ItemDto> getByOwner(Long ownerId) {
         log.debug("/getByOwner");
-        userService.isExist(ownerId);
+        userStorage.isExist(ownerId);
         return itemStorage.getAll().stream()
                 .filter(item -> Objects.equals(item.getOwner(), ownerId))
+                .map(ItemDtoMapper::toItemDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<Item> search(String text) {
+    public List<ItemDto> search(String text) {
         log.debug("/search");
         if (text.isBlank()) return Collections.emptyList();
         return itemStorage.getAll().stream()
-                .filter(item -> (item.getName().toLowerCase().contains(text.toLowerCase())
-                        || item.getDescription().toLowerCase().contains(text.toLowerCase())) && item.getAvailable())
+                .filter(item -> item.getAvailable()
+                            && (item.getName().toLowerCase().contains(text.toLowerCase())
+                                || item.getDescription().toLowerCase().contains(text.toLowerCase())))
+                .map(ItemDtoMapper::toItemDto)
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public void checkItemOwner(Long itemId, Long ownerId) throws NotFoundException {
+    private void checkItemOwner(Long itemId, Long ownerId) throws NotFoundException {
         log.debug("/checkItemOwner");
         if (!Objects.equals(itemStorage.get(itemId).getOwner(), ownerId)) {
             throw new NotFoundException(OWNER_NOT_MATCH_ITEM);
         }
     }
 
-    @Override
-    public void annotationValidate(BindingResult br) {
+    private void annotationValidate(BindingResult br) {
         log.debug("/annotationValidate");
         if (br.hasErrors()) throw new ValidateException(GlobalExceptionHandler.bindingResultToString(br));
-    }
-
-    @Override
-    public void isExist(Long itemId) {
-        log.debug("/isExist");
-        if (itemStorage.get(itemId) == null) throw new NotFoundException(ITEM_NOT_FOUND);
     }
 }

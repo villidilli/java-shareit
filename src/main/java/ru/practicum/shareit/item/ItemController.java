@@ -33,8 +33,7 @@ public class ItemController {
                           BindingResult br,
                           @RequestHeader(name = PARAM_NAME_OWNER_ID) Long ownerId) {
         log.debug("/create");
-        Item createdItem = itemService.create(ItemDtoMapper.toItem(itemDto, ownerId), br);
-        return ItemDtoMapper.toItemDto(createdItem);
+        return itemService.create(itemDto, ownerId, br);
     }
 
     @PatchMapping("/{itemId}")
@@ -42,25 +41,24 @@ public class ItemController {
                           @RequestBody ItemDto itemDto,
                           @RequestHeader(name = PARAM_NAME_OWNER_ID) Long ownerId) {
         log.debug("/update");
-        Item updItem = itemService.update(itemId, ItemDtoMapper.toItem(itemDto, ownerId));
-        return ItemDtoMapper.toItemDto(updItem);
+        return itemService.update(itemId, itemDto, ownerId);
     }
 
     @GetMapping("/{itemId}")
     public ItemDto get(@PathVariable Long itemId) {
         log.debug("/get");
-        return ItemDtoMapper.toItemDto(itemService.get(itemId));
+        return itemService.get(itemId);
     }
 
     @GetMapping
     public List<ItemDto> getByOwner(@RequestHeader(name = PARAM_NAME_OWNER_ID) Long ownerId) {
         log.debug("/getByOwner");
-        return itemService.getByOwner(ownerId).stream().map(ItemDtoMapper::toItemDto).collect(Collectors.toList());
+        return itemService.getByOwner(ownerId);
     }
 
     @GetMapping("/search")
     public List<ItemDto> search(@RequestParam String text) {
         log.debug("/search");
-        return itemService.search(text).stream().map(ItemDtoMapper::toItemDto).collect(Collectors.toList());
+        return itemService.search(text);
     }
 }

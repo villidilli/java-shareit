@@ -2,12 +2,14 @@ package ru.practicum.shareit.user.storage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
+import ru.practicum.shareit.exception.FieldConflictException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.User;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import static ru.practicum.shareit.exception.NotFoundException.USER_NOT_FOUND;
+import static ru.practicum.shareit.exception.ValidateException.DUPLICATE_EMAIL;
 
 @Repository
 @Slf4j
@@ -47,5 +49,11 @@ public class UserStorageInMemory implements UserStorage {
     public List<User> getAll() {
         log.debug("/getAll");
         return new ArrayList<>(users.values());
+    }
+
+    @Override
+    public void isExist(Long userId) {
+        log.debug("/isExistUser");
+        if (users.get(userId) == null) throw new NotFoundException(USER_NOT_FOUND);
     }
 }

@@ -30,22 +30,19 @@ public class UserController {
     @ResponseStatus(HttpStatus.CREATED)
     public UserDto create(@Valid @RequestBody UserDto userDto, BindingResult br) {
         log.debug("/create");
-        User user = UserDtoMapper.toUser(userDto);
-        User createdUser = userService.create(user, br);
-        return UserDtoMapper.toUserDto(createdUser);
+        return userService.create(userDto, br);
     }
 
     @PatchMapping("/{userId}")
     public UserDto update(@PathVariable Long userId, @RequestBody UserDto userDto) {
         log.debug("/update");
-        User updUser = userService.update(userId, UserDtoMapper.toUser(userDto));
-        return UserDtoMapper.toUserDto(updUser);
+        return userService.update(userId, userDto);
     }
 
     @GetMapping("/{userId}")
     public UserDto get(@PathVariable Long userId) {
         log.debug("/get");
-        return UserDtoMapper.toUserDto(userService.get(userId));
+        return userService.get(userId);
     }
 
     @DeleteMapping("/{userId}")
@@ -57,6 +54,6 @@ public class UserController {
     @GetMapping
     public List<UserDto> getAll() {
         log.debug("/getAll");
-        return userService.getAll().stream().map(UserDtoMapper::toUserDto).collect(Collectors.toList());
+        return userService.getAll();
     }
 }
