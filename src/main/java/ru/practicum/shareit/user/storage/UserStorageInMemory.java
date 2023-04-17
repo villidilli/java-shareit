@@ -1,7 +1,9 @@
 package ru.practicum.shareit.user.storage;
 
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Repository;
+
 import ru.practicum.shareit.exception.FieldConflictException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.User;
@@ -64,6 +66,6 @@ public class UserStorageInMemory implements UserStorage {
 
     @Override
     public void isExist(String email) {
-        if(emails.contains(email)) throw new FieldConflictException(DUPLICATE_EMAIL);
+        if (emails.contains(email)) throw new FieldConflictException(DUPLICATE_EMAIL);
     }
 }

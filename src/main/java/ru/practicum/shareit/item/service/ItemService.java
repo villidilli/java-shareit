@@ -1,7 +1,7 @@
 package ru.practicum.shareit.item.service;
 
 import org.springframework.validation.BindingResult;
-import ru.practicum.shareit.item.Item;
+
 import ru.practicum.shareit.item.dto.ItemDto;
 
 import java.util.List;

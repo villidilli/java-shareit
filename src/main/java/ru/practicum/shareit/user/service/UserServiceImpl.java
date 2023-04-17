@@ -15,15 +15,12 @@ import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserDtoMapper;
 import ru.practicum.shareit.user.storage.UserStorage;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static ru.practicum.shareit.exception.NotFoundException.USER_NOT_FOUND;
-import static ru.practicum.shareit.exception.ValidateException.DUPLICATE_EMAIL;
 import static ru.practicum.shareit.exception.ValidateException.EMAIL_NOT_BLANK;
+import static ru.practicum.shareit.user.dto.UserDtoMapper.*;
 
 @Service
 @Slf4j
@@ -35,12 +32,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto create(UserDto userDto, BindingResult br) {
         log.debug("/create");
-        User user = UserDtoMapper.toUser(userDto);
+        User user = toUser(userDto);
         emailDuplicateValidate(user.getEmail(), user.getId());
         emailNotBlankValidate(user.getEmail());
         annotationValidate(br);
-        user = userStorage.add(user);
-        return UserDtoMapper.toUserDto(user);
+        User createdUser = userStorage.add(user);
+        return toUserDto(createdUser);
     }
 
     @SneakyThrows
@@ -48,21 +45,21 @@ public class UserServiceImpl implements UserService {
     public UserDto update(Long userId, UserDto userDto) {
         log.debug("/update");
         userStorage.isExist(userId);
-        User user = UserDtoMapper.toUser(userDto);
-        emailDuplicateValidate(user.getEmail(), userId);
-        Map<String, String> valuesToUpdate = generateMapUpdFields(user);
-        User savedUser = userStorage.get(userId);
-        Map<String, String> savedUserMap = objectMapper.convertValue(savedUser, Map.class);
-        savedUserMap.putAll(valuesToUpdate);
-        User updUser = objectMapper.convertValue(savedUserMap, User.class);
-        return UserDtoMapper.toUserDto(userStorage.update(userId, updUser));
+        User userWithUpdate = toUser(userDto);
+        emailDuplicateValidate(userWithUpdate.getEmail(), userId);
+        Map<String, String> fieldsToUpdate = getFieldsToUpdate(userWithUpdate);
+        User existedUser = userStorage.get(userId);
+        Map<String, String> existedUserMap = objectMapper.convertValue(existedUser, Map.class);
+        existedUserMap.putAll(fieldsToUpdate);
+        User updatedUser = objectMapper.convertValue(existedUserMap, User.class);
+        return toUserDto(userStorage.update(userId, updatedUser));
     }
 
     @Override
     public UserDto get(Long userId) throws NotFoundException {
         log.debug("/get");
         userStorage.isExist(userId);
-        return UserDtoMapper.toUserDto(userStorage.get(userId));
+        return toUserDto(userStorage.get(userId));
     }
 
     @Override
@@ -80,11 +77,11 @@ public class UserServiceImpl implements UserService {
 
     public void emailDuplicateValidate(String email, Long userId) throws FieldConflictException {
         log.debug("/emailDuplicateValid");
-        if(userId == null) {
+        if (userId == null) {
             userStorage.isExist(email);
             return;
         }
-        if(!userStorage.get(userId).getEmail().equals(email)) {
+        if (!userStorage.get(userId).getEmail().equals(email)) {
             userStorage.isExist(email);
         }
     }
@@ -99,11 +96,10 @@ public class UserServiceImpl implements UserService {
         if (br.hasErrors()) throw new ValidateException(GlobalExceptionHandler.bindingResultToString(br));
     }
 
-    private Map<String, String> generateMapUpdFields(User user) {
+    private Map<String, String> getFieldsToUpdate(User user) {
         Map<String, String> mapWithNullFields = objectMapper.convertValue(user, Map.class);
-        Map<String, String> mapWithFieldsToUpd = mapWithNullFields.entrySet().stream()
+        return mapWithNullFields.entrySet().stream()
                 .filter(entry -> entry.getValue() != null)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        return mapWithFieldsToUpd;
     }
 }

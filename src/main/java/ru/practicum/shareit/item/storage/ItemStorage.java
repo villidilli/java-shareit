@@ -1,11 +1,8 @@
 package ru.practicum.shareit.item.storage;
 
-import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.Item;
 
 import java.util.List;
-
-import static ru.practicum.shareit.exception.NotFoundException.ITEM_NOT_FOUND;
 
 public interface ItemStorage {
 
