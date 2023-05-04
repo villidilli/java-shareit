@@ -7,6 +7,8 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 
 import ru.practicum.shareit.exception.GlobalExceptionHandler;
@@ -17,6 +19,7 @@ import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoMapper;
 import ru.practicum.shareit.item.storage.ItemStorage;
+import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.storage.UserStorage;
 
 import java.util.Collections;
@@ -31,9 +34,11 @@ import static ru.practicum.shareit.item.dto.ItemDtoMapper.*;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional(isolation = Isolation.REPEATABLE_READ)
 public class ItemServiceImpl implements ItemService {
     private final ItemStorage itemStorage;
     private final UserStorage userStorage;
+    private final UserService userService;
     private final ObjectMapper objectMapper;
 
     @Override
@@ -41,55 +46,70 @@ public class ItemServiceImpl implements ItemService {
         log.debug("/create");
         annotationValidate(br);
         Item item = toItem(itemDto, ownerId);
-//        userStorage.isExist(item.getOwner());
-        return toItemDto(itemStorage.add(item));
+        userService.getById(ownerId);
+        log.warn(item.toString());
+        return toItemDto(itemStorage.save(item));
     }
 
     @SneakyThrows
     @Override
     public ItemDto update(Long itemId, ItemDto itemDto, Long ownerId) {
         log.debug("/update");
-        itemStorage.isExist(itemId);
-//        userStorage.isExist(ownerId);
         isOwnerOfItem(itemId, ownerId);
+        Item existedItem = getById(itemId);
         Item itemWithUpdate = toItem(itemDto, ownerId);
-        Item existedItem = itemStorage.get(itemId);
-        Map<String, String> fieldsToUpdate = getFieldToUpdate(itemWithUpdate);
-        Map<String, String> existedItemMap = objectMapper.convertValue(existedItem, Map.class);
-        existedItemMap.putAll(fieldsToUpdate);
-        Item updatedItem = objectMapper.convertValue(existedItemMap, Item.class);
-        return toItemDto(itemStorage.update(itemId, updatedItem));
+        Item updatedItem = setNewFields(existedItem, itemWithUpdate);
+        return toItemDto(itemStorage.save(updatedItem));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ItemDto get(Long itemId) {
         log.debug("/get");
-        return toItemDto(itemStorage.get(itemId));
+        return toItemDto(getById(itemId));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ItemDto> getByOwner(Long ownerId) {
         log.debug("/getByOwner");
-//        userStorage.isExist(ownerId);
-        return itemStorage.getByOwner(ownerId).stream().map(ItemDtoMapper::toItemDto).collect(Collectors.toList());
+        userService.getById(ownerId);
+        return itemStorage.findByOwnerId(ownerId).stream().map(ItemDtoMapper::toItemDto).collect(Collectors.toList());
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ItemDto> search(String text) {
         log.debug("/search");
         if (text.isBlank()) return Collections.emptyList();
-        return itemStorage.getAll().stream()
-                .filter(item -> item.getAvailable()
-                        && (item.getName().toLowerCase().contains(text.toLowerCase())
-                        || item.getDescription().toLowerCase().contains(text.toLowerCase()))
-                )
+        return itemStorage.findByAvailableIsTrueAndNameContainsIgnoreCaseOrDescriptionContainsIgnoreCase(text, text)
+                .stream()
+//                .filter(item -> item.getAvailable()
+//                        && (item.getName().toLowerCase().contains(text.toLowerCase())
+//                        || item.getDescription().toLowerCase().contains(text.toLowerCase()))
+//                )
                 .map(ItemDtoMapper::toItemDto)
                 .collect(Collectors.toList());
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Item getById(Long itemId) {
+        log.debug("/getById");
+        return itemStorage.findById(itemId).orElseThrow(() -> new NotFoundException(ITEM_NOT_FOUND));
+    }
+
+    private Item setNewFields(Item existedItem, Item itemWithUpdate) {
+        log.debug("/setNewFields");
+        Map<String, String> fieldsToUpdate = getFieldToUpdate(itemWithUpdate);
+        Map<String, String> existedItemMap = objectMapper.convertValue(existedItem, Map.class);
+        existedItemMap.putAll(fieldsToUpdate);
+        return objectMapper.convertValue(existedItemMap, Item.class);
+    }
+
     private void isOwnerOfItem(Long itemId, Long ownerId) throws NotFoundException {
-        log.debug("/checkItemOwner");
-        if (!Objects.equals(itemStorage.get(itemId).getOwner(), ownerId)) {
+        log.debug("/isOwnerOfItem");
+        if (!Objects.equals(getById(itemId).getOwner().getId(), ownerId)) {
             throw new NotFoundException(OWNER_NOT_MATCH_ITEM);
         }
     }

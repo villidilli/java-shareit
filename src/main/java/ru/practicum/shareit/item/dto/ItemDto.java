@@ -19,6 +19,6 @@ public class ItemDto {
     private String name;
     @NotBlank(message = "Description must not be empty")
     private String description;
-    @NotNull
+    @NotNull(message = "Available must not be null")
     private Boolean available;
 }

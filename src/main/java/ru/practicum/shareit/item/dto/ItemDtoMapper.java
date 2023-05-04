@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.user.User;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ItemDtoMapper {
@@ -23,8 +24,9 @@ public class ItemDtoMapper {
         item.setName(itemDto.getName());
         item.setDescription(itemDto.getDescription());
         item.setAvailable(itemDto.getAvailable());
-        item.setAvailable(itemDto.getAvailable());
-        item.setOwner(ownerId);
+        User owner = new User();
+        owner.setId(ownerId);
+        item.setOwner(owner);
         return item;
     }
 }

@@ -2,6 +2,7 @@ package ru.practicum.shareit.user.service;
 
 import org.springframework.validation.BindingResult;
 
+import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import java.util.List;
@@ -17,4 +18,6 @@ public interface UserService {
     void delete(Long userId);
 
     List<UserDto> getAll();
+
+    User getById(Long userId);
 }

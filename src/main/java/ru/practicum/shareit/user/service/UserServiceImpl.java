@@ -75,6 +75,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Transactional(readOnly = true)
+    @Override
     public User getById(Long userId) {
         log.debug("/getById");
         return userStorage.findById(userId).orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));

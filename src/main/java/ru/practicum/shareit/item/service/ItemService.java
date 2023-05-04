@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.service;
 
 import org.springframework.validation.BindingResult;
 
+import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.dto.ItemDto;
 
 import java.util.List;
@@ -17,4 +18,6 @@ public interface ItemService {
     List<ItemDto> getByOwner(Long ownerId);
 
     List<ItemDto> search(String text);
+
+    Item getById(Long itemId);
 }
