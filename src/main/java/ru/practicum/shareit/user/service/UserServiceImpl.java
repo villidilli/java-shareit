@@ -7,6 +7,9 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 
 import ru.practicum.shareit.exception.*;
@@ -25,6 +28,7 @@ import static ru.practicum.shareit.user.dto.UserDtoMapper.*;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Transactional(isolation = Isolation.REPEATABLE_READ)
 public class UserServiceImpl implements UserService {
     private final UserStorage userStorage;
     private final ObjectMapper objectMapper;
@@ -36,7 +40,7 @@ public class UserServiceImpl implements UserService {
         emailDuplicateValidate(user.getEmail(), user.getId());
         emailNotBlankValidate(user.getEmail());
         annotationValidate(br);
-        User createdUser = userStorage.add(user);
+        User createdUser = userStorage.save(user);
         return toUserDto(createdUser);
     }
 
@@ -56,6 +60,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserDto get(Long userId) throws NotFoundException {
         log.debug("/get");
         userStorage.isExist(userId);
@@ -70,6 +75,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<UserDto> getAll() {
         log.debug("/getAll");
         return userStorage.getAll().stream().map(UserDtoMapper::toUserDto).collect(Collectors.toList());
