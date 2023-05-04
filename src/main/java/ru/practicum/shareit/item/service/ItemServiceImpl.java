@@ -41,7 +41,7 @@ public class ItemServiceImpl implements ItemService {
         log.debug("/create");
         annotationValidate(br);
         Item item = toItem(itemDto, ownerId);
-        userStorage.isExist(item.getOwner());
+//        userStorage.isExist(item.getOwner());
         return toItemDto(itemStorage.add(item));
     }
 
@@ -50,7 +50,7 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto update(Long itemId, ItemDto itemDto, Long ownerId) {
         log.debug("/update");
         itemStorage.isExist(itemId);
-        userStorage.isExist(ownerId);
+//        userStorage.isExist(ownerId);
         isOwnerOfItem(itemId, ownerId);
         Item itemWithUpdate = toItem(itemDto, ownerId);
         Item existedItem = itemStorage.get(itemId);
@@ -70,7 +70,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemDto> getByOwner(Long ownerId) {
         log.debug("/getByOwner");
-        userStorage.isExist(ownerId);
+//        userStorage.isExist(ownerId);
         return itemStorage.getByOwner(ownerId).stream().map(ItemDtoMapper::toItemDto).collect(Collectors.toList());
     }
 

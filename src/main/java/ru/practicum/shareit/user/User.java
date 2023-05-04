@@ -3,6 +3,7 @@ package ru.practicum.shareit.user;
 import lombok.*;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 
 /**
  * TODO Sprint add-controllers.
@@ -10,13 +11,13 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Getter @Setter @ToString
 @Entity
-@Table
+@Table(name = "users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column
+    @Column(name = "name")
     private String name;
-    @Column(nullable = false)
+    @Column(name = "email", nullable = false)
     private String email;
 }

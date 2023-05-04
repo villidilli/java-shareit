@@ -20,4 +20,5 @@ public interface UserStorage extends JpaRepository<User, Long> {
 //    void isExist(Long userId);
 //
 //    void isExist(String email);
+    User findFirstByEmail(String email);
 }

@@ -2,6 +2,7 @@ package ru.practicum.shareit.exception;
 
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -12,7 +13,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
+import static ru.practicum.shareit.exception.NotFoundException.USER_NOT_FOUND;
+import static ru.practicum.shareit.exception.ValidateException.DUPLICATE_EMAIL;
 import static ru.practicum.shareit.exception.ValidateException.OWNER_ID_NOT_BLANK;
 
 @RestControllerAdvice("ru.practicum.shareit")
@@ -45,12 +49,20 @@ public class GlobalExceptionHandler {
         return new ExceptionResponse(e);
     }
 
+//    @ExceptionHandler
+//    @ResponseStatus(HttpStatus.CONFLICT)
+//    public ExceptionResponse exceptionHandler(FieldConflictException e) {
+//        log.debug("/FieldConflictExceptionHandler");
+//        logException(HttpStatus.CONFLICT, e);
+//        return new ExceptionResponse(e);
+//    }
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ExceptionResponse exceptionHandler(FieldConflictException e) {
-        log.debug("/FieldConflictExceptionHandler");
+    public ExceptionResponse exceptionHandler(DataIntegrityViolationException e) {
+        log.debug("/DataIntegrityVoilationHandler");
         logException(HttpStatus.CONFLICT, e);
-        return new ExceptionResponse(e);
+        return new ExceptionResponse(new FieldConflictException(DUPLICATE_EMAIL));
     }
 
     @ExceptionHandler
