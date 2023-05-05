@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 
@@ -20,11 +19,9 @@ import ru.practicum.shareit.user.storage.UserStorage;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.exception.NotFoundException.USER_NOT_FOUND;
-import static ru.practicum.shareit.exception.ValidateException.EMAIL_NOT_BLANK;
 import static ru.practicum.shareit.user.dto.UserDtoMapper.*;
 
 @Service
@@ -47,7 +44,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto update(Long userId, UserDto userDto) {
         log.debug("/update");
-        User existedUser = getById(userId);
+        User existedUser = findById(userId);
         User userWithUpdate = toUser(userDto);
         User updatedUser = setNewFields(existedUser, userWithUpdate);
         return toUserDto(userStorage.save(updatedUser));
@@ -57,13 +54,13 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public UserDto get(Long userId) throws NotFoundException {
         log.debug("/get");
-        return toUserDto(getById(userId));
+        return toUserDto(findById(userId));
     }
 
     @Override
     public void delete(Long userId) {
         log.debug("/delete");
-        getById(userId);
+        findById(userId);
         userStorage.deleteById(userId);
     }
 
@@ -76,7 +73,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(readOnly = true)
     @Override
-    public User getById(Long userId) {
+    public User findById(Long userId) throws NotFoundException {
         log.debug("/getById");
         return userStorage.findById(userId).orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
     }

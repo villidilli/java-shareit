@@ -37,7 +37,6 @@ import static ru.practicum.shareit.item.dto.ItemDtoMapper.*;
 @Transactional(isolation = Isolation.REPEATABLE_READ)
 public class ItemServiceImpl implements ItemService {
     private final ItemStorage itemStorage;
-    private final UserStorage userStorage;
     private final UserService userService;
     private final ObjectMapper objectMapper;
 
@@ -46,8 +45,7 @@ public class ItemServiceImpl implements ItemService {
         log.debug("/create");
         annotationValidate(br);
         Item item = toItem(itemDto, ownerId);
-        userService.getById(ownerId);
-        log.warn(item.toString());
+        userService.findById(ownerId);
         return toItemDto(itemStorage.save(item));
     }
 
@@ -73,7 +71,7 @@ public class ItemServiceImpl implements ItemService {
     @Transactional(readOnly = true)
     public List<ItemDto> getByOwner(Long ownerId) {
         log.debug("/getByOwner");
-        userService.getById(ownerId);
+        userService.findById(ownerId);
         return itemStorage.findByOwnerId(ownerId).stream().map(ItemDtoMapper::toItemDto).collect(Collectors.toList());
     }
 
@@ -82,12 +80,8 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemDto> search(String text) {
         log.debug("/search");
         if (text.isBlank()) return Collections.emptyList();
-        return itemStorage.findByAvailableIsTrueAndNameContainsIgnoreCaseOrDescriptionContainsIgnoreCase(text, text)
+        return itemStorage.findByNameContainsIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(text, text)
                 .stream()
-//                .filter(item -> item.getAvailable()
-//                        && (item.getName().toLowerCase().contains(text.toLowerCase())
-//                        || item.getDescription().toLowerCase().contains(text.toLowerCase()))
-//                )
                 .map(ItemDtoMapper::toItemDto)
                 .collect(Collectors.toList());
     }
@@ -120,6 +114,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private Map<String, String> getFieldToUpdate(Item itemWithUpdate) {
+        log.debug("/getFieldsToUpdate");
         Map<String, String> mapWithNullFields = objectMapper.convertValue(itemWithUpdate, Map.class);
         return mapWithNullFields.entrySet().stream()
                 .filter(entry -> entry.getValue() != null)
