@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
@@ -59,10 +60,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ExceptionResponse exceptionHandler(DataIntegrityViolationException e) {
+    public ResponseEntity<ExceptionResponse> exceptionHandler(DataIntegrityViolationException e) {
         log.debug("/DataIntegrityVoilationHandler");
         logException(HttpStatus.CONFLICT, e);
-        return new ExceptionResponse(new FieldConflictException(DUPLICATE_EMAIL));
+        ResponseEntity<ExceptionResponse> response = new ResponseEntity<>()
+        return new ExceptionResponse(new FieldConflictException(e.getRootCause().getClass().getSimpleName()));
     }
 
     @ExceptionHandler

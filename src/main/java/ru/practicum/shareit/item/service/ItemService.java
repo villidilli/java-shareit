@@ -19,5 +19,7 @@ public interface ItemService {
 
     List<ItemDto> search(String text);
 
-    Item getById(Long itemId);
+    Item getByIdOrThrow(Long itemId);
+
+    Item checkAvailable(Long itemId);
 }

@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import ru.practicum.shareit.item.Item;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ItemStorage extends JpaRepository<Item, Long> {
 
@@ -15,15 +16,5 @@ public interface ItemStorage extends JpaRepository<Item, Long> {
     List<Item> findByNameContainsIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(String textNameSearch,
                                                                                                String textDescrSearch);
 
-//    Item add(Item item);
-//
-//    Item update(Long itemId, Item savedItem);
-//
-//    Item get(Long itemId);
-//
-//    List<Item> getAll();
-//
-//    void isExist(Long itemId);
-//
-//    List<Item> getByOwner(Long userId);
+    Optional<Item> findByIdAndAvailableIsTrue(Long itemId);
 }

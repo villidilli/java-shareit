@@ -44,7 +44,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto update(Long userId, UserDto userDto) {
         log.debug("/update");
-        User existedUser = findById(userId);
+        User existedUser = getByIdOrThrow(userId);
         User userWithUpdate = toUser(userDto);
         User updatedUser = setNewFields(existedUser, userWithUpdate);
         return toUserDto(userStorage.save(updatedUser));
@@ -54,13 +54,13 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public UserDto get(Long userId) throws NotFoundException {
         log.debug("/get");
-        return toUserDto(findById(userId));
+        return toUserDto(getByIdOrThrow(userId));
     }
 
     @Override
     public void delete(Long userId) {
         log.debug("/delete");
-        findById(userId);
+        getByIdOrThrow(userId);
         userStorage.deleteById(userId);
     }
 
@@ -73,7 +73,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(readOnly = true)
     @Override
-    public User findById(Long userId) throws NotFoundException {
+    public User getByIdOrThrow(Long userId) throws NotFoundException {
         log.debug("/getById");
         return userStorage.findById(userId).orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
     }

@@ -20,15 +20,12 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoMapper;
 import ru.practicum.shareit.item.storage.ItemStorage;
 import ru.practicum.shareit.user.service.UserService;
-import ru.practicum.shareit.user.storage.UserStorage;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.exception.NotFoundException.*;
+import static ru.practicum.shareit.exception.ValidateException.ITEM_NOT_AVAILABLE;
 import static ru.practicum.shareit.item.dto.ItemDtoMapper.*;
 
 @Service
@@ -45,7 +42,7 @@ public class ItemServiceImpl implements ItemService {
         log.debug("/create");
         annotationValidate(br);
         Item item = toItem(itemDto, ownerId);
-        userService.findById(ownerId);
+        userService.getByIdOrThrow(ownerId);
         return toItemDto(itemStorage.save(item));
     }
 
@@ -54,7 +51,7 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto update(Long itemId, ItemDto itemDto, Long ownerId) {
         log.debug("/update");
         isOwnerOfItem(itemId, ownerId);
-        Item existedItem = getById(itemId);
+        Item existedItem = getByIdOrThrow(itemId);
         Item itemWithUpdate = toItem(itemDto, ownerId);
         Item updatedItem = setNewFields(existedItem, itemWithUpdate);
         return toItemDto(itemStorage.save(updatedItem));
@@ -64,14 +61,14 @@ public class ItemServiceImpl implements ItemService {
     @Transactional(readOnly = true)
     public ItemDto get(Long itemId) {
         log.debug("/get");
-        return toItemDto(getById(itemId));
+        return toItemDto(getByIdOrThrow(itemId));
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<ItemDto> getByOwner(Long ownerId) {
         log.debug("/getByOwner");
-        userService.findById(ownerId);
+        userService.getByIdOrThrow(ownerId);
         return itemStorage.findByOwnerId(ownerId).stream().map(ItemDtoMapper::toItemDto).collect(Collectors.toList());
     }
 
@@ -88,9 +85,18 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public Item getById(Long itemId) {
+    public Item getByIdOrThrow(Long itemId) {
         log.debug("/getById");
         return itemStorage.findById(itemId).orElseThrow(() -> new NotFoundException(ITEM_NOT_FOUND));
+    }
+
+    @Override
+    public Item checkAvailable(Long itemId) {
+        log.debug("/checkAvailable");
+        Optional<Item> item = Optional.ofNullable(itemStorage.findByIdAndAvailableIsTrue(itemId)
+                .orElseThrow(() -> new ValidateException(ITEM_NOT_AVAILABLE)));
+        log.warn(item.toString());
+        return item.get();
     }
 
     private Item setNewFields(Item existedItem, Item itemWithUpdate) {
@@ -103,7 +109,7 @@ public class ItemServiceImpl implements ItemService {
 
     private void isOwnerOfItem(Long itemId, Long ownerId) throws NotFoundException {
         log.debug("/isOwnerOfItem");
-        if (!Objects.equals(getById(itemId).getOwner().getId(), ownerId)) {
+        if (!Objects.equals(getByIdOrThrow(itemId).getOwner().getId(), ownerId)) {
             throw new NotFoundException(OWNER_NOT_MATCH_ITEM);
         }
     }

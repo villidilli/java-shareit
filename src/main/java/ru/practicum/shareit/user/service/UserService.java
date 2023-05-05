@@ -19,5 +19,5 @@ public interface UserService {
 
     List<UserDto> getAll();
 
-    User findById(Long userId);
+    User getByIdOrThrow(Long userId);
 }
