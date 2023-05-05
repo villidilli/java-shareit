@@ -26,11 +26,8 @@ public class Item {
     @JoinColumn(name = "owner_id", nullable = false)
     @JsonIgnoreProperties({"hibernateLazyInitializer"})
     private User owner;
-    @Column
     private String name;
-    @Column
     private String description;
-    @Column
     private Boolean available;
     @Transient
     private Long request;
