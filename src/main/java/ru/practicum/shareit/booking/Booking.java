@@ -32,15 +32,11 @@ public class Booking {
     @DateTimeFormat(pattern = "YYYY-MM-DD HH:mm:ss")
     @Column(name = "end_time")
     private LocalDateTime end;
-//    @OneToOne(fetch = FetchType.LAZY)
-    @OneToOne
-    @JoinColumn(name = "item_id")
-//    @JsonIgnoreProperties({"hibernateLazyInitializer"})
-    private Item item;
-//    @ManyToOne(fetch = FetchType.LAZY)
     @ManyToOne
+    @JoinColumn(name = "item_id")
+    private Item item;
+    @OneToOne
     @JoinColumn(name = "booker_id")
-//    @JsonIgnoreProperties({"hibernateLazyInitializer"})
     private User booker;
     @Enumerated(EnumType.STRING)
     private BookingStatus status;

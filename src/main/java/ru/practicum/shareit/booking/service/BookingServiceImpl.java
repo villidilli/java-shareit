@@ -2,7 +2,9 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Transaction;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import ru.practicum.shareit.booking.Booking;
@@ -24,7 +26,7 @@ import static ru.practicum.shareit.exception.ValidateException.ENDTIME_BEFORE_ST
 @Service
 @Slf4j
 @RequiredArgsConstructor
-@Transactional
+@Transactional(isolation = Isolation.REPEATABLE_READ)
 public class BookingServiceImpl implements BookingService {
     private final BookingDbStorage bookingStorage;
     private final UserService userService;
@@ -38,11 +40,12 @@ public class BookingServiceImpl implements BookingService {
         userService.getByIdOrThrow(bookerId);
         itemService.getByIdOrThrow(bookingIncomeDto.getItemId());
         itemService.checkAvailable(bookingIncomeDto.getItemId());
-        Booking booking = toBooking(bookingIncomeDto, bookerId);
-        log.debug("ПЕРЕД СОХРАНЕНИЕМ -> " + booking);
-        Booking saved = bookingStorage.save(booking);
-        log.debug("ПОСЛЕ СОХРАНЕНИЯ -> " + saved);
-        log.debug("ДОСТАЛ ОТДЕЛЬНО БУКЕРА " + bookingStorage.findById(saved.getId()).get().getBooker().getName());
+
+        log.debug("ДОСТАЛ НАПРЯМУЮ ИЗ ЮЗЕР СЕРВИСА ->>>>>" + userService.getByIdOrThrow(bookerId));
+        log.debug("ДОСТАЛ НАПРЯМУЮ ИЗ ИТЕМ СЕРВИСА ->>>>>" + itemService.getByIdOrThrow(bookingIncomeDto.getItemId()));
+        Booking savedBooking = bookingStorage.save(toBooking(bookingIncomeDto,bookerId));
+        log.debug("СОХРАНЕННЫЙ В БД БУКИНГ ->>>>>" + savedBooking);
+        log.debug("ДОСТАЛ ИЗ БУКИНГ СЕРВИСА ЧЕРЕЗ СУЩНОСТЬ БУКИНГ ->>>>> " + bookingStorage.getReferenceById(savedBooking.getId()));
         return null;
     }
 
