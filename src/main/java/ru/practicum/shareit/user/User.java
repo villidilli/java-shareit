@@ -9,6 +9,7 @@ import javax.validation.constraints.NotBlank;
  * TODO Sprint add-controllers.
  */
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter @Setter @ToString
 @Entity
 @Table(name = "users")

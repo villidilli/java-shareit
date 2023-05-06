@@ -25,6 +25,6 @@ CREATE TABLE IF NOT EXISTS bookings (
     end_time TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     item_id BIGINT REFERENCES items(id) ON DELETE CASCADE NOT NULL,
     booker_id BIGINT REFERENCES users(id) ON DELETE CASCADE NOT NULL,
-    status VARCHAR(64),
-    CONSTRAINT "endAfterStart" CHECK ( end_time > bookings.start_time )
+    status VARCHAR(64)
+    --CONSTRAINT "end_time_before_start_time" CHECK ( end_time > bookings.start_time )
 );

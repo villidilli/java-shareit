@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Setter
 @ToString
 @EqualsAndHashCode
-public class BookingLongDto {
+public class BookingResponseDto {
     private Long id;
     @NotBlank(message = "Item ID must not be null or empty")
     private LocalDateTime start;

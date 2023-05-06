@@ -60,11 +60,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ResponseEntity<ExceptionResponse> exceptionHandler(DataIntegrityViolationException e) {
+    public ExceptionResponse exceptionHandler(DataIntegrityViolationException e) {
         log.debug("/DataIntegrityVoilationHandler");
         logException(HttpStatus.CONFLICT, e);
-        ResponseEntity<ExceptionResponse> response = new ResponseEntity<>()
-        return new ExceptionResponse(new FieldConflictException(e.getRootCause().getClass().getSimpleName()));
+        return new ExceptionResponse(new FieldConflictException(e.getMessage()));
     }
 
     @ExceptionHandler

@@ -1,9 +1,9 @@
 package ru.practicum.shareit.booking.service;
 
 import org.springframework.validation.BindingResult;
-import ru.practicum.shareit.booking.dto.BookingIncomeDto;
-import ru.practicum.shareit.booking.dto.BookingLongDto;
+import ru.practicum.shareit.booking.dto.BookingRequestDto;
+import ru.practicum.shareit.booking.dto.BookingResponseDto;
 
 public interface BookingService {
-    BookingLongDto create(BookingIncomeDto bookingIncomeDto, BindingResult br, Long bookerId);
+    BookingResponseDto create(BookingRequestDto bookingIncomeDto, BindingResult br, Long bookerId);
 }
