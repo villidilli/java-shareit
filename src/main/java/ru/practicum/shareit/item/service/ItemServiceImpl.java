@@ -25,7 +25,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.exception.NotFoundException.*;
-import static ru.practicum.shareit.exception.ValidateException.ITEM_NOT_AVAILABLE;
 import static ru.practicum.shareit.item.dto.ItemDtoMapper.*;
 
 @Service
@@ -41,8 +40,8 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto create(ItemDto itemDto, Long ownerId, BindingResult br) {
         log.debug("/create");
         annotationValidate(br);
+        userService.isExist(ownerId);
         Item item = toItem(itemDto, ownerId);
-        userService.getByIdOrThrow(ownerId);
         return toItemDto(itemStorage.save(item));
     }
 
@@ -50,8 +49,9 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto update(Long itemId, ItemDto itemDto, Long ownerId) {
         log.debug("/update");
+        isExist(itemId);
         isOwnerOfItem(itemId, ownerId);
-        Item existedItem = getByIdOrThrow(itemId);
+        Item existedItem = itemStorage.findById(itemId).get();
         Item itemWithUpdate = toItem(itemDto, ownerId);
         Item updatedItem = setNewFields(existedItem, itemWithUpdate);
         return toItemDto(itemStorage.save(updatedItem));
@@ -61,14 +61,15 @@ public class ItemServiceImpl implements ItemService {
     @Transactional(readOnly = true)
     public ItemDto get(Long itemId) {
         log.debug("/get");
-        return toItemDto(getByIdOrThrow(itemId));
+        isExist(itemId);
+        return toItemDto(itemStorage.findById(itemId).get());
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<ItemDto> getByOwner(Long ownerId) {
         log.debug("/getByOwner");
-        userService.getByIdOrThrow(ownerId);
+        userService.isExist(ownerId);
         return itemStorage.findByOwnerId(ownerId).stream().map(ItemDtoMapper::toItemDto).collect(Collectors.toList());
     }
 
@@ -85,18 +86,16 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public Item getByIdOrThrow(Long itemId) {
-        log.debug("/getById");
-        return itemStorage.findById(itemId).orElseThrow(() -> new NotFoundException(ITEM_NOT_FOUND));
+    public void isExist(Long itemId) {
+        log.debug("/isExist");
+        if(!itemStorage.existsById(itemId)) throw new NotFoundException(ITEM_NOT_FOUND);
     }
 
+    @Transactional(readOnly = true)
     @Override
-    public Item checkAvailable(Long itemId) {
+    public void checkAvailable(Long itemId) throws ValidateException {
         log.debug("/checkAvailable");
-        Optional<Item> item = Optional.ofNullable(itemStorage.findByIdAndAvailableIsTrue(itemId)
-                .orElseThrow(() -> new ValidateException(ITEM_NOT_AVAILABLE)));
-        log.warn(item.toString());
-        return item.get();
+        if(itemStorage.findByIdAndAvailableIsTrue(itemId) == null) throw new ValidateException(ITEM_NOT_FOUND);
     }
 
     private Item setNewFields(Item existedItem, Item itemWithUpdate) {
@@ -109,7 +108,7 @@ public class ItemServiceImpl implements ItemService {
 
     private void isOwnerOfItem(Long itemId, Long ownerId) throws NotFoundException {
         log.debug("/isOwnerOfItem");
-        if (!Objects.equals(getByIdOrThrow(itemId).getOwner().getId(), ownerId)) {
+        if (!Objects.equals(itemStorage.findById(itemId).get().getOwner().getId(), ownerId)) {
             throw new NotFoundException(OWNER_NOT_MATCH_ITEM);
         }
     }

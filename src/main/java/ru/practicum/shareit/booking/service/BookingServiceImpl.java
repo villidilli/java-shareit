@@ -2,7 +2,6 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Transaction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,11 +12,14 @@ import ru.practicum.shareit.booking.dto.BookingResponseDto;
 import ru.practicum.shareit.booking.storage.BookingDbStorage;
 import ru.practicum.shareit.exception.GlobalExceptionHandler;
 import ru.practicum.shareit.exception.ValidateException;
+import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.item.storage.ItemStorage;
+import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.user.storage.UserStorage;
 
 import java.sql.Timestamp;
-import java.util.Optional;
 
 import static ru.practicum.shareit.booking.dto.BookingDtoMapper.toBooking;
 import static ru.practicum.shareit.booking.dto.BookingDtoMapper.toBookingDto;
@@ -31,22 +33,26 @@ public class BookingServiceImpl implements BookingService {
     private final BookingDbStorage bookingStorage;
     private final UserService userService;
     private final ItemService itemService;
+    private final UserStorage userStorage;
+    private final ItemStorage itemStorage;
 
     @Override
     public BookingResponseDto create(BookingRequestDto bookingIncomeDto, BindingResult br, Long bookerId) {
         log.debug("/create");
         annotationValidate(br);
         customValidate(bookingIncomeDto);
-        userService.getByIdOrThrow(bookerId);
-        itemService.getByIdOrThrow(bookingIncomeDto.getItemId());
+        userService.isExist(bookerId);
+        itemService.isExist(bookingIncomeDto.getItemId());
         itemService.checkAvailable(bookingIncomeDto.getItemId());
-
-        log.debug("ДОСТАЛ НАПРЯМУЮ ИЗ ЮЗЕР СЕРВИСА ->>>>>" + userService.getByIdOrThrow(bookerId));
-        log.debug("ДОСТАЛ НАПРЯМУЮ ИЗ ИТЕМ СЕРВИСА ->>>>>" + itemService.getByIdOrThrow(bookingIncomeDto.getItemId()));
-        Booking savedBooking = bookingStorage.save(toBooking(bookingIncomeDto,bookerId));
-        log.debug("СОХРАНЕННЫЙ В БД БУКИНГ ->>>>>" + savedBooking);
-        log.debug("ДОСТАЛ ИЗ БУКИНГ СЕРВИСА ЧЕРЕЗ СУЩНОСТЬ БУКИНГ ->>>>> " + bookingStorage.getReferenceById(savedBooking.getId()));
-        return null;
+        User booker = userStorage.getReferenceById(bookerId);
+        log.debug("РЕФЕРЕНС НА ЮЗЕРА ---------- " + booker);
+        Item item = itemStorage.getReferenceById(bookingIncomeDto.getItemId());
+        log.debug("РЕФЕРЕНС НА ИТЕМ ---------- " + item);
+        Booking savedBooking = bookingStorage.save(toBooking(bookingIncomeDto, item, booker));
+        log.debug("SAVED ---------- "  + savedBooking);
+        BookingResponseDto dto =  toBookingDto(savedBooking);
+        log.debug("ИЗ СЕРВИСА ДТО === " + dto);
+        return dto;
     }
 
     private void annotationValidate(BindingResult br) {
