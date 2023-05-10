@@ -18,7 +18,6 @@ import static ru.practicum.shareit.booking.BookingStatus.WAITING;
 public class BookingDtoMapper {
 
     public static BookingResponseDto toBookingDto(Booking booking) {
-        log.debug("ПРИШЕЛ БУКИНГ В TO DTO ---------- " + booking);
         BookingResponseDto bookingResponseDto = new BookingResponseDto();
         bookingResponseDto.setId(booking.getId());
         bookingResponseDto.setStart(booking.getStart());
@@ -29,16 +28,6 @@ public class BookingDtoMapper {
                                                                         booking.getItem().getName()));
         return bookingResponseDto;
     }
-
-//    public static Booking toBooking(BookingRequestDto bookingIncomeDto, Item item, User booker) {
-//        Booking booking = new Booking();
-//        booking.setStart(bookingIncomeDto.getStart());
-//        booking.setEnd(bookingIncomeDto.getEnd());
-//        booking.setItem(item);
-//        booking.setBooker(booker);
-//        booking.setStatus(WAITING);
-//        return booking;
-//    }
 
     public static Booking toBooking(BookingRequestDto bookingIncomeDto, User booker, Item item) {
         Booking booking = new Booking();

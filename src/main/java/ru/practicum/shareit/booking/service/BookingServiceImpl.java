@@ -33,8 +33,7 @@ import java.util.stream.Collectors;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
-import static ru.practicum.shareit.booking.BookingStatus.REJECTED;
-import static ru.practicum.shareit.booking.BookingStatus.WAITING;
+import static ru.practicum.shareit.booking.BookingStatus.*;
 import static ru.practicum.shareit.booking.dto.BookingDtoMapper.toBooking;
 import static ru.practicum.shareit.booking.dto.BookingDtoMapper.toBookingDto;
 import static ru.practicum.shareit.exception.NotFoundException.*;
@@ -60,25 +59,35 @@ public class BookingServiceImpl implements BookingService {
         userService.isExist(bookerId);
         itemService.isExist(bookingIncomeDto.getItemId());
         itemService.checkAvailable(bookingIncomeDto.getItemId());
+        isBookerIsOwnerItem(bookingIncomeDto.getItemId(), bookerId);
         User booker = userStorage.getReferenceById(bookerId);
         Item item = itemStorage.getReferenceById(bookingIncomeDto.getItemId());
         Booking savedBooking = bookingStorage.save(toBooking(bookingIncomeDto, booker, item));
         return toBookingDto(savedBooking);
     }
 
+    private void isBookerIsOwnerItem(Long itemId, Long bookerId) {
+        Long itemOwnerId = itemStorage.getReferenceById(itemId).getOwner().getId();
+        if(bookerId.equals(itemOwnerId)) throw new NotFoundException(BOOKER_IS_OWNER_ITEM);
+    }
+
     @Override
-    public BookingResponseDto update(Long bookingId, Long bookerId, Boolean status) {
+    public BookingResponseDto update(Long bookingId, Long ownerId, String status) {
         isExist(bookingId);
+        userService.isExist(ownerId);
         Booking booking = bookingStorage.getReferenceById(bookingId);
-        userService.isExist(bookerId);
-        itemService.isOwnerOfItem(booking.getItem().getId(), bookerId);
-        if(status == null) status = FALSE;
-        if (status) {
-            booking.setStatus(BookingStatus.APPROVED);
-        } else {
-            booking.setStatus(REJECTED);
+        itemService.isOwnerOfItem(booking.getItem().getId(), ownerId);
+        isStatusWaiting(booking);
+        if(status != null) {
+            if(Boolean.parseBoolean(status)) booking.setStatus(APPROVED);
+            if(!Boolean.parseBoolean(status)) booking.setStatus(REJECTED);
         }
         return toBookingDto(bookingStorage.save(booking));
+    }
+
+    private void isStatusWaiting(Booking booking) {
+        BookingStatus status = booking.getStatus();
+        if(status != WAITING) throw new ValidateException(STATUS_NOT_WAITING);
     }
 
     private void annotationValidate(BindingResult br) {

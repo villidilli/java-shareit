@@ -31,4 +31,7 @@ public interface BookingStorage extends JpaRepository<Booking, Long> {
     List<Booking> findAllByItem_Owner_IdAndStatusIsOrderByIdDesc(Long ownerId, BookingStatus status);
 
     List<Booking> findAllByItem_OwnerIdOrderByIdDesc(Long ownerId);
+
+    Booking findTopByItem_IdAndStartIsBeforeOrderByEndDesc(Long item_id, LocalDateTime start);
+    Booking findTopByItem_IdAndStartIsAfterOrderByStartAsc(Long item_id, LocalDateTime start);
 }

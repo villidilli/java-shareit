@@ -8,6 +8,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDtoWithBooking;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
@@ -28,28 +29,29 @@ public class ItemController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ItemDto create(@Valid @RequestBody ItemDto itemDto,
-                          BindingResult br,
-                          @RequestHeader(name = PARAM_NAME_OWNER_ID) Long ownerId) {
+                                     BindingResult br,
+                                     @RequestHeader(name = PARAM_NAME_OWNER_ID) Long ownerId) {
         log.debug("/create");
         return itemService.create(itemDto, ownerId, br);
     }
 
     @PatchMapping("/{itemId}")
     public ItemDto update(@PathVariable Long itemId,
-                          @RequestBody ItemDto itemDto,
-                          @RequestHeader(name = PARAM_NAME_OWNER_ID) Long ownerId) {
+                                     @RequestBody ItemDto itemDto,
+                                     @RequestHeader(name = PARAM_NAME_OWNER_ID) Long ownerId) {
         log.debug("/update");
         return itemService.update(itemId, itemDto, ownerId);
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto get(@PathVariable Long itemId) {
+    public ItemDtoWithBooking get(@PathVariable Long itemId,
+                                  @RequestHeader(name = PARAM_NAME_OWNER_ID) Long ownerId) {
         log.debug("/get");
-        return itemService.get(itemId);
+        return itemService.get(itemId, ownerId);
     }
 
     @GetMapping
-    public List<ItemDto> getByOwner(@RequestHeader(name = PARAM_NAME_OWNER_ID) Long ownerId) {
+    public List<ItemDtoWithBooking> getByOwner(@RequestHeader(name = PARAM_NAME_OWNER_ID) Long ownerId) {
         log.debug("/getByOwner");
         return itemService.getByOwner(ownerId);
     }

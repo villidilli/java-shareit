@@ -6,8 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.item.Item;
-import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.storage.UserStorage;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -20,6 +20,27 @@ public class ItemDtoMapper {
     @Autowired
     private ItemDtoMapper(UserStorage userStorage) {
         ItemDtoMapper.userStorage = userStorage;
+    }
+
+    public static ItemDtoWithBooking toItemDtoWithBooking(Item item, Booking bookingLast, Booking bookingNext) {
+        log.debug("/toItemDtoWithBooking");
+        log.debug("Пришло ITEM - " + item);
+        log.debug("Пришло BOOK LAST " + bookingLast);
+        log.debug("Пришло BOOK NEXT " + bookingNext);
+        ItemDtoWithBooking itemDtoWithBooking = new ItemDtoWithBooking();
+        itemDtoWithBooking.setId(item.getId());
+        itemDtoWithBooking.setName(item.getName());
+        itemDtoWithBooking.setDescription(item.getDescription());
+        itemDtoWithBooking.setAvailable(item.getAvailable());
+        if(bookingLast != null) {
+            itemDtoWithBooking.setLastBooking(new ItemDtoWithBooking.BookingShortDto(bookingLast.getId(),
+                    bookingLast.getBooker().getId()));
+        }
+        if(bookingNext != null) {
+            itemDtoWithBooking.setNextBooking(new ItemDtoWithBooking.BookingShortDto(bookingNext.getId(),
+                    bookingNext.getBooker().getId()));
+        }
+        return itemDtoWithBooking;
     }
 
     public static ItemDto toItemDto(Item item) {

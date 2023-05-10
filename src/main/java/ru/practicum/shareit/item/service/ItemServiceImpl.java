@@ -11,6 +11,9 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 
+import ru.practicum.shareit.booking.Booking;
+import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.booking.storage.BookingStorage;
 import ru.practicum.shareit.exception.GlobalExceptionHandler;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidateException;
@@ -18,9 +21,11 @@ import ru.practicum.shareit.exception.ValidateException;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoMapper;
+import ru.practicum.shareit.item.dto.ItemDtoWithBooking;
 import ru.practicum.shareit.item.storage.ItemStorage;
 import ru.practicum.shareit.user.service.UserService;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -35,6 +40,8 @@ public class ItemServiceImpl implements ItemService {
     private final ItemStorage itemStorage;
     private final UserService userService;
     private final ObjectMapper objectMapper;
+    private final BookingStorage bookingStorage;
+
 
     @Override
     public ItemDto create(ItemDto itemDto, Long ownerId, BindingResult br) {
@@ -50,6 +57,7 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto update(Long itemId, ItemDto itemDto, Long ownerId) {
         log.debug("/update");
         isExist(itemId);
+        userService.isExist(ownerId);
         isOwnerOfItem(itemId, ownerId);
         Item existedItem = itemStorage.findById(itemId).get();
         Item itemWithUpdate = toItem(itemDto, ownerId);
@@ -59,18 +67,26 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public ItemDto get(Long itemId) {
+    public ItemDtoWithBooking get(Long itemId, Long ownerId) {
         log.debug("/get");
         isExist(itemId);
-        return toItemDto(itemStorage.findById(itemId).get());
+        Item foundedItem = itemStorage.findById(itemId).get();
+        try {
+            isOwnerOfItem(itemId, ownerId);
+            return toItemDtoWithBooking(foundedItem, getLastBooking(itemId), getNextBooking(itemId));
+        } catch (NotFoundException e) {
+            return toItemDtoWithBooking(foundedItem, null, null);
+        }
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemDto> getByOwner(Long ownerId) {
+    public List<ItemDtoWithBooking> getByOwner(Long ownerId) {
         log.debug("/getByOwner");
         userService.isExist(ownerId);
-        return itemStorage.findByOwnerId(ownerId).stream().map(ItemDtoMapper::toItemDto).collect(Collectors.toList());
+        return itemStorage.findByOwnerId(ownerId).stream()
+                .map(item -> toItemDtoWithBooking(item, getLastBooking(item.getId()), getNextBooking(item.getId())))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -82,6 +98,18 @@ public class ItemServiceImpl implements ItemService {
                 .stream()
                 .map(ItemDtoMapper::toItemDto)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public Booking getLastBooking(Long itemId) {
+        final LocalDateTime curTime = LocalDateTime.now();
+        return bookingStorage.findTopByItem_IdAndStartIsBeforeOrderByEndDesc(itemId, curTime);
+    }
+
+    @Transactional(readOnly = true)
+    public Booking getNextBooking(Long itemId) {
+        final LocalDateTime curTime = LocalDateTime.now();
+        return bookingStorage.findTopByItem_IdAndStartIsAfterOrderByStartAsc(itemId, curTime);
     }
 
     @Override
@@ -110,8 +138,11 @@ public class ItemServiceImpl implements ItemService {
     public void isOwnerOfItem(Long itemId, Long ownerId) throws NotFoundException {
         log.debug("/isOwnerOfItem");
         if (!Objects.equals(itemStorage.findById(itemId).get().getOwner().getId(), ownerId)) {
-            throw new ValidateException(OWNER_NOT_MATCH_ITEM);
+            log.debug("ЗАПРАШИВАЕМЫЙ ОВНЕР "  + ownerId);
+            log.debug("НЕТТТТТТТТТ НЕ ОВНЕР");
+            throw new NotFoundException(OWNER_NOT_MATCH_ITEM);
         }
+        log.debug("ЯЯЯЯ ОВНЕРРРРРРРРР");
     }
 
     private void annotationValidate(BindingResult br) {

@@ -9,6 +9,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
 import org.springframework.web.bind.MissingRequestHeaderException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -17,8 +18,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import static ru.practicum.shareit.exception.NotFoundException.USER_NOT_FOUND;
-import static ru.practicum.shareit.exception.ValidateException.DUPLICATE_EMAIL;
-import static ru.practicum.shareit.exception.ValidateException.OWNER_ID_NOT_BLANK;
+import static ru.practicum.shareit.exception.ValidateException.*;
 
 @RestControllerAdvice("ru.practicum.shareit")
 @Slf4j
@@ -64,6 +64,14 @@ public class GlobalExceptionHandler {
         log.debug("/MissingRequestHeaderExceptionHandler");
         logException(HttpStatus.BAD_REQUEST, e);
         return new ExceptionResponse(new ValidateException(OWNER_ID_NOT_BLANK));
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionResponse exceptionHandler(MissingServletRequestParameterException e) {
+        log.debug("/MissingRequestHeaderExceptionHandler");
+        logException(HttpStatus.BAD_REQUEST, e);
+        return new ExceptionResponse(new ValidateException(STATUS_PARAM_NOT_BLANK));
     }
 
     @ExceptionHandler

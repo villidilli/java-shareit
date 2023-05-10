@@ -39,12 +39,11 @@ public class BookingController {
 
     @PatchMapping("/{bookingId}")
     @ResponseStatus(HttpStatus.OK)
-    public BookingResponseDto update(@RequestHeader(name = PARAM_NAME_BOOKED_OWNER_ID) Long bookerId,
+    public BookingResponseDto update(@RequestHeader(name = PARAM_NAME_BOOKED_OWNER_ID) Long ownerId,
                                      @PathVariable Long bookingId,
-                                     @RequestParam(name = "approved",
-                                                   required = false) Boolean status) {
+                                     @RequestParam(name = "approved") String status) {
         log.debug("/update");
-        return bookingService.update(bookingId, bookerId, status);
+        return bookingService.update(bookingId, ownerId, status);
     }
 
     @GetMapping("/{bookingId}")
