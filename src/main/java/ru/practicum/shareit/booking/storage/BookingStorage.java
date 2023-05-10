@@ -13,14 +13,22 @@ public interface BookingStorage extends JpaRepository<Booking, Long> {
 
     List<Booking> findAllByBooker_IdOrderByIdDesc(Long bookerId);
 
-    List<Booking> findAllByBooker_IdAndStartIsBeforeAndEndIsAfter(
-            Long bookerId, LocalDateTime start, LocalDateTime end);
+    List<Booking> findAllByBooker_IdAndStartIsBeforeAndEndIsAfterOrderByIdDesc(
+                                                            Long bookerId, LocalDateTime start, LocalDateTime end);
+    List<Booking> findAllByItem_Owner_IdAndStartIsBeforeAndEndIsAfterOrderByIdDesc(
+                                                            Long ownerId, LocalDateTime start, LocalDateTime end);
 
-    List<Booking> findAllByBooker_idAndEndIsBefore(
-            Long bookerId, LocalDateTime end);
+    List<Booking> findAllByBooker_idAndEndIsBeforeOrderByIdDesc(Long bookerId, LocalDateTime end);
 
-    List<Booking> findAllByBooker_idAndStartIsAfter(
-            Long bookerId, LocalDateTime start);
+    List<Booking> findAllByItem_Owner_IdAndEndIsBeforeOrderByIdDesc(Long ownerId, LocalDateTime end);
 
-    List<Booking> findAllByBooker_IdAndStatusIs(Long bookerId, BookingStatus status);
+    List<Booking> findAllByBooker_idAndStartIsAfterOrderByIdDesc(Long bookerId, LocalDateTime start);
+
+    List<Booking> findAllByItem_Owner_IdAndStartIsAfterOrderByIdDesc(Long ownerId, LocalDateTime start);
+
+    List<Booking> findAllByBooker_IdAndStatusIsOrderByIdDesc(Long bookerId, BookingStatus status);
+
+    List<Booking> findAllByItem_Owner_IdAndStatusIsOrderByIdDesc(Long ownerId, BookingStatus status);
+
+    List<Booking> findAllByItem_OwnerIdOrderByIdDesc(Long ownerId);
 }

@@ -20,19 +20,24 @@ import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.storage.ItemStorage;
 import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.UserRole;
 import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.storage.UserStorage;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static ru.practicum.shareit.booking.BookingStatus.REJECTED;
+import static ru.practicum.shareit.booking.BookingStatus.WAITING;
 import static ru.practicum.shareit.booking.dto.BookingDtoMapper.toBooking;
 import static ru.practicum.shareit.booking.dto.BookingDtoMapper.toBookingDto;
 import static ru.practicum.shareit.exception.NotFoundException.*;
 import static ru.practicum.shareit.exception.ValidateException.*;
+import static ru.practicum.shareit.user.UserRole.BOOKER;
 
 @Service
 @Slf4j
@@ -68,7 +73,7 @@ public class BookingServiceImpl implements BookingService {
         if (status) {
             booking.setStatus(BookingStatus.APPROVED);
         } else {
-            booking.setStatus(BookingStatus.REJECTED);
+            booking.setStatus(REJECTED);
         }
         return toBookingDto(bookingStorage.save(booking));
     }
@@ -98,7 +103,7 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = bookingStorage.getReferenceById(bookingId);
         if (booking.getBooker().getId() != userId
             && booking.getItem().getOwner().getId() != userId) {
-            throw new ValidateException(USER_NOT_RELATED_FOR_BOOKING);
+            throw new NotFoundException(USER_NOT_RELATED_FOR_BOOKING);
         }
     }
 
@@ -113,39 +118,70 @@ public class BookingServiceImpl implements BookingService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<BookingResponseDto> getAllByBooker(Long bookerId, String state) {
-        log.debug("/getAllByBooker");
-        userService.isExist(bookerId);
-        List<Booking> bookings;
-
-        switch (BookingState.valueOf(state)) {
-            case All:
-                bookings = bookingStorage.findAllByBooker_IdOrderByIdDesc(bookerId);
+    public List<BookingResponseDto> getAllByUser(Long userId, String state, UserRole userRole) {
+        log.debug("/getAllByUser");
+        userService.isExist(userId);
+        List<Booking> bookings = Collections.emptyList();
+        BookingState bookingState;
+        try {
+            bookingState = BookingState.valueOf(state.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new ValidateException(STATE_INCORRECT_INPUT + state);
+        }
+        final LocalDateTime curTime = LocalDateTime.now();
+        switch (bookingState) {
+            case ALL:
+                log.debug("switch state - ALL");
+                if(userRole == BOOKER) {
+                    log.debug("switch role - BOOKER");
+                    bookings = bookingStorage.findAllByBooker_IdOrderByIdDesc(userId); break;
+                }
+                log.debug("switch role - OWNER");
+                bookings = bookingStorage.findAllByItem_Owner_IdOrderByIdDesc(userId); break;
             case CURRENT:
-                bookings = bookingStorage.findAllByBooker_IdAndStartIsBeforeAndEndIsAfter(
-                        bookerId, LocalDateTime.now(), LocalDateTime.now()); break;
+                log.debug("switch state - CURRENT");
+                if(userRole == BOOKER) {
+                    log.debug("switch role - BOOKER");
+                    bookings = bookingStorage.findAllByBooker_IdAndStartIsBeforeAndEndIsAfterOrderByIdDesc(
+                            userId, curTime, curTime); break;
+                }
+                log.debug("switch role - OWNER");
+                bookings = bookingStorage.findAllByItem_Owner_IdAndStartIsBeforeAndEndIsAfterOrderByIdDesc(
+                            userId, curTime, curTime); break;
             case PAST:
-                bookings = bookingStorage.findAllByBooker_idAndEndIsBefore(
-                        bookerId, LocalDateTime.now()); break;
+                log.debug("switch state - PAST");
+                if(userRole == BOOKER) {
+                    log.debug("switch role - BOOKER");
+                    bookings = bookingStorage.findAllByBooker_idAndEndIsBeforeOrderByIdDesc(userId, curTime); break;
+                }
+                log.debug("switch role - OWNER");
+                bookings = bookingStorage.findAllByItem_Owner_IdAndEndIsBeforeOrderByIdDesc(userId, curTime); break;
             case FUTURE:
-                bookings = bookingStorage.findAllByBooker_idAndStartIsAfter(
-                        bookerId, LocalDateTime.now()); break;
+                log.debug("switch state - FUTURE");
+                if(userRole == BOOKER) {
+                    log.debug("switch role - BOOKER");
+                    bookings = bookingStorage.findAllByBooker_idAndStartIsAfterOrderByIdDesc(userId, curTime); break;
+                }
+                log.debug("switch role - OWNER");
+                bookings = bookingStorage.findAllByItem_Owner_IdAndStartIsAfterOrderByIdDesc(userId, curTime); break;
             case WAITING:
-                bookings = bookingStorage.findAllByBooker_IdAndStatusIs(bookerId, BookingStatus.WAITING); break;
+                log.debug("switch status - WAITING");
+                if(userRole == BOOKER) {
+                    log.debug("switch role - BOOKER");
+                    bookings = bookingStorage.findAllByBooker_IdAndStatusIsOrderByIdDesc(userId, WAITING); break;
+                }
+                log.debug("switch role - OWNER");
+                bookings = bookingStorage.findAllByItem_Owner_IdAndStatusIsOrderByIdDesc(userId, WAITING); break;
             case REJECTED:
-                bookings = bookingStorage.findAllByBooker_IdAndStatusIs(bookerId, BookingStatus.REJECTED); break;
-            default: return Collections.emptyList();
+                log.debug("switch status - REJECTED");
+                if(userRole == BOOKER) {
+                    log.debug("switch role - BOOKER");
+                    bookings = bookingStorage.findAllByBooker_IdAndStatusIsOrderByIdDesc(userId, REJECTED); break;
+                }
+                log.debug("switch role - OWNER");
+                bookings = bookingStorage.findAllByItem_Owner_IdAndStatusIsOrderByIdDesc(userId, REJECTED); break;
         }
         return bookings.stream().map(BookingDtoMapper::toBookingDto).collect(Collectors.toList());
-    }
-
-    @Override
-    public List<BookingResponseDto> getAllByOwner(Long ownerId) {
-        log.debug("/getAllByOwner");
-        userService.isExist(ownerId);
-        return bookingStorage.findAllByItem_Owner_IdOrderByIdDesc(ownerId).stream()
-                .map(BookingDtoMapper::toBookingDto)
-                .collect(Collectors.toList());
     }
 
     @Override

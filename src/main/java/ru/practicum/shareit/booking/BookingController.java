@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.user.UserRole;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -53,19 +54,22 @@ public class BookingController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<BookingResponseDto> getAllByBooker(@RequestHeader(name = PARAM_NAME_BOOKED_OWNER_ID) Long bookerId,
+    public List<BookingResponseDto> getAllByBooker(@RequestHeader(name = PARAM_NAME_BOOKED_OWNER_ID) Long userId,
                                                    @RequestParam(name = PARAM_NAME_BOOKING_STATE,
                                                                  required = false,
-                                                                 value = DEFAULT_BOOKING_STATE) String state) {
+                                                                 defaultValue = DEFAULT_BOOKING_STATE) String state) {
         log.debug("/getAllByBooker");
-        return bookingService.getAllByBooker(bookerId, state);
+        return bookingService.getAllByUser(userId, state, UserRole.BOOKER);
     }
 
     @GetMapping("/owner")
     @ResponseStatus(HttpStatus.OK)
-    public List<BookingResponseDto> getAllByOwner(@RequestHeader(name = PARAM_NAME_BOOKED_OWNER_ID) Long ownerId) {
+    public List<BookingResponseDto> getAllByOwner(@RequestHeader(name = PARAM_NAME_BOOKED_OWNER_ID) Long userId,
+                                                  @RequestParam(name = PARAM_NAME_BOOKING_STATE,
+                                                          required = false,
+                                                          defaultValue = DEFAULT_BOOKING_STATE) String state) {
         log.debug("/getAllByOwner");
-        return bookingService.getAllByOwner(ownerId);
+        return bookingService.getAllByUser(userId, state, UserRole.OWNER);
     }
 
     @GetMapping("/all")

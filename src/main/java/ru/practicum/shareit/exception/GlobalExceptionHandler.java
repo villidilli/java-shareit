@@ -50,14 +50,6 @@ public class GlobalExceptionHandler {
         return new ExceptionResponse(e);
     }
 
-//    @ExceptionHandler
-//    @ResponseStatus(HttpStatus.CONFLICT)
-//    public ExceptionResponse exceptionHandler(FieldConflictException e) {
-//        log.debug("/FieldConflictExceptionHandler");
-//        logException(HttpStatus.CONFLICT, e);
-//        return new ExceptionResponse(e);
-//    }
-
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public ExceptionResponse exceptionHandler(DataIntegrityViolationException e) {

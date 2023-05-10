@@ -10,13 +10,13 @@ import java.sql.Timestamp;
 @Setter
 @Getter
 public class ExceptionResponse {
-    protected String exceptionClass;
-    protected String exceptionMessage;
+    protected String errorClass;
+    protected String error;
     protected Timestamp timestamp;
 
     public ExceptionResponse(Exception exception) {
-        this.exceptionClass = exception.getClass().getSimpleName();
-        this.exceptionMessage = exception.getMessage();
+        this.error = exception.getMessage();
+        this.errorClass = exception.getClass().getSimpleName();
         this.timestamp = new Timestamp(System.currentTimeMillis());
     }
 }

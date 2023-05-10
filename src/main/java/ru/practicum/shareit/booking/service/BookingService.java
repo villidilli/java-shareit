@@ -3,6 +3,7 @@ package ru.practicum.shareit.booking.service;
 import org.springframework.validation.BindingResult;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
+import ru.practicum.shareit.user.UserRole;
 
 import java.util.List;
 
@@ -15,9 +16,9 @@ public interface BookingService {
 
     BookingResponseDto getByUser(Long userId, Long bookingId);
 
-    List<BookingResponseDto> getAllByBooker(Long bookerId, String state);
+    List<BookingResponseDto> getAllByUser(Long bookerId, String state, UserRole userRole);
 
-    List<BookingResponseDto> getAllByOwner(Long ownerId);
+//    List<BookingResponseDto> getAllByOwner(Long ownerId, String state, UserRole userRole);
 
     List<BookingResponseDto> TESTgetAll();
 }
