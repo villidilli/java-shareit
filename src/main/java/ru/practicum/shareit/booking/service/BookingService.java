@@ -3,7 +3,7 @@ package ru.practicum.shareit.booking.service;
 import org.springframework.validation.BindingResult;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
-import ru.practicum.shareit.user.UserRole;
+import ru.practicum.shareit.user.model.UserRole;
 
 import java.util.List;
 

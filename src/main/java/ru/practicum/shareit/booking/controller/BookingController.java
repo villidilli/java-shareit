@@ -1,4 +1,4 @@
-package ru.practicum.shareit.booking;
+package ru.practicum.shareit.booking.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,12 +8,10 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
 import ru.practicum.shareit.booking.service.BookingService;
-import ru.practicum.shareit.user.UserRole;
+import ru.practicum.shareit.user.model.UserRole;
 
 import javax.validation.Valid;
 import java.util.List;
-
-import static java.lang.Boolean.TRUE;
 
 /**
  * TODO Sprint add-bookings.
