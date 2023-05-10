@@ -2,10 +2,7 @@ package ru.practicum.shareit.booking.dto;
 
 import lombok.*;
 import ru.practicum.shareit.booking.BookingStatus;
-import ru.practicum.shareit.item.Item;
-import ru.practicum.shareit.user.User;
 
-import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 
 /**
@@ -18,11 +15,26 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode
 public class BookingResponseDto {
     private Long id;
-    @NotBlank(message = "Item ID must not be null or empty")
     private LocalDateTime start;
-    @NotBlank(message = "End time must not be null or empty")
     private LocalDateTime end;
     private BookingStatus status;
-    private User booker;
-    private Item item;
+    private UserShortDto booker;
+    private ItemShortDto item;
+
+    @AllArgsConstructor
+    @Getter
+    @Setter
+    @ToString
+    public static class UserShortDto {
+        private Long id;
+    }
+
+    @AllArgsConstructor
+    @Getter
+    @Setter
+    @ToString
+    public static class ItemShortDto {
+        private Long id;
+        private String name;
+    }
 }

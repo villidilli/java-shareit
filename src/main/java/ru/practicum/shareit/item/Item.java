@@ -24,7 +24,6 @@ public class Item {
     private Long id;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
-    @JsonIgnoreProperties({"hibernateLazyInitializer"})
     private User owner;
     private String name;
     private String description;

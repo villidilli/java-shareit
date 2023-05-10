@@ -22,4 +22,6 @@ public interface ItemService {
     void isExist(Long itemId);
 
     void checkAvailable(Long itemId);
+
+    void isOwnerOfItem(Long itemId, Long ownerId);
 }

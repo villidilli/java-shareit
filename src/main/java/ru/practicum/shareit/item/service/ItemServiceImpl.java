@@ -106,7 +106,8 @@ public class ItemServiceImpl implements ItemService {
         return objectMapper.convertValue(existedItemMap, Item.class);
     }
 
-    private void isOwnerOfItem(Long itemId, Long ownerId) throws NotFoundException {
+    @Override
+    public void isOwnerOfItem(Long itemId, Long ownerId) throws NotFoundException {
         log.debug("/isOwnerOfItem");
         if (!Objects.equals(itemStorage.findById(itemId).get().getOwner().getId(), ownerId)) {
             throw new NotFoundException(OWNER_NOT_MATCH_ITEM);

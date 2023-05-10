@@ -6,6 +6,8 @@ public class ValidateException extends RuntimeException {
     public static final String OWNER_ID_NOT_BLANK = "[X-Sharer-User-Id parameter must not be null or blank]";
     public static final String ITEM_NOT_AVAILABLE = "[Item has status -> not available]";
     public static final String ENDTIME_BEFORE_STARTTIME = "[End time must not be early then start time]";
+    public static final String USER_NOT_RELATED_FOR_BOOKING = "Access denied. UserId not related for this booking";
+
 
     public ValidateException(String message) {
         super(message);
