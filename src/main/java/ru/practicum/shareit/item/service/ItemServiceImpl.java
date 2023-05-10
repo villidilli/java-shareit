@@ -110,7 +110,7 @@ public class ItemServiceImpl implements ItemService {
     public void isOwnerOfItem(Long itemId, Long ownerId) throws NotFoundException {
         log.debug("/isOwnerOfItem");
         if (!Objects.equals(itemStorage.findById(itemId).get().getOwner().getId(), ownerId)) {
-            throw new NotFoundException(OWNER_NOT_MATCH_ITEM);
+            throw new ValidateException(OWNER_NOT_MATCH_ITEM);
         }
     }
 

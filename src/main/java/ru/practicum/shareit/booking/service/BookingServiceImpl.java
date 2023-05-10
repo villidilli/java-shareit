@@ -31,6 +31,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 import static ru.practicum.shareit.booking.BookingStatus.REJECTED;
 import static ru.practicum.shareit.booking.BookingStatus.WAITING;
 import static ru.practicum.shareit.booking.dto.BookingDtoMapper.toBooking;
@@ -70,6 +72,7 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = bookingStorage.getReferenceById(bookingId);
         userService.isExist(bookerId);
         itemService.isOwnerOfItem(booking.getItem().getId(), bookerId);
+        if(status == null) status = FALSE;
         if (status) {
             booking.setStatus(BookingStatus.APPROVED);
         } else {

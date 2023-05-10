@@ -13,6 +13,8 @@ import ru.practicum.shareit.user.UserRole;
 import javax.validation.Valid;
 import java.util.List;
 
+import static java.lang.Boolean.TRUE;
+
 /**
  * TODO Sprint add-bookings.
  */
@@ -39,7 +41,8 @@ public class BookingController {
     @ResponseStatus(HttpStatus.OK)
     public BookingResponseDto update(@RequestHeader(name = PARAM_NAME_BOOKED_OWNER_ID) Long bookerId,
                                      @PathVariable Long bookingId,
-                                     @RequestParam("approved") Boolean status) {
+                                     @RequestParam(name = "approved",
+                                                   required = false) Boolean status) {
         log.debug("/update");
         return bookingService.update(bookingId, bookerId, status);
     }
