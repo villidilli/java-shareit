@@ -13,13 +13,11 @@ target/
 .springBeans
 .sts4-cache
 
-### IntelliJ IDEA ###
 .idea
 *.iws
 *.iml
 *.ipr
 
-### NetBeans ###
 /nbproject/private/
 /nbbuild/
 /dist/
@@ -29,9 +27,24 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
-### VS Code ###
 .vscode/
 /.fastRequest/
 /db/
 shareit.mv.db
-shareit.iml
+shareit.trace.db
+
+#check-repo hw14
+*.yml
+*.class
+*.idea
+*.db
+*.jar
+*.iws
+*.log
+mvn
+mvn/
+*.iml
+out/
+.DS_Store
+*.ipr
+target/
