@@ -18,8 +18,15 @@ target/
 *.iws
 *.iml
 *.ipr
-.db
+*.db
 /db/
+out/
+*.class
+*.idea
+*.log
+*.jar
+*.mvn
+*.DS_Store
 
 ### NetBeans ###
 /nbproject/private/
