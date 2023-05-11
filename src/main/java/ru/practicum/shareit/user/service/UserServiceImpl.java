@@ -27,22 +27,24 @@ import static ru.practicum.shareit.user.dto.UserDtoMapper.*;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-@Transactional(isolation = Isolation.REPEATABLE_READ)
+@Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
 public class UserServiceImpl implements UserService {
     private final UserStorage userStorage;
     private final ObjectMapper objectMapper;
 
+    @Transactional
     @Override
-    public UserDto create(UserDto userDto, BindingResult br) {
+    public UserDto create(UserDto userDto, BindingResult br) throws ValidateException, NotFoundException {
         log.debug("/create");
         User user = toUser(userDto);
         annotationValidate(br);
         return toUserDto(userStorage.save(user));
     }
 
+    @Transactional
     @SneakyThrows
     @Override
-    public UserDto update(Long userId, UserDto userDto) {
+    public UserDto update(Long userId, UserDto userDto) throws NotFoundException {
         log.debug("/update");
         isExist(userId);
         User existedUser = userStorage.findById(userId).get();
@@ -52,28 +54,26 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public UserDto get(Long userId) throws NotFoundException {
         log.debug("/get");
         isExist(userId);
         return toUserDto(userStorage.findById(userId).get());
     }
 
+    @Transactional
     @Override
-    public void delete(Long userId) {
+    public void delete(Long userId) throws NotFoundException {
         log.debug("/delete");
         isExist(userId);
         userStorage.deleteById(userId);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<UserDto> getAll() {
         log.debug("/getAll");
         return userStorage.findAll().stream().map(UserDtoMapper::toUserDto).collect(Collectors.toList());
     }
 
-    @Transactional(readOnly = true)
     @Override
     public void isExist(Long userId) throws NotFoundException {
         log.debug("/isExist");
@@ -81,13 +81,14 @@ public class UserServiceImpl implements UserService {
     }
 
     private User setNewFields(User existedUser, User userWithUpdate) {
+        log.debug("/setMewFields");
         Map<String, String> existedUserMap = objectMapper.convertValue(existedUser, Map.class);
         Map<String, String> fieldsToUpdate = getFieldsToUpdate(userWithUpdate);
         existedUserMap.putAll(fieldsToUpdate);
         return objectMapper.convertValue(existedUserMap, User.class);
     }
 
-    private void annotationValidate(BindingResult br) {
+    private void annotationValidate(BindingResult br) throws ValidateException {
         log.debug("/annotationValidate");
         if (br.hasErrors()) throw new ValidateException(GlobalExceptionHandler.bindingResultToString(br));
     }

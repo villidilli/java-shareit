@@ -54,7 +54,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional
     @Override
-    public ItemDto create(ItemDto itemDto, Long ownerId, BindingResult br) {
+    public ItemDto create(ItemDto itemDto, Long ownerId, BindingResult br) throws ValidateException, NotFoundException {
         log.debug("/create");
         annotationValidate(br);
         userService.isExist(ownerId);
@@ -65,7 +65,7 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     @SneakyThrows
     @Override
-    public ItemDto update(Long itemId, ItemDto itemDto, Long ownerId) {
+    public ItemDto update(Long itemId, ItemDto itemDto, Long ownerId) throws NotFoundException {
         log.debug("/update");
         isExist(itemId);
         userService.isExist(ownerId);
@@ -78,7 +78,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDtoWithBooking get(Long itemId, Long ownerId) {
+    public ItemDtoWithBooking get(Long itemId, Long ownerId) throws NotFoundException {
         log.debug("/get");
         isExist(itemId);
         userService.isExist(ownerId);
@@ -95,7 +95,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDtoWithBooking> getByOwner(Long ownerId) {
+    public List<ItemDtoWithBooking> getByOwner(Long ownerId) throws NotFoundException {
         log.debug("/getByOwner");
         userService.isExist(ownerId);
         List<ItemDtoWithBooking> itemDtos = itemStorage.findByOwnerId(ownerId).stream()
@@ -116,7 +116,8 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public CommentDto createComment(CommentDto commentDto, Long itemId, Long bookerId, BindingResult br) {
+    public CommentDto createComment(CommentDto commentDto, Long itemId, Long bookerId, BindingResult br)
+                                                            throws ValidateException, NotFoundException {
         log.debug("/createComment");
         annotationValidate(br);
         isExist(itemId);

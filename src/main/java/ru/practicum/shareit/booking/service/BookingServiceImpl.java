@@ -51,7 +51,8 @@ public class BookingServiceImpl implements BookingService {
 
     @Transactional
     @Override
-    public BookingResponseDto create(BookingRequestDto bookingIncomeDto, BindingResult br, Long bookerId) {
+    public BookingResponseDto create(BookingRequestDto bookingIncomeDto, BindingResult br, Long bookerId)
+                                                            throws ValidateException, NotFoundException {
         log.debug("/create");
         annotationValidate(br);
         customValidate(bookingIncomeDto);
@@ -67,7 +68,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Transactional
     @Override
-    public BookingResponseDto update(Long bookingId, Long ownerId, String status) {
+    public BookingResponseDto update(Long bookingId, Long ownerId, String status) throws NotFoundException {
         log.debug("/update");
         isExist(bookingId);
         userService.isExist(ownerId);
@@ -82,7 +83,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public BookingResponseDto getByUser(Long userId, Long bookingId) {
+    public BookingResponseDto getByUser(Long userId, Long bookingId) throws NotFoundException {
         log.debug("/getByUser");
         userService.isExist(userId);
         isExist(bookingId);
@@ -91,7 +92,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingResponseDto> getAllByUser(Long userId, String state, UserRole role) {
+    public List<BookingResponseDto> getAllByUser(Long userId, String state, UserRole role) throws NotFoundException {
         log.debug("/getAllByUser");
         userService.isExist(userId);
         final LocalDateTime curTime = LocalDateTime.now();
@@ -154,7 +155,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public void isExist(Long bookingId) {
+    public void isExist(Long bookingId) throws NotFoundException {
         log.debug("/isExist");
         if(!bookingStorage.existsById(bookingId)) throw new NotFoundException(BOOKING_NOT_FOUND);
     }
