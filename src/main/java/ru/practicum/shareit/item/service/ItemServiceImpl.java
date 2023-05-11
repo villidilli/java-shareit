@@ -19,7 +19,6 @@ import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidateException;
 
 import ru.practicum.shareit.item.dto.*;
-import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.CommentStorage;
 import ru.practicum.shareit.item.storage.ItemStorage;
@@ -122,22 +121,29 @@ public class ItemServiceImpl implements ItemService {
         annotationValidate(br);
         isExist(itemId);
         userService.isExist(bookerId);
-        isItemBookedByUser(itemId, bookerId);
+        isUserBookedItem(itemId, bookerId);
         User author = userStorage.getReferenceById(bookerId);
         Item item = itemStorage.getReferenceById(itemId);
         return toCommentDto(commentStorage.save(toComment(commentDto, item, author)));
     }
 
     @Override
-    public void isExist(Long itemId) {
+    public void isExist(Long itemId) throws NotFoundException {
         log.debug("/isExist");
         if(!itemStorage.existsById(itemId)) throw new NotFoundException(ITEM_NOT_FOUND);
     }
 
     @Override
-    public void isItemAvailable(Long itemId) throws ValidateException {//TODO
+    public void isItemAvailable(Long itemId) throws ValidateException {
         log.debug("/checkAvailable");
         if(itemStorage.findByIdAndAvailableIsTrue(itemId) == null) throw new ValidateException(ITEM_NOT_FOUND);
+    }
+
+    @Override
+    public void isOwnerOfItem(Long itemId, Long ownerId) throws NotFoundException {
+        log.debug("/isOwnerOfItem");
+        Long savedItemOwnerId = itemStorage.findById(itemId).get().getOwner().getId();
+        if (!Objects.equals(savedItemOwnerId, ownerId)) throw new NotFoundException(OWNER_NOT_MATCH_ITEM);
     }
 
     private Booking getLastBooking(Long itemId) {
@@ -160,25 +166,15 @@ public class ItemServiceImpl implements ItemService {
         return objectMapper.convertValue(existedItemMap, Item.class);
     }
 
-    @Override
-    public void isOwnerOfItem(Long itemId, Long ownerId) throws NotFoundException {
-        log.debug("/isOwnerOfItem");
-        Long savedItemOwnerId = itemStorage.findById(itemId).get().getOwner().getId();
-        if (!Objects.equals(savedItemOwnerId, ownerId)) throw new NotFoundException(OWNER_NOT_MATCH_ITEM);
-    }
-
-    @Transactional(readOnly = true)
-    public void isItemBookedByUser(Long itemId, Long bookerId) {
-        log.debug("/isItemBookedByUser");
+    private void isUserBookedItem(Long itemId, Long bookerId) {
+        log.debug("/isUserHasBookingForItem");
         Long numCompletedBookingsByUser =
                 bookingStorage.countBookingsByBooker_IdAndItem_IdAndEndBefore(bookerId, itemId, LocalDateTime.now());
-        log.debug("Все было букингов " + numCompletedBookingsByUser);
         if(numCompletedBookingsByUser == 0) throw new ValidateException(ITEM_NOT_HAVE_BOOKING_BY_USER);
     }
 
     private void annotationValidate(BindingResult br) {
         log.debug("/annotationValidate");
-        log.debug(br.getAllErrors().toString() + "ПРИШЛИ ОШИБКИ");
         if (br.hasErrors()) throw new ValidateException(GlobalExceptionHandler.bindingResultToString(br));
     }
 
