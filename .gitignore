@@ -38,5 +38,4 @@ build/
 .github\
 .idea\
 db\
-.fastRequest\
 directory.json
