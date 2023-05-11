@@ -35,7 +35,6 @@ build/
 .vscode/
 
 .fastRequest\
-.github\
 .idea\
 db\
 directory.json
