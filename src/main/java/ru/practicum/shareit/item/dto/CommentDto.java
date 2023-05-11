@@ -1,12 +1,11 @@
 package ru.practicum.shareit.item.dto;
 
 import lombok.*;
-import org.springframework.format.annotation.DateTimeFormat;
-import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.model.User;
 
-import javax.persistence.*;
+import org.springframework.format.annotation.DateTimeFormat;
+
 import javax.validation.constraints.NotBlank;
+
 import java.time.LocalDateTime;
 
 @NoArgsConstructor

@@ -27,7 +27,6 @@ import ru.practicum.shareit.user.storage.UserStorage;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -56,7 +55,7 @@ public class BookingServiceImpl implements BookingService {
         customValidate(bookingIncomeDto);
         userService.isExist(bookerId);
         itemService.isExist(bookingIncomeDto.getItemId());
-        itemService.checkAvailable(bookingIncomeDto.getItemId());
+        itemService.isItemAvailable(bookingIncomeDto.getItemId());
         isBookerIsOwnerItem(bookingIncomeDto.getItemId(), bookerId);
         User booker = userStorage.getReferenceById(bookerId);
         Item item = itemStorage.getReferenceById(bookingIncomeDto.getItemId());

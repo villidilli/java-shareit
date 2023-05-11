@@ -9,7 +9,6 @@ import ru.practicum.shareit.item.dto.ItemDtoWithBooking;
 import java.util.List;
 
 public interface ItemService {
-
     ItemDto create(ItemDto itemDto, Long ownerId, BindingResult br);
 
     ItemDto update(Long itemId, ItemDto item, Long ownerID);
@@ -22,7 +21,7 @@ public interface ItemService {
 
     void isExist(Long itemId);
 
-    void checkAvailable(Long itemId);
+    void isItemAvailable(Long itemId);
 
     void isOwnerOfItem(Long itemId, Long ownerId);
 

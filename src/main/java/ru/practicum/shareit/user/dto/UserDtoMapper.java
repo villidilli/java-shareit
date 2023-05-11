@@ -7,7 +7,6 @@ import ru.practicum.shareit.user.model.User;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserDtoMapper {
-
     public static UserDto toUserDto(User user) {
         UserDto userDto = new UserDto();
         userDto.setId(user.getId());

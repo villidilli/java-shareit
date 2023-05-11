@@ -2,9 +2,6 @@ package ru.practicum.shareit.item.dto;
 
 import lombok.*;
 
-import javax.persistence.CollectionTable;
-import javax.persistence.ElementCollection;
-import javax.persistence.JoinColumn;
 import java.util.List;
 
 @NoArgsConstructor
@@ -19,7 +16,6 @@ public class ItemDtoWithBooking {
     private BookingShortDto lastBooking;
     private BookingShortDto nextBooking;
     private List<CommentDto> comments;
-
 
     @AllArgsConstructor
     @Getter

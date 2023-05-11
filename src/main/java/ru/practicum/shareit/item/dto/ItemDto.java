@@ -5,8 +5,10 @@ import lombok.*;
 import javax.persistence.CollectionTable;
 import javax.persistence.ElementCollection;
 import javax.persistence.JoinColumn;
+
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+
 import java.util.List;
 
 /**
