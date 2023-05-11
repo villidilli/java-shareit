@@ -27,6 +27,7 @@ import ru.practicum.shareit.user.storage.UserStorage;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -151,11 +152,11 @@ public class BookingServiceImpl implements BookingService {
                 log.debug("switch state - CURRENT");
                 if(userRole == BOOKER) {
                     log.debug("switch role - BOOKER");
-                    bookings = bookingStorage.findAllByBooker_IdAndStartIsBeforeAndEndIsAfterOrderByIdDesc(
+                    bookings = bookingStorage.findAllByBooker_IdAndStartIsBeforeAndEndIsAfterOrderByIdAsc(
                             userId, curTime, curTime); break;
                 }
                 log.debug("switch role - OWNER");
-                bookings = bookingStorage.findAllByItem_Owner_IdAndStartIsBeforeAndEndIsAfterOrderByIdDesc(
+                bookings = bookingStorage.findAllByItem_Owner_IdAndStartIsBeforeAndEndIsAfterOrderByIdAsc(
                             userId, curTime, curTime); break;
             case PAST:
                 log.debug("switch state - PAST");

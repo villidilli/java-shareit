@@ -1,9 +1,13 @@
 package ru.practicum.shareit.item.model;
 
 import lombok.*;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * TODO Sprint add-controllers.

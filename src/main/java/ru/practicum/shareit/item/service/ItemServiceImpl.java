@@ -12,15 +12,16 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.storage.BookingStorage;
 import ru.practicum.shareit.exception.GlobalExceptionHandler;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidateException;
 
+import ru.practicum.shareit.item.dto.*;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemDtoMapper;
-import ru.practicum.shareit.item.dto.ItemDtoWithBooking;
+import ru.practicum.shareit.item.storage.CommentStorage;
 import ru.practicum.shareit.item.storage.ItemStorage;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -28,7 +29,10 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static ru.practicum.shareit.booking.model.BookingStatus.REJECTED;
 import static ru.practicum.shareit.exception.NotFoundException.*;
+import static ru.practicum.shareit.exception.ValidateException.ITEM_NOT_HAVE_BOOKING_BY_USER;
+import static ru.practicum.shareit.item.dto.CommentDtoMapper.toComment;
 import static ru.practicum.shareit.item.dto.ItemDtoMapper.*;
 
 @Service
@@ -40,6 +44,7 @@ public class ItemServiceImpl implements ItemService {
     private final UserService userService;
     private final ObjectMapper objectMapper;
     private final BookingStorage bookingStorage;
+    private final CommentStorage commentStorage;
 
 
     @Override
@@ -70,12 +75,15 @@ public class ItemServiceImpl implements ItemService {
         log.debug("/get");
         isExist(itemId);
         Item foundedItem = itemStorage.findById(itemId).get();
+        ItemDtoWithBooking itemDto;
         try {
             isOwnerOfItem(itemId, ownerId);
-            return toItemDtoWithBooking(foundedItem, getLastBooking(itemId), getNextBooking(itemId));
+            itemDto = toItemDtoWithBooking(foundedItem, getLastBooking(itemId), getNextBooking(itemId));
         } catch (NotFoundException e) {
-            return toItemDtoWithBooking(foundedItem, null, null);
+            itemDto = toItemDtoWithBooking(foundedItem, null, null);
         }
+        itemDto.setComments(getCommentsDto(itemId));
+        return itemDto;
     }
 
     @Override
@@ -83,8 +91,17 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemDtoWithBooking> getByOwner(Long ownerId) {
         log.debug("/getByOwner");
         userService.isExist(ownerId);
-        return itemStorage.findByOwnerId(ownerId).stream()
+        List<ItemDtoWithBooking> itemDtos = itemStorage.findByOwnerId(ownerId).stream()
                 .map(item -> toItemDtoWithBooking(item, getLastBooking(item.getId()), getNextBooking(item.getId())))
+                .collect(Collectors.toList());
+        itemDtos.forEach(itemDto -> itemDto.setComments(getCommentsDto(itemDto.getId())));
+        return itemDtos;
+    }
+
+    @Transactional(readOnly = true)
+    public List<CommentDto> getCommentsDto(Long itemId) {
+        return commentStorage.findAllByItem_Id(itemId).stream()
+                .map(CommentDtoMapper::toCommentDto)
                 .collect(Collectors.toList());
     }
 
@@ -102,13 +119,13 @@ public class ItemServiceImpl implements ItemService {
     @Transactional(readOnly = true)
     public Booking getLastBooking(Long itemId) {
         final LocalDateTime curTime = LocalDateTime.now();
-        return bookingStorage.findTopByItem_IdAndStartIsBeforeOrderByEndDesc(itemId, curTime);
+        return bookingStorage.findTopByItem_IdAndStatusIsNotAndStartIsBeforeOrderByEndDesc(itemId, REJECTED, curTime);
     }
 
     @Transactional(readOnly = true)
     public Booking getNextBooking(Long itemId) {
         final LocalDateTime curTime = LocalDateTime.now();
-        return bookingStorage.findTopByItem_IdAndStartIsAfterOrderByStartAsc(itemId, curTime);
+        return bookingStorage.findTopByItem_IdAndStatusIsNotAndStartIsAfterOrderByStartAsc(itemId, REJECTED, curTime);
     }
 
     @Override
@@ -136,16 +153,36 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public void isOwnerOfItem(Long itemId, Long ownerId) throws NotFoundException {
         log.debug("/isOwnerOfItem");
-        if (!Objects.equals(itemStorage.findById(itemId).get().getOwner().getId(), ownerId)) {
-            log.debug("ЗАПРАШИВАЕМЫЙ ОВНЕР "  + ownerId);
-            log.debug("НЕТТТТТТТТТ НЕ ОВНЕР");
-            throw new NotFoundException(OWNER_NOT_MATCH_ITEM);
-        }
-        log.debug("ЯЯЯЯ ОВНЕРРРРРРРРР");
+        Long savedItemOwnerId = itemStorage.findById(itemId).get().getOwner().getId();
+        if (!Objects.equals(savedItemOwnerId, ownerId)) throw new NotFoundException(OWNER_NOT_MATCH_ITEM);
+    }
+
+    @Override
+    public CommentDto createComment(CommentDto commentDto, Long itemId, Long bookerId, BindingResult br) {
+        log.debug("/createComment");
+        log.debug("Пришло DTO " + commentDto);
+        log.debug("Пришло itemId " + itemId);
+        log.debug("Пришло bookerId " + bookerId);
+        annotationValidate(br);
+        isExist(itemId);
+        userService.isExist(bookerId);
+        isItemBookedByUser(itemId, bookerId);
+        Comment savedComment = commentStorage.save(toComment(commentDto, itemId, bookerId));
+        log.debug("saved COMMENT " + savedComment);
+        return CommentDtoMapper.toCommentDto(savedComment);
+    }
+
+    private void isItemBookedByUser(Long itemId, Long bookerId) {
+        log.debug("/isItemBookedByUser");
+        Long numCompletedBookingsByUser =
+                bookingStorage.countBookingsByBooker_IdAndItem_IdAndEndBefore(bookerId, itemId, LocalDateTime.now());
+        log.debug("Все было букингов " + numCompletedBookingsByUser);
+        if(numCompletedBookingsByUser == 0) throw new ValidateException(ITEM_NOT_HAVE_BOOKING_BY_USER);
     }
 
     private void annotationValidate(BindingResult br) {
         log.debug("/annotationValidate");
+        log.debug(br.getAllErrors().toString() + "ПРИШЛИ ОШИБКИ");
         if (br.hasErrors()) throw new ValidateException(GlobalExceptionHandler.bindingResultToString(br));
     }
 

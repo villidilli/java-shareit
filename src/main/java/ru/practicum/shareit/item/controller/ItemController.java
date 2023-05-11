@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoWithBooking;
 import ru.practicum.shareit.item.service.ItemService;
@@ -60,5 +61,14 @@ public class ItemController {
     public List<ItemDto> search(@RequestParam String text) {
         log.debug("/search");
         return itemService.search(text);
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto createComment(@Valid @RequestBody CommentDto commentDto,
+                                    BindingResult br,
+                                    @PathVariable Long itemId,
+                                    @RequestHeader(PARAM_NAME_OWNER_ID) Long bookerId) {
+        log.debug("/createComment");
+        return itemService.createComment(commentDto, itemId, bookerId, br);
     }
 }

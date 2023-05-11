@@ -7,14 +7,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.storage.UserStorage;
+
+import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Slf4j
 @Component
 public class ItemDtoMapper {
-
     private static UserStorage userStorage;
 
     @Autowired
@@ -22,11 +24,9 @@ public class ItemDtoMapper {
         ItemDtoMapper.userStorage = userStorage;
     }
 
-    public static ItemDtoWithBooking toItemDtoWithBooking(Item item, Booking bookingLast, Booking bookingNext) {
+    public static ItemDtoWithBooking toItemDtoWithBooking(
+            Item item, Booking bookingLast, Booking bookingNext) {
         log.debug("/toItemDtoWithBooking");
-        log.debug("Пришло ITEM - " + item);
-        log.debug("Пришло BOOK LAST " + bookingLast);
-        log.debug("Пришло BOOK NEXT " + bookingNext);
         ItemDtoWithBooking itemDtoWithBooking = new ItemDtoWithBooking();
         itemDtoWithBooking.setId(item.getId());
         itemDtoWithBooking.setName(item.getName());

@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.service;
 
 import org.springframework.validation.BindingResult;
 
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoWithBooking;
 
@@ -24,4 +25,6 @@ public interface ItemService {
     void checkAvailable(Long itemId);
 
     void isOwnerOfItem(Long itemId, Long ownerId);
+
+    CommentDto createComment(CommentDto commentDto, Long itemId, Long bookerId, BindingResult br);
 }
