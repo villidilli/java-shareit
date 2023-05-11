@@ -39,12 +39,8 @@ shareit.trace.db
 *.idea
 *.db
 *.jar
-*.iws
 *.log
 mvn
 mvn/
-*.iml
 out/
 .DS_Store
-*.ipr
-target/
