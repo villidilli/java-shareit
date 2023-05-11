@@ -18,15 +18,6 @@ target/
 *.iws
 *.iml
 *.ipr
-*.db
-/db/
-out/
-*.class
-*.idea
-*.log
-*.jar
-*.mvn
-*.DS_Store
 
 ### NetBeans ###
 /nbproject/private/
@@ -40,4 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
-
+/.fastRequest/
+/db/
+shareit.mv.db
+shareit.iml
