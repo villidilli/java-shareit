@@ -131,13 +131,13 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public void isExist(Long itemId) throws NotFoundException {
         log.debug("/isExist");
-        if(!itemStorage.existsById(itemId)) throw new NotFoundException(ITEM_NOT_FOUND);
+        if (!itemStorage.existsById(itemId)) throw new NotFoundException(ITEM_NOT_FOUND);
     }
 
     @Override
     public void isItemAvailable(Long itemId) throws ValidateException {
         log.debug("/checkAvailable");
-        if(itemStorage.findByIdAndAvailableIsTrue(itemId) == null) throw new ValidateException(ITEM_NOT_FOUND);
+        if (itemStorage.findByIdAndAvailableIsTrue(itemId) == null) throw new ValidateException(ITEM_NOT_FOUND);
     }
 
     @Override
@@ -171,7 +171,7 @@ public class ItemServiceImpl implements ItemService {
         log.debug("/isUserHasBookingForItem");
         Long numCompletedBookingsByUser =
                 bookingStorage.countBookingsByBooker_IdAndItem_IdAndEndBefore(bookerId, itemId, LocalDateTime.now());
-        if(numCompletedBookingsByUser == 0) throw new ValidateException(ITEM_NOT_HAVE_BOOKING_BY_USER);
+        if (numCompletedBookingsByUser == 0) throw new ValidateException(ITEM_NOT_HAVE_BOOKING_BY_USER);
     }
 
     private void annotationValidate(BindingResult br) {

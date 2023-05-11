@@ -77,7 +77,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void isExist(Long userId) throws NotFoundException {
         log.debug("/isExist");
-        if(!userStorage.existsById(userId)) throw new NotFoundException(USER_NOT_FOUND);
+        if (!userStorage.existsById(userId)) throw new NotFoundException(USER_NOT_FOUND);
     }
 
     private User setNewFields(User existedUser, User userWithUpdate) {

@@ -31,10 +31,10 @@ public interface BookingStorage extends JpaRepository<Booking, Long> {
 
 
     Booking findTopByItem_IdAndStatusIsNotAndStartIsBeforeOrderByEndDesc(
-                                                            Long item_id, BookingStatus status, LocalDateTime start);
+                                                            Long itemId, BookingStatus status, LocalDateTime start);
 
     Booking findTopByItem_IdAndStatusIsNotAndStartIsAfterOrderByStartAsc(
-                                                            Long item_id, BookingStatus status, LocalDateTime start);
+                                                            Long itemId, BookingStatus status, LocalDateTime start);
 
     List<Booking> findAllByBooker_IdAndStartIsBeforeAndEndIsAfterOrderByIdAsc(
             Long bookerId, LocalDateTime start, LocalDateTime end);

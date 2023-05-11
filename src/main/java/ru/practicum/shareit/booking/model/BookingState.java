@@ -10,7 +10,7 @@ public enum BookingState {
 
     final String message;
 
-    BookingState(String message){
+    BookingState(String message) {
         this.message = message;
     }
 }

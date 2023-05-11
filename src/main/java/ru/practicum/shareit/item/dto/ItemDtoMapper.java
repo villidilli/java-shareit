@@ -18,9 +18,9 @@ public class ItemDtoMapper {
         itemDtoBook.setName(item.getName());
         itemDtoBook.setDescription(item.getDescription());
         itemDtoBook.setAvailable(item.getAvailable());
-        if(bookingLast != null) itemDtoBook.setLastBooking(
+        if (bookingLast != null) itemDtoBook.setLastBooking(
                     new ItemDtoWithBooking.BookingShortDto(bookingLast.getId(), bookingLast.getBooker().getId()));
-        if(bookingNext != null) itemDtoBook.setNextBooking(
+        if (bookingNext != null) itemDtoBook.setNextBooking(
                     new ItemDtoWithBooking.BookingShortDto(bookingNext.getId(), bookingNext.getBooker().getId()));
         return itemDtoBook;
     }

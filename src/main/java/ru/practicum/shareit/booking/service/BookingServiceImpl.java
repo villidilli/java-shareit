@@ -75,9 +75,9 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = bookingStorage.getReferenceById(bookingId);
         itemService.isOwnerOfItem(booking.getItem().getId(), ownerId);
         isStatusIsWaiting(booking);
-        if(status != null) {
-            if(Boolean.parseBoolean(status)) booking.setStatus(APPROVED);
-            if(!Boolean.parseBoolean(status)) booking.setStatus(REJECTED);
+        if (status != null) {
+            if (Boolean.parseBoolean(status)) booking.setStatus(APPROVED);
+            if (!Boolean.parseBoolean(status)) booking.setStatus(REJECTED);
         }
         return toBookingDto(bookingStorage.save(booking));
     }
@@ -102,7 +102,7 @@ public class BookingServiceImpl implements BookingService {
         switch (bookingState) {
             case ALL:
                 log.debug("switch state - ALL");
-                if(role == BOOKER) {
+                if (role == BOOKER) {
                     log.debug("switch role - BOOKER");
                     bookings = bookingStorage.findAllByBooker_IdOrderByIdDesc(userId); break;
                 }
@@ -110,7 +110,7 @@ public class BookingServiceImpl implements BookingService {
                 bookings = bookingStorage.findAllByItem_Owner_IdOrderByIdDesc(userId); break;
             case CURRENT:
                 log.debug("switch state - CURRENT");
-                if(role == BOOKER) {
+                if (role == BOOKER) {
                     log.debug("switch role - BOOKER");
                     bookings = bookingStorage.findAllByBooker_IdAndStartIsBeforeAndEndIsAfterOrderByIdAsc(
                             userId, curTime, curTime); break;
@@ -120,7 +120,7 @@ public class BookingServiceImpl implements BookingService {
                             userId, curTime, curTime); break;
             case PAST:
                 log.debug("switch state - PAST");
-                if(role == BOOKER) {
+                if (role == BOOKER) {
                     log.debug("switch role - BOOKER");
                     bookings = bookingStorage.findAllByBooker_idAndEndIsBeforeOrderByIdDesc(userId, curTime); break;
                 }
@@ -128,7 +128,7 @@ public class BookingServiceImpl implements BookingService {
                 bookings = bookingStorage.findAllByItem_Owner_IdAndEndIsBeforeOrderByIdDesc(userId, curTime); break;
             case FUTURE:
                 log.debug("switch state - FUTURE");
-                if(role == BOOKER) {
+                if (role == BOOKER) {
                     log.debug("switch role - BOOKER");
                     bookings = bookingStorage.findAllByBooker_idAndStartIsAfterOrderByIdDesc(userId, curTime); break;
                 }
@@ -136,7 +136,7 @@ public class BookingServiceImpl implements BookingService {
                 bookings = bookingStorage.findAllByItem_Owner_IdAndStartIsAfterOrderByIdDesc(userId, curTime); break;
             case WAITING:
                 log.debug("switch status - WAITING");
-                if(role == BOOKER) {
+                if (role == BOOKER) {
                     log.debug("switch role - BOOKER");
                     bookings = bookingStorage.findAllByBooker_IdAndStatusIsOrderByIdDesc(userId, WAITING); break;
                 }
@@ -144,7 +144,7 @@ public class BookingServiceImpl implements BookingService {
                 bookings = bookingStorage.findAllByItem_Owner_IdAndStatusIsOrderByIdDesc(userId, WAITING); break;
             case REJECTED:
                 log.debug("switch status - REJECTED");
-                if(role == BOOKER) {
+                if (role == BOOKER) {
                     log.debug("switch role - BOOKER");
                     bookings = bookingStorage.findAllByBooker_IdAndStatusIsOrderByIdDesc(userId, REJECTED); break;
                 }
@@ -157,7 +157,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public void isExist(Long bookingId) throws NotFoundException {
         log.debug("/isExist");
-        if(!bookingStorage.existsById(bookingId)) throw new NotFoundException(BOOKING_NOT_FOUND);
+        if (!bookingStorage.existsById(bookingId)) throw new NotFoundException(BOOKING_NOT_FOUND);
     }
 
     private void annotationValidate(BindingResult br) throws ValidateException {
@@ -169,20 +169,20 @@ public class BookingServiceImpl implements BookingService {
         log.debug("/customValidate");
         Timestamp startTime = Timestamp.valueOf(bookingIncomeDto.getStart());
         Timestamp endTime = Timestamp.valueOf(bookingIncomeDto.getEnd());
-        if(endTime.before(startTime)
+        if (endTime.before(startTime)
                 || endTime.equals(startTime)) throw new ValidateException(ENDTIME_BEFORE_STARTTIME);
     }
 
     private void isBookerIsOwner(Long itemId, Long bookerId) throws NotFoundException {
         log.debug("/isBookerIsOwner");
         Long itemOwnerId = itemStorage.getReferenceById(itemId).getOwner().getId();
-        if(bookerId.equals(itemOwnerId)) throw new NotFoundException(BOOKER_IS_OWNER_ITEM);
+        if (bookerId.equals(itemOwnerId)) throw new NotFoundException(BOOKER_IS_OWNER_ITEM);
     }
 
     private void isStatusIsWaiting(Booking booking) throws ValidateException {
         log.debug("/isStatusIsWaiting");
         BookingStatus status = booking.getStatus();
-        if(status != WAITING) throw new ValidateException(STATUS_NOT_WAITING);
+        if (status != WAITING) throw new ValidateException(STATUS_NOT_WAITING);
     }
 
     private void isUserBookerOrOwner(Long userId, Long bookingId) throws NotFoundException {
