@@ -45,3 +45,5 @@ shareit.trace.db
 
 #check-repo hw14
 shareit.mv.db
+.fastRequest\
+.db
