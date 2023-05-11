@@ -2,23 +2,24 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Service;
+
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+
 import org.springframework.validation.BindingResult;
-import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.BookingState;
-import ru.practicum.shareit.booking.model.BookingStatus;
-import ru.practicum.shareit.booking.dto.BookingDtoMapper;
-import ru.practicum.shareit.booking.dto.BookingRequestDto;
-import ru.practicum.shareit.booking.dto.BookingResponseDto;
+
+import ru.practicum.shareit.booking.model.*;
+import ru.practicum.shareit.booking.dto.*;
 import ru.practicum.shareit.booking.storage.BookingStorage;
-import ru.practicum.shareit.exception.GlobalExceptionHandler;
-import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.ValidateException;
+
+import ru.practicum.shareit.exception.*;
+
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.storage.ItemStorage;
+
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.model.UserRole;
 import ru.practicum.shareit.user.service.UserService;
@@ -40,7 +41,7 @@ import static ru.practicum.shareit.user.model.UserRole.BOOKER;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-@Transactional(isolation = Isolation.REPEATABLE_READ)
+@Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
 public class BookingServiceImpl implements BookingService {
     private final BookingStorage bookingStorage;
     private final UserService userService;
@@ -48,6 +49,7 @@ public class BookingServiceImpl implements BookingService {
     private final UserStorage userStorage;
     private final ItemStorage itemStorage;
 
+    @Transactional
     @Override
     public BookingResponseDto create(BookingRequestDto bookingIncomeDto, BindingResult br, Long bookerId) {
         log.debug("/create");
@@ -56,64 +58,27 @@ public class BookingServiceImpl implements BookingService {
         userService.isExist(bookerId);
         itemService.isExist(bookingIncomeDto.getItemId());
         itemService.isItemAvailable(bookingIncomeDto.getItemId());
-        isBookerIsOwnerItem(bookingIncomeDto.getItemId(), bookerId);
+        isBookerIsOwner(bookingIncomeDto.getItemId(), bookerId);
         User booker = userStorage.getReferenceById(bookerId);
         Item item = itemStorage.getReferenceById(bookingIncomeDto.getItemId());
         Booking savedBooking = bookingStorage.save(toBooking(bookingIncomeDto, booker, item));
         return toBookingDto(savedBooking);
     }
 
-    private void isBookerIsOwnerItem(Long itemId, Long bookerId) {
-        Long itemOwnerId = itemStorage.getReferenceById(itemId).getOwner().getId();
-        if(bookerId.equals(itemOwnerId)) throw new NotFoundException(BOOKER_IS_OWNER_ITEM);
-    }
-
+    @Transactional
     @Override
     public BookingResponseDto update(Long bookingId, Long ownerId, String status) {
+        log.debug("/update");
         isExist(bookingId);
         userService.isExist(ownerId);
         Booking booking = bookingStorage.getReferenceById(bookingId);
         itemService.isOwnerOfItem(booking.getItem().getId(), ownerId);
-        isStatusWaiting(booking);
+        isStatusIsWaiting(booking);
         if(status != null) {
             if(Boolean.parseBoolean(status)) booking.setStatus(APPROVED);
             if(!Boolean.parseBoolean(status)) booking.setStatus(REJECTED);
         }
         return toBookingDto(bookingStorage.save(booking));
-    }
-
-    private void isStatusWaiting(Booking booking) {
-        BookingStatus status = booking.getStatus();
-        if(status != WAITING) throw new ValidateException(STATUS_NOT_WAITING);
-    }
-
-    private void annotationValidate(BindingResult br) {
-        log.debug("/annotationValidate");
-        if (br.hasErrors()) throw new ValidateException(GlobalExceptionHandler.bindingResultToString(br));
-    }
-
-    private void customValidate(BookingRequestDto bookingIncomeDto) {
-        log.debug("/customValidate");
-        Timestamp startTime = Timestamp.valueOf(bookingIncomeDto.getStart());
-        Timestamp endTime = Timestamp.valueOf(bookingIncomeDto.getEnd());
-        if(endTime.before(startTime)
-           || endTime.equals(startTime)) throw new ValidateException(ENDTIME_BEFORE_STARTTIME);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public void isExist(Long bookingId) {
-        log.debug("/isExist");
-        if(!bookingStorage.existsById(bookingId)) throw new NotFoundException(BOOKING_NOT_FOUND);
-    }
-
-    @Transactional(readOnly = true)
-    public void isUserBookerOrOwner(Long userId, Long bookingId) {
-        Booking booking = bookingStorage.getReferenceById(bookingId);
-        if (booking.getBooker().getId() != userId
-            && booking.getItem().getOwner().getId() != userId) {
-            throw new NotFoundException(USER_NOT_RELATED_FOR_BOOKING);
-        }
     }
 
     @Override
@@ -125,23 +90,18 @@ public class BookingServiceImpl implements BookingService {
         return toBookingDto(bookingStorage.getReferenceById(bookingId));
     }
 
-    @Transactional(readOnly = true)
     @Override
-    public List<BookingResponseDto> getAllByUser(Long userId, String state, UserRole userRole) {
+    public List<BookingResponseDto> getAllByUser(Long userId, String state, UserRole role) {
         log.debug("/getAllByUser");
         userService.isExist(userId);
-        List<Booking> bookings = Collections.emptyList();
-        BookingState bookingState;
-        try {
-            bookingState = BookingState.valueOf(state.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new ValidateException(STATE_INCORRECT_INPUT + state);
-        }
         final LocalDateTime curTime = LocalDateTime.now();
+        List<Booking> bookings = Collections.emptyList();
+        BookingState bookingState = toBookingState(state);
+
         switch (bookingState) {
             case ALL:
                 log.debug("switch state - ALL");
-                if(userRole == BOOKER) {
+                if(role == BOOKER) {
                     log.debug("switch role - BOOKER");
                     bookings = bookingStorage.findAllByBooker_IdOrderByIdDesc(userId); break;
                 }
@@ -149,7 +109,7 @@ public class BookingServiceImpl implements BookingService {
                 bookings = bookingStorage.findAllByItem_Owner_IdOrderByIdDesc(userId); break;
             case CURRENT:
                 log.debug("switch state - CURRENT");
-                if(userRole == BOOKER) {
+                if(role == BOOKER) {
                     log.debug("switch role - BOOKER");
                     bookings = bookingStorage.findAllByBooker_IdAndStartIsBeforeAndEndIsAfterOrderByIdAsc(
                             userId, curTime, curTime); break;
@@ -159,7 +119,7 @@ public class BookingServiceImpl implements BookingService {
                             userId, curTime, curTime); break;
             case PAST:
                 log.debug("switch state - PAST");
-                if(userRole == BOOKER) {
+                if(role == BOOKER) {
                     log.debug("switch role - BOOKER");
                     bookings = bookingStorage.findAllByBooker_idAndEndIsBeforeOrderByIdDesc(userId, curTime); break;
                 }
@@ -167,7 +127,7 @@ public class BookingServiceImpl implements BookingService {
                 bookings = bookingStorage.findAllByItem_Owner_IdAndEndIsBeforeOrderByIdDesc(userId, curTime); break;
             case FUTURE:
                 log.debug("switch state - FUTURE");
-                if(userRole == BOOKER) {
+                if(role == BOOKER) {
                     log.debug("switch role - BOOKER");
                     bookings = bookingStorage.findAllByBooker_idAndStartIsAfterOrderByIdDesc(userId, curTime); break;
                 }
@@ -175,7 +135,7 @@ public class BookingServiceImpl implements BookingService {
                 bookings = bookingStorage.findAllByItem_Owner_IdAndStartIsAfterOrderByIdDesc(userId, curTime); break;
             case WAITING:
                 log.debug("switch status - WAITING");
-                if(userRole == BOOKER) {
+                if(role == BOOKER) {
                     log.debug("switch role - BOOKER");
                     bookings = bookingStorage.findAllByBooker_IdAndStatusIsOrderByIdDesc(userId, WAITING); break;
                 }
@@ -183,7 +143,7 @@ public class BookingServiceImpl implements BookingService {
                 bookings = bookingStorage.findAllByItem_Owner_IdAndStatusIsOrderByIdDesc(userId, WAITING); break;
             case REJECTED:
                 log.debug("switch status - REJECTED");
-                if(userRole == BOOKER) {
+                if(role == BOOKER) {
                     log.debug("switch role - BOOKER");
                     bookings = bookingStorage.findAllByBooker_IdAndStatusIsOrderByIdDesc(userId, REJECTED); break;
                 }
@@ -194,9 +154,50 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingResponseDto> TESTgetAll() {
-        return bookingStorage.findAll().stream()
-                .map(BookingDtoMapper::toBookingDto)
-                .collect(Collectors.toList());
+    public void isExist(Long bookingId) {
+        log.debug("/isExist");
+        if(!bookingStorage.existsById(bookingId)) throw new NotFoundException(BOOKING_NOT_FOUND);
+    }
+
+    private void annotationValidate(BindingResult br) throws ValidateException {
+        log.debug("/annotationValidate");
+        if (br.hasErrors()) throw new ValidateException(GlobalExceptionHandler.bindingResultToString(br));
+    }
+
+    private void customValidate(BookingRequestDto bookingIncomeDto) throws ValidateException {
+        log.debug("/customValidate");
+        Timestamp startTime = Timestamp.valueOf(bookingIncomeDto.getStart());
+        Timestamp endTime = Timestamp.valueOf(bookingIncomeDto.getEnd());
+        if(endTime.before(startTime)
+                || endTime.equals(startTime)) throw new ValidateException(ENDTIME_BEFORE_STARTTIME);
+    }
+
+    private void isBookerIsOwner(Long itemId, Long bookerId) throws NotFoundException {
+        log.debug("/isBookerIsOwner");
+        Long itemOwnerId = itemStorage.getReferenceById(itemId).getOwner().getId();
+        if(bookerId.equals(itemOwnerId)) throw new NotFoundException(BOOKER_IS_OWNER_ITEM);
+    }
+
+    private void isStatusIsWaiting(Booking booking) throws ValidateException {
+        log.debug("/isStatusIsWaiting");
+        BookingStatus status = booking.getStatus();
+        if(status != WAITING) throw new ValidateException(STATUS_NOT_WAITING);
+    }
+
+    private void isUserBookerOrOwner(Long userId, Long bookingId) throws NotFoundException {
+        log.debug("/isUserBookerOrOwner");
+        Booking booking = bookingStorage.getReferenceById(bookingId);
+        if (!booking.getBooker().getId().equals(userId) && !booking.getItem().getOwner().getId().equals(userId)) {
+            throw new NotFoundException(USER_NOT_RELATED_FOR_BOOKING);
+        }
+    }
+
+    private BookingState toBookingState(String state) throws ValidateException {
+        log.debug("/toBookingState");
+        try {
+            return BookingState.valueOf(state.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new ValidateException(STATE_INCORRECT_INPUT + state);
+        }
     }
 }
