@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.dto;
 
+import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
@@ -7,7 +8,7 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Slf4j
 public class CommentDtoMapper {
     public static Comment toComment(CommentDto commentDto, Item item, User author) {

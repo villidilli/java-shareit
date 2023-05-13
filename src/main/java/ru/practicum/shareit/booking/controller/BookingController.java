@@ -60,19 +60,17 @@ public class BookingController {
     @ResponseStatus(HttpStatus.OK)
     public List<BookingResponseDto> getAllByBooker(@RequestHeader(name = PARAM_USER_ID) Long userId,
                                                    @RequestParam(name = PARAM_NAME_BOOKING_STATE,
-                                                                 required = false,
                                                                  defaultValue = DEFAULT_BOOKING_STATE) String state) {
         log.debug("/getAllByBooker");
-        return bookingService.getAllByUser(userId, state, UserRole.BOOKER);
+        return bookingService.getAllByBooker(userId, state);
     }
 
     @GetMapping("/owner")
     @ResponseStatus(HttpStatus.OK)
     public List<BookingResponseDto> getAllByOwner(@RequestHeader(name = PARAM_USER_ID) Long userId,
                                                   @RequestParam(name = PARAM_NAME_BOOKING_STATE,
-                                                                required = false,
                                                                 defaultValue = DEFAULT_BOOKING_STATE) String state) {
         log.debug("/getAllByOwner");
-        return bookingService.getAllByUser(userId, state, UserRole.OWNER);
+        return bookingService.getAllByOwner(userId, state);
     }
 }

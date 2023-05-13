@@ -6,7 +6,7 @@ public enum BookingStatus {
     REJECTED("отклонено владельцем"),
     CANCELED("отменено создателем");
 
-    public final String message;
+    private final String message;
 
     private BookingStatus(String message) {
         this.message = message;

@@ -8,7 +8,7 @@ public enum BookingState {
     WAITING("ожидающие подтверждения"),
     REJECTED("отклоненные");
 
-    final String message;
+    private final String message;
 
     BookingState(String message) {
         this.message = message;
