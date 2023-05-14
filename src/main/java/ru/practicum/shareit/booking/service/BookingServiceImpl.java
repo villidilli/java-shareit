@@ -75,8 +75,8 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = bookingStorage.getReferenceById(bookingId);
         itemService.isOwnerOfItem(booking.getItem().getId(), ownerId);
         isStatusIsWaiting(booking);
-        boolean statusBool = Boolean.parseBoolean(status);
         if (status != null) {
+            boolean statusBool = Boolean.parseBoolean(status);
             if (statusBool) booking.setStatus(APPROVED);
             if(!statusBool) booking.setStatus(REJECTED);
         }

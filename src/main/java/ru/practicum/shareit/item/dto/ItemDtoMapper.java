@@ -25,6 +25,16 @@ public class ItemDtoMapper {
         return itemDtoBook;
     }
 
+    public static ItemDtoWithBooking toItemDtoWithBooking(Item item) {
+        log.debug("/toItemDtoWithBooking");
+        ItemDtoWithBooking itemDtoBook = new ItemDtoWithBooking();
+        itemDtoBook.setId(item.getId());
+        itemDtoBook.setName(item.getName());
+        itemDtoBook.setDescription(item.getDescription());
+        itemDtoBook.setAvailable(item.getAvailable());
+        return itemDtoBook;
+    }
+
     public static ItemDto toItemDto(Item item) {
         log.debug("/toItemDto");
         ItemDto itemDto = new ItemDto();

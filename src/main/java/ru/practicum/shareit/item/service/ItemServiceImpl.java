@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,6 +52,7 @@ public class ItemServiceImpl implements ItemService {
     private final BookingStorage bookingStorage;
     private final CommentStorage commentStorage;
     private final UserStorage userStorage;
+    private final Sort sort = Sort.by("start").ascending();
 
     @Transactional
     @Override
@@ -98,11 +100,22 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemDtoWithBooking> getByOwner(Long ownerId) throws NotFoundException {
         log.debug("/getByOwner");
         userService.isExist(ownerId);
-        List<ItemDtoWithBooking> itemDtos = itemStorage.findByOwnerId(ownerId).stream()
-                .map(item -> toItemDtoWithBooking(item, getLastBooking(item.getId()), getNextBooking(item.getId())))
-                .collect(Collectors.toList());
-        itemDtos.forEach(itemDto -> itemDto.setComments(getCommentDtos(itemDto.getId())));
-        return itemDtos;
+
+
+        List<Booking> bookings = bookingStorage.findByItem_Owner_Id(ownerId, sort);
+        Map<Long, ItemDtoWithBooking> items = bookings.stream()
+                .map(Booking::getItem)
+                .collect(Collectors.toMap(Item::getId, ItemDtoMapper::toItemDtoWithBooking));
+        items.values().stream()
+                .forEach();
+
+        return null;
+
+//        List<ItemDtoWithBooking> itemDtos = itemStorage.findByOwnerId(ownerId).stream()
+//                .map(item -> toItemDtoWithBooking(item, getLastBooking(item.getId()), getNextBooking(item.getId())))
+//                .collect(Collectors.toList());
+//        itemDtos.forEach(itemDto -> itemDto.setComments(getCommentDtos(itemDto.getId())));
+//        return itemDtos;
     }
 
     @Override
@@ -147,10 +160,11 @@ public class ItemServiceImpl implements ItemService {
         if (!Objects.equals(savedItemOwnerId, ownerId)) throw new NotFoundException(OWNER_NOT_MATCH_ITEM);
     }
 
-    private Booking getLastBooking(Long itemId) {
+    private Booking getLastBooking(Long itemId) {//todo
         log.debug("/getLastBooking");
         final LocalDateTime curTime = LocalDateTime.now();
-        return bookingStorage.findTopByItem_IdAndStatusIsNotAndStartIsBeforeOrderByEndDesc(itemId, REJECTED, curTime);
+        return  null;
+//        return bookingStorage.findTopByItem_IdAndStatusIsNotAndStartIsBeforeOrderByEndDesc(itemId, REJECTED, curTime);
     }
 
     private Booking getNextBooking(Long itemId) {
