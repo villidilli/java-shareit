@@ -27,7 +27,5 @@ public class ItemDto {
     private String description;
     @NotNull(message = "Available must not be null")
     private Boolean available;
-    @ElementCollection
-    @CollectionTable(name = "comments", joinColumns = @JoinColumn(name = "item_id"))
     private List<CommentDto> comments;
 }
