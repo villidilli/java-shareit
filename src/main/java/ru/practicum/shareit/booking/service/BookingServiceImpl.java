@@ -3,6 +3,7 @@ package ru.practicum.shareit.booking.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Isolation;
@@ -21,12 +22,13 @@ import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.storage.ItemStorage;
 
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.model.UserRole;
 import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.storage.UserStorage;
 
 import java.sql.Timestamp;
+
 import java.time.LocalDateTime;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,7 +38,6 @@ import static ru.practicum.shareit.booking.dto.BookingDtoMapper.toBooking;
 import static ru.practicum.shareit.booking.dto.BookingDtoMapper.toBookingDto;
 import static ru.practicum.shareit.exception.NotFoundException.*;
 import static ru.practicum.shareit.exception.ValidateException.*;
-import static ru.practicum.shareit.user.model.UserRole.BOOKER;
 
 @Service
 @Slf4j
@@ -48,6 +49,8 @@ public class BookingServiceImpl implements BookingService {
     private final ItemService itemService;
     private final UserStorage userStorage;
     private final ItemStorage itemStorage;
+    private final Sort sortByIdDesc = Sort.by("id").descending();
+    private final Sort sortByIdAsc = Sort.by("id").ascending();
 
     @Transactional
     @Override
@@ -103,23 +106,29 @@ public class BookingServiceImpl implements BookingService {
         switch (bookingState) {
             case ALL:
                 log.debug("switch state - ALL");
-                bookings = bookingStorage.findAllByBooker_IdOrderByIdDesc(userId); break;
+                bookings = bookingStorage.findAllByBooker_Id(userId, sortByIdDesc);
+                break;
             case CURRENT:
                 log.debug("switch state - CURRENT");
-                bookings = bookingStorage.findAllByBooker_IdAndStartIsBeforeAndEndIsAfterOrderByIdAsc(
-                            userId, curTime, curTime); break;
+                bookings = bookingStorage.findAllByBooker_IdAndStartIsBeforeAndEndIsAfter(
+                                                                            userId, curTime, curTime, sortByIdAsc);
+                break;
             case PAST:
                 log.debug("switch state - PAST");
-                bookings = bookingStorage.findAllByBooker_idAndEndIsBeforeOrderByIdDesc(userId, curTime); break;
+                bookings = bookingStorage.findAllByBooker_idAndEndIsBefore(userId, curTime, sortByIdDesc);
+                break;
             case FUTURE:
                 log.debug("switch state - FUTURE");
-                bookings = bookingStorage.findAllByBooker_idAndStartIsAfterOrderByIdDesc(userId, curTime); break;
+                bookings = bookingStorage.findAllByBooker_idAndStartIsAfter(userId, curTime, sortByIdDesc);
+                break;
             case WAITING:
                 log.debug("switch status - WAITING");
-                bookings = bookingStorage.findAllByBooker_IdAndStatusIsOrderByIdDesc(userId, WAITING); break;
+                bookings = bookingStorage.findAllByBooker_IdAndStatusIs(userId, WAITING, sortByIdDesc);
+                break;
             case REJECTED:
                 log.debug("switch status - REJECTED");
-                bookings = bookingStorage.findAllByBooker_IdAndStatusIsOrderByIdDesc(userId, REJECTED); break;
+                bookings = bookingStorage.findAllByBooker_IdAndStatusIs(userId, REJECTED, sortByIdDesc);
+                break;
         }
         return bookings.stream().map(BookingDtoMapper::toBookingDto).collect(Collectors.toList());
     }
@@ -135,23 +144,29 @@ public class BookingServiceImpl implements BookingService {
         switch (bookingState) {
             case ALL:
                 log.debug("switch state - ALL");
-                bookings = bookingStorage.findAllByItem_Owner_IdOrderByIdDesc(userId); break;
+                bookings = bookingStorage.findAllByItem_Owner_Id(userId, sortByIdDesc);
+                break;
             case CURRENT:
                 log.debug("switch state - CURRENT");
-                bookings = bookingStorage.findAllByItem_Owner_IdAndStartIsBeforeAndEndIsAfterOrderByIdAsc(
-                        userId, curTime, curTime); break;
+                bookings = bookingStorage.findAllByItem_Owner_IdAndStartIsBeforeAndEndIsAfter(
+                                                                    userId, curTime, curTime, sortByIdAsc);
+                break;
             case PAST:
                 log.debug("switch state - PAST");
-                bookings = bookingStorage.findAllByItem_Owner_IdAndEndIsBeforeOrderByIdDesc(userId, curTime); break;
+                bookings = bookingStorage.findAllByItem_Owner_IdAndEndIsBefore(userId, curTime, sortByIdDesc);
+                break;
             case FUTURE:
                 log.debug("switch state - FUTURE");
-                bookings = bookingStorage.findAllByItem_Owner_IdAndStartIsAfterOrderByIdDesc(userId, curTime); break;
+                bookings = bookingStorage.findAllByItem_Owner_IdAndStartIsAfter(userId, curTime, sortByIdDesc);
+                break;
             case WAITING:
                 log.debug("switch status - WAITING");
-                bookings = bookingStorage.findAllByItem_Owner_IdAndStatusIsOrderByIdDesc(userId, WAITING); break;
+                bookings = bookingStorage.findAllByItem_Owner_IdAndStatusIs(userId, WAITING, sortByIdDesc);
+                break;
             case REJECTED:
                 log.debug("switch status - REJECTED");
-                bookings = bookingStorage.findAllByItem_Owner_IdAndStatusIsOrderByIdDesc(userId, REJECTED); break;
+                bookings = bookingStorage.findAllByItem_Owner_IdAndStatusIs(userId, REJECTED, sortByIdDesc);
+                break;
         }
         return bookings.stream().map(BookingDtoMapper::toBookingDto).collect(Collectors.toList());
     }
