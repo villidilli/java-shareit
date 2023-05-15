@@ -26,6 +26,6 @@ public class Item {
     private String name;
     private String description;
     private Boolean available;
-    @Transient
+//    @Transient
     private Long request;
 }
