@@ -7,10 +7,12 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 
 import ru.practicum.shareit.exception.*;
-import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserDtoMapper;
 import ru.practicum.shareit.user.storage.UserStorage;
@@ -19,84 +21,80 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static ru.practicum.shareit.exception.ValidateException.EMAIL_NOT_BLANK;
+import static ru.practicum.shareit.exception.NotFoundException.USER_NOT_FOUND;
 import static ru.practicum.shareit.user.dto.UserDtoMapper.*;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
 public class UserServiceImpl implements UserService {
     private final UserStorage userStorage;
     private final ObjectMapper objectMapper;
 
+    @Transactional
     @Override
-    public UserDto create(UserDto userDto, BindingResult br) {
+    public UserDto create(UserDto userDto, BindingResult br) throws ValidateException, NotFoundException {
         log.debug("/create");
         User user = toUser(userDto);
-        emailDuplicateValidate(user.getEmail(), user.getId());
-        emailNotBlankValidate(user.getEmail());
         annotationValidate(br);
-        User createdUser = userStorage.add(user);
-        return toUserDto(createdUser);
+        return toUserDto(userStorage.save(user));
     }
 
+    @Transactional
     @SneakyThrows
     @Override
-    public UserDto update(Long userId, UserDto userDto) {
+    public UserDto update(Long userId, UserDto userDto) throws NotFoundException {
         log.debug("/update");
-        userStorage.isExist(userId);
+        isExist(userId);
+        User existedUser = userStorage.findById(userId).get();
         User userWithUpdate = toUser(userDto);
-        emailDuplicateValidate(userWithUpdate.getEmail(), userId);
-        Map<String, String> fieldsToUpdate = getFieldsToUpdate(userWithUpdate);
-        User existedUser = userStorage.get(userId);
-        Map<String, String> existedUserMap = objectMapper.convertValue(existedUser, Map.class);
-        existedUserMap.putAll(fieldsToUpdate);
-        User updatedUser = objectMapper.convertValue(existedUserMap, User.class);
-        return toUserDto(userStorage.update(userId, updatedUser));
+        User updatedUser = setNewFields(existedUser, userWithUpdate);
+        return toUserDto(userStorage.save(updatedUser));
     }
 
     @Override
     public UserDto get(Long userId) throws NotFoundException {
         log.debug("/get");
-        userStorage.isExist(userId);
-        return toUserDto(userStorage.get(userId));
+        isExist(userId);
+        return toUserDto(userStorage.findById(userId).get());
     }
 
+    @Transactional
     @Override
-    public void delete(Long userId) {
+    public void delete(Long userId) throws NotFoundException {
         log.debug("/delete");
-        userStorage.isExist(userId);
-        userStorage.delete(userId);
+        isExist(userId);
+        userStorage.deleteById(userId);
     }
 
     @Override
     public List<UserDto> getAll() {
         log.debug("/getAll");
-        return userStorage.getAll().stream().map(UserDtoMapper::toUserDto).collect(Collectors.toList());
+        return userStorage.findAll().stream().map(UserDtoMapper::toUserDto).collect(Collectors.toList());
     }
 
-    public void emailDuplicateValidate(String email, Long userId) throws FieldConflictException {
-        log.debug("/emailDuplicateValid");
-        if (userId == null) {
-            userStorage.isExist(email);
-            return;
-        }
-        if (!userStorage.get(userId).getEmail().equals(email)) {
-            userStorage.isExist(email);
-        }
+    @Override
+    public void isExist(Long userId) throws NotFoundException {
+        log.debug("/isExist");
+        if (!userStorage.existsById(userId)) throw new NotFoundException(USER_NOT_FOUND);
     }
 
-    private void emailNotBlankValidate(String email) {
-        log.debug("/emailNotBlankValid");
-        if (email == null || email.isBlank()) throw new ValidateException(EMAIL_NOT_BLANK);
+    private User setNewFields(User existedUser, User userWithUpdate) {
+        log.debug("/setMewFields");
+        Map<String, String> existedUserMap = objectMapper.convertValue(existedUser, Map.class);
+        Map<String, String> fieldsToUpdate = getFieldsToUpdate(userWithUpdate);
+        existedUserMap.putAll(fieldsToUpdate);
+        return objectMapper.convertValue(existedUserMap, User.class);
     }
 
-    private void annotationValidate(BindingResult br) {
+    private void annotationValidate(BindingResult br) throws ValidateException {
         log.debug("/annotationValidate");
         if (br.hasErrors()) throw new ValidateException(GlobalExceptionHandler.bindingResultToString(br));
     }
 
     private Map<String, String> getFieldsToUpdate(User user) {
+        log.debug("/getFieldsToUpdate");
         Map<String, String> mapWithNullFields = objectMapper.convertValue(user, Map.class);
         return mapWithNullFields.entrySet().stream()
                 .filter(entry -> entry.getValue() != null)

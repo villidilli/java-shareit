@@ -2,18 +2,20 @@ package ru.practicum.shareit.exception;
 
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
 import org.springframework.web.bind.MissingRequestHeaderException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.List;
 
-import static ru.practicum.shareit.exception.ValidateException.OWNER_ID_NOT_BLANK;
+import static ru.practicum.shareit.exception.ValidateException.*;
 
 @RestControllerAdvice("ru.practicum.shareit")
 @Slf4j
@@ -47,10 +49,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ExceptionResponse exceptionHandler(FieldConflictException e) {
-        log.debug("/FieldConflictExceptionHandler");
+    public ExceptionResponse exceptionHandler(DataIntegrityViolationException e) {
+        log.debug("/DataIntegrityVoilationHandler");
         logException(HttpStatus.CONFLICT, e);
-        return new ExceptionResponse(e);
+        return new ExceptionResponse(new FieldConflictException(e.getMessage()));
     }
 
     @ExceptionHandler
@@ -59,6 +61,14 @@ public class GlobalExceptionHandler {
         log.debug("/MissingRequestHeaderExceptionHandler");
         logException(HttpStatus.BAD_REQUEST, e);
         return new ExceptionResponse(new ValidateException(OWNER_ID_NOT_BLANK));
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionResponse exceptionHandler(MissingServletRequestParameterException e) {
+        log.debug("/MissingRequestHeaderExceptionHandler");
+        logException(HttpStatus.BAD_REQUEST, e);
+        return new ExceptionResponse(new ValidateException(STATUS_PARAM_NOT_BLANK));
     }
 
     @ExceptionHandler

@@ -18,6 +18,8 @@ target/
 *.iws
 *.iml
 *.ipr
+.db
+/db/
 
 ### NetBeans ###
 /nbproject/private/
@@ -31,3 +33,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+.fastRequest\
+.idea\
+db\
+directory.json
