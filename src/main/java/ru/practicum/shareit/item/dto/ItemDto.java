@@ -24,4 +24,5 @@ public class ItemDto {
     @NotNull(message = "Available must not be null")
     private Boolean available;
     private List<CommentDto> comments;
+    private Long requestId;
 }

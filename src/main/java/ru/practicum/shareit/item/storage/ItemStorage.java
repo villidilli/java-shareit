@@ -13,4 +13,6 @@ public interface ItemStorage extends JpaRepository<Item, Long> {
                                                                         String textNameSearch, String textDescrSearch);
 
     Item findByIdAndAvailableIsTrue(Long itemId);
+
+    List<Item> findByRequest_IdIn(List<Long> requestIds);
 }

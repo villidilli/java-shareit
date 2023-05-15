@@ -24,10 +24,15 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.CommentStorage;
 import ru.practicum.shareit.item.storage.ItemStorage;
 
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.service.ItemRequestService;
+import ru.practicum.shareit.request.storage.ItemRequestStorage;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.storage.UserStorage;
 
+import javax.annotation.Nullable;
+import javax.validation.constraints.Null;
 import java.time.LocalDateTime;
 
 import java.util.*;
@@ -52,6 +57,8 @@ public class ItemServiceImpl implements ItemService {
     private final BookingStorage bookingStorage;
     private final CommentStorage commentStorage;
     private final UserStorage userStorage;
+    private final ItemRequestService requestService;
+    private final ItemRequestStorage requestStorage;
 
     @Transactional
     @Override
@@ -59,8 +66,10 @@ public class ItemServiceImpl implements ItemService {
         log.debug("/create");
         annotationValidate(br);
         userService.isExist(ownerId);
+        ItemRequest request = getRequest(itemDto.getRequestId());
+        log.debug("РЕКВЕСТ " + request);
         User owner = userStorage.getReferenceById(ownerId);
-        return toItemDto(itemStorage.save(toItem(itemDto, owner)));
+        return toItemDto(itemStorage.save(toItem(itemDto, owner, request)));
     }
 
     @Transactional
@@ -72,8 +81,9 @@ public class ItemServiceImpl implements ItemService {
         userService.isExist(ownerId);
         isOwnerOfItem(itemId, ownerId);
         User owner = userStorage.getReferenceById(ownerId);
+        ItemRequest request = getRequest(itemDto.getRequestId());
         Item existedItem = itemStorage.findById(itemId).get();
-        Item itemWithUpdate = toItem(itemDto, owner);
+        Item itemWithUpdate = toItem(itemDto, owner, request);
         Item updatedItem = setNewFields(existedItem, itemWithUpdate);
         return toItemDto(itemStorage.save(updatedItem));
     }
@@ -162,6 +172,18 @@ public class ItemServiceImpl implements ItemService {
         log.debug("/isOwnerOfItem");
         Long savedItemOwnerId = itemStorage.findById(itemId).get().getOwner().getId();
         if (!Objects.equals(savedItemOwnerId, ownerId)) throw new NotFoundException(OWNER_NOT_MATCH_ITEM);
+    }
+
+    @Nullable
+    private ItemRequest getRequest(Long requestId) {
+        log.debug("/getRequest");
+        log.debug("ПРИШЛО ID" + requestId);
+        if (requestId == null) return null;
+        log.debug("НУЛ НЕ СРАБОТАЛ");
+        requestService.isExist(requestId);
+        ItemRequest request = requestStorage.getReferenceById(requestId);
+        log.debug("РЕКВЕСТ ИЗ БАЗЫ" + request);
+        return request;
     }
 
     private Item setNewFields(Item existedItem, Item itemWithUpdate) {

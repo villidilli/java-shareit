@@ -5,10 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.request.dto.ItemRequestFullDto;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.service.ItemRequestService;
 
 import javax.validation.Valid;
+
+import java.util.List;
 
 import static ru.practicum.shareit.item.controller.ItemController.PARAM_USER_ID;
 
@@ -31,10 +34,11 @@ public class ItemRequestController {
         return requestService.create(requestDto, br, userId);
     }
 
-//    @GetMapping
-//    @ResponseStatus(HttpStatus.OK)
-//    public ItemRequestDto getByUser(@RequestHeader(name = PARAM_USER_ID) Long requesterId) {
-//        log.debug("/getByUser");
-//        return requestService.getByRequester(requesterId);
-//    }
+
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    public List<ItemRequestFullDto> getByRequester(@RequestHeader(name = PARAM_USER_ID) Long requesterId) {
+        log.debug("/getAllByRequester");
+        return requestService.getByRequester(requesterId);
+    }
 }

@@ -29,7 +29,8 @@ public class ItemController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ItemDto create(@Valid @RequestBody ItemDto itemDto, BindingResult br,
+    public ItemDto create(@Valid @RequestBody ItemDto itemDto,
+                          BindingResult br,
                           @RequestHeader(name = PARAM_USER_ID) Long ownerId) {
         log.debug("/create");
         return itemService.create(itemDto, ownerId, br);
