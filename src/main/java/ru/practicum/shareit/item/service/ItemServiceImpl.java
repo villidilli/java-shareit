@@ -195,7 +195,7 @@ public class ItemServiceImpl implements ItemService {
     private Map<Long, List<CommentDto>> getComments(List<Item> items) {
         log.debug("/getCommentDtos");
         List<Long> itemIds = items.stream().map(Item::getId).collect(Collectors.toList());
-        List<Comment> allComments= commentStorage.findByItem_IdIn(itemIds);
+        List<Comment> allComments = commentStorage.findByItem_IdIn(itemIds);
         Map<Long, List<CommentDto>> result = new HashMap<>();
         allComments.forEach(comment -> {
             Long itemId = comment.getItem().getId();
@@ -214,7 +214,7 @@ public class ItemServiceImpl implements ItemService {
                 .sorted(Comparator.comparing(Booking::getStart).reversed())
                 .forEach(booking -> {
                     Long itemId = booking.getItem().getId();
-                    if(!lastBookings.containsKey(itemId)) lastBookings.put(itemId, booking);
+                    if (!lastBookings.containsKey(itemId)) lastBookings.put(itemId, booking);
                 });
         return lastBookings;
     }
@@ -227,7 +227,7 @@ public class ItemServiceImpl implements ItemService {
                 .sorted(Comparator.comparing(Booking::getStart))
                 .forEach(booking -> {
                     Long itemId = booking.getItem().getId();
-                    if(!nextBooking.containsKey(itemId)) nextBooking.put(itemId, booking);
+                    if (!nextBooking.containsKey(itemId)) nextBooking.put(itemId, booking);
                 });
         return nextBooking;
     }

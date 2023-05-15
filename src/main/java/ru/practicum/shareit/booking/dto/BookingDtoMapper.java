@@ -8,8 +8,6 @@ import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
-import static ru.practicum.shareit.booking.model.BookingStatus.WAITING;
-
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Slf4j
 public class BookingDtoMapper {

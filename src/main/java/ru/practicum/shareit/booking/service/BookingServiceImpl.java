@@ -81,7 +81,7 @@ public class BookingServiceImpl implements BookingService {
         if (status != null) {
             boolean statusBool = Boolean.parseBoolean(status);
             if (statusBool) booking.setStatus(APPROVED);
-            if(!statusBool) booking.setStatus(REJECTED);
+            if (!statusBool) booking.setStatus(REJECTED);
         }
         return toBookingDto(bookingStorage.save(booking));
     }
