@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface ItemRequestStorage extends JpaRepository<ItemRequest, Long> {
     List<ItemRequest> findByRequester_Id(Long requesterId);
+
+    List<ItemRequest> findByRequester_IdNot(Long requesterId);
 }

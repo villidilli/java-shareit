@@ -3,6 +3,7 @@ package ru.practicum.shareit.request.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +42,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     private final UserStorage userStorage;
     private final ItemStorage itemStorage;
     private final ItemRequestStorage requestStorage;
+    private final Sort sortByCreatedDesc = Sort.by("created").descending();
 
     @Override
     @Transactional
@@ -60,30 +62,37 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     @Override
-    public List<ItemRequestFullDto> getByRequester(Long requesterId) {
-        log.debug("/getByRequester");
+    public List<ItemRequestFullDto> getAllOwn(Long requesterId) {
+        log.debug("/getAllOwn");
         userService.isExist(requesterId);
         List<ItemRequest> requests = requestStorage.findByRequester_Id(requesterId); // получили реквесты юзера
-        log.debug("ПОЛУЧИЛИ РЕКВЕСТЫ ЮЗЕРА " + requests);
         Map<Long, List<Item>> requestIdItems = getRequestItems(requests);
-        log.debug("ПОЛУЧИЛИ МАПУ РЕКВЕСТИ ИД ИТЕМЫ " + requestIdItems.values());
         List<ItemRequestFullDto> result = new ArrayList<>();
         requests.forEach(request -> result.add(toItemRequestDtoWithItem(request, requestIdItems.get(request.getId()))));
-        log.debug("РЕСАЛТ ПОСЛЕ МАПИНГА " + result);
+        return result;
+    }
+
+    @Override
+    public List<ItemRequestFullDto> getAllNotOwn(Long requesterId) {
+        log.debug("/getAllNotOwn");
+        userService.isExist(requesterId);
+        List<ItemRequest> requests = requestStorage.findByRequester_IdNot(requesterId);
+        Map<Long, List<Item>> requestIdItems = getRequestItems(requests);
+        List<ItemRequestFullDto> result = new ArrayList<>();
+        requests.forEach(request -> result.add(toItemRequestDtoWithItem(request, requestIdItems.get(request.getId()))));
         return result;
     }
 
     private Map<Long, List<Item>> getRequestItems(List<ItemRequest> requests) {
         log.debug("/getRequestItems");
-        List<Long> requestIds = requests.stream()
-                .map(ItemRequest::getId)
-                .collect(Collectors.toList()); // выдернули айди айтемов из реквестов
-        List<Item> items = itemStorage.findByRequest_IdIn(requestIds); // получили сами айтемы
-        Map<Long, List<Item>> result = new HashMap<>();
+        List<Long> requestIds = requests.stream().map(ItemRequest::getId).collect(Collectors.toList());
+        List<Item> items = itemStorage.findByRequest_IdIn(requestIds);
+        Map<Long, List<Item>> result = new HashMap<>(); // key = requestId, value = his items
         items.forEach(item -> {
-            List<Item> requestItems = result.getOrDefault(item.getRequest().getId(), new ArrayList<>());
-            requestItems.add(item);
-            result.put(item.getRequest().getId(), requestItems);
+            Long currentItemRequestId = item.getRequest().getId();
+            List<Item> currentRequestItems = result.getOrDefault(currentItemRequestId, new ArrayList<>());
+            currentRequestItems.add(item);
+            result.put(item.getRequest().getId(), currentRequestItems);
         });
         return result;
     }

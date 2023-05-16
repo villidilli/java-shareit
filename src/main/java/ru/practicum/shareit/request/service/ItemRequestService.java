@@ -11,5 +11,7 @@ public interface ItemRequestService {
 
     void isExist(Long requestId);
 
-    List<ItemRequestFullDto> getByRequester(Long requesterId);
+    List<ItemRequestFullDto> getAllOwn(Long requesterId);
+
+    List<ItemRequestFullDto> getAllNotOwn(Long requesterId);
 }
