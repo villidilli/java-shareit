@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import javax.validation.ConstraintViolationException;
 import java.util.List;
 
 import static ru.practicum.shareit.exception.ValidateException.*;
@@ -69,6 +70,14 @@ public class GlobalExceptionHandler {
         log.debug("/MissingRequestHeaderExceptionHandler");
         logException(HttpStatus.BAD_REQUEST, e);
         return new ExceptionResponse(new ValidateException(STATUS_PARAM_NOT_BLANK));
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionResponse exceptionHandler(ConstraintViolationException e) {
+        log.debug("/IllegalArgumentExceptionHandler");
+        logException(HttpStatus.BAD_REQUEST, e);
+        return new ExceptionResponse(new ValidateException(ILLEGAL_ARGUMENT));
     }
 
     @ExceptionHandler

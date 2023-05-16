@@ -13,8 +13,11 @@ import ru.practicum.shareit.item.dto.ItemDtoWithBooking;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 
 import java.util.List;
+
+import static ru.practicum.shareit.request.controller.ItemRequestController.*;
 
 /**
  * TODO Sprint add-controllers.

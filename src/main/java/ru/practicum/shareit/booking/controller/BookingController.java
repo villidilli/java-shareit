@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
@@ -12,10 +13,12 @@ import ru.practicum.shareit.booking.dto.BookingResponseDto;
 import ru.practicum.shareit.booking.service.BookingService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 
 import java.util.List;
 
 import static ru.practicum.shareit.item.controller.ItemController.PARAM_USER_ID;
+import static ru.practicum.shareit.request.controller.ItemRequestController.*;
 
 /**
  * TODO Sprint add-bookings.
@@ -24,6 +27,7 @@ import static ru.practicum.shareit.item.controller.ItemController.PARAM_USER_ID;
 @RequestMapping(path = "/bookings")
 @Slf4j
 @RequiredArgsConstructor
+@Validated
 public class BookingController {
     public static final String PARAM_NAME_BOOKING_STATE = "state";
     public static final String DEFAULT_BOOKING_STATE = "ALL";
@@ -59,9 +63,13 @@ public class BookingController {
     @ResponseStatus(HttpStatus.OK)
     public List<BookingResponseDto> getAllByBooker(@RequestHeader(name = PARAM_USER_ID) Long userId,
                                                    @RequestParam(name = PARAM_NAME_BOOKING_STATE,
-                                                                 defaultValue = DEFAULT_BOOKING_STATE) String state) {
+                                                                 defaultValue = DEFAULT_BOOKING_STATE) String state,
+                                                   @RequestParam(value = FIRST_PAGE,
+                                                           defaultValue = DEFAULT_FIRST_PAGE) @Min(0) Integer from,
+                                                   @RequestParam(value = SIZE_VIEW,
+                                                           defaultValue = DEFAULT_SIZE_VIEW) @Min(1) Integer size) {
         log.debug("/getAllByBooker");
-        return bookingService.getAllByBooker(userId, state);
+        return bookingService.getAllByBooker(userId, state, from, size);
     }
 
     @GetMapping("/owner")

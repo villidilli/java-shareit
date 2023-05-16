@@ -13,5 +13,7 @@ public interface ItemRequestService {
 
     List<ItemRequestFullDto> getAllOwn(Long requesterId);
 
-    List<ItemRequestFullDto> getAllNotOwn(Long requesterId);
+    List<ItemRequestFullDto> getAllNotOwn(Long requesterId, Integer from, Integer size);
+
+    ItemRequestFullDto getById(Long requesterId, Long requestId);
 }

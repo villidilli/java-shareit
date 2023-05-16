@@ -4,12 +4,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.request.dto.ItemRequestFullDto;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.service.ItemRequestService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 
 import java.util.List;
 
@@ -21,10 +23,13 @@ import static ru.practicum.shareit.item.controller.ItemController.PARAM_USER_ID;
 @RestController
 @RequestMapping(path = "/requests")
 @Slf4j
+@Validated
 @RequiredArgsConstructor
 public class ItemRequestController {
-    public static final String NUM_FIRST_ELEM = "from";
+    public static final String FIRST_PAGE = "from";
+    public static final String DEFAULT_FIRST_PAGE = "0";
     public static final String SIZE_VIEW = "size";
+    public static final String DEFAULT_SIZE_VIEW = "999";
     private final ItemRequestService requestService;
 
     @PostMapping
@@ -44,9 +49,18 @@ public class ItemRequestController {
 
     @GetMapping("/all")
     public List<ItemRequestFullDto> getAllNotOwn(@RequestHeader(PARAM_USER_ID) Long requesterId,
-                                                 @RequestParam(value = NUM_FIRST_ELEM, required = false) Integer from,
-                                                 @RequestParam(value = SIZE_VIEW, required = false) Integer size) {
+                                                 @RequestParam(value = FIRST_PAGE,
+                                                               defaultValue = DEFAULT_FIRST_PAGE) @Min(0) Integer from,
+                                                 @RequestParam(value = SIZE_VIEW,
+                                                               defaultValue = DEFAULT_SIZE_VIEW) @Min(1) Integer size) {
         log.debug("getAllNotOwn");
-        return requestService.getAllNotOwn(requesterId);
+        return requestService.getAllNotOwn(requesterId, from, size);
+    }
+
+    @GetMapping("/{requestId}")
+    public ItemRequestFullDto getById(@RequestHeader(PARAM_USER_ID) Long requesterId,
+                                      @PathVariable Long requestId) {
+        log.debug("/getById");
+        return requestService.getById(requesterId, requestId);
     }
 }

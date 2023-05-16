@@ -3,6 +3,9 @@ package ru.practicum.shareit.request.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -31,6 +34,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.exception.NotFoundException.REQUEST_NOT_FOUND;
+import static ru.practicum.shareit.request.controller.ItemRequestController.DEFAULT_FIRST_PAGE;
 import static ru.practicum.shareit.request.dto.ItemRequestDtoMapper.*;
 
 @Service
@@ -65,7 +69,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     public List<ItemRequestFullDto> getAllOwn(Long requesterId) {
         log.debug("/getAllOwn");
         userService.isExist(requesterId);
-        List<ItemRequest> requests = requestStorage.findByRequester_Id(requesterId); // получили реквесты юзера
+        List<ItemRequest> requests = requestStorage.findByRequester_Id(requesterId, sortByCreatedDesc); // получили реквесты юзера
         Map<Long, List<Item>> requestIdItems = getRequestItems(requests);
         List<ItemRequestFullDto> result = new ArrayList<>();
         requests.forEach(request -> result.add(toItemRequestDtoWithItem(request, requestIdItems.get(request.getId()))));
@@ -73,14 +77,28 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     @Override
-    public List<ItemRequestFullDto> getAllNotOwn(Long requesterId) {
+    public List<ItemRequestFullDto> getAllNotOwn(Long requesterId, Integer from, Integer size) {
         log.debug("/getAllNotOwn");
         userService.isExist(requesterId);
-        List<ItemRequest> requests = requestStorage.findByRequester_IdNot(requesterId);
-        Map<Long, List<Item>> requestIdItems = getRequestItems(requests);
+        Page<ItemRequest> requests = requestStorage.findByRequester_IdNot(requesterId, getPage(from, size));
+        Map<Long, List<Item>> requestIdItems = getRequestItems(requests.toList());
         List<ItemRequestFullDto> result = new ArrayList<>();
         requests.forEach(request -> result.add(toItemRequestDtoWithItem(request, requestIdItems.get(request.getId()))));
         return result;
+    }
+
+    @Override
+    public ItemRequestFullDto getById(Long requesterId, Long requestId) {
+        isExist(requestId);
+        userService.isExist(requesterId);
+        ItemRequest request = requestStorage.findByIdIs(requestId);
+        Map<Long, List<Item>> requestIdItems = getRequestItems(List.of(request));
+        return toItemRequestDtoWithItem(request, requestIdItems.get(request.getId()));
+    }
+
+    private Pageable getPage(Integer from, Integer size) {
+        int firstPage = from != 0 ? from / size : Integer.parseInt(DEFAULT_FIRST_PAGE);
+        return PageRequest.of(firstPage, size, sortByCreatedDesc);
     }
 
     private Map<Long, List<Item>> getRequestItems(List<ItemRequest> requests) {

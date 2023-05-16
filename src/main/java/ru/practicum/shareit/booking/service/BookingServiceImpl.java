@@ -3,6 +3,9 @@ package ru.practicum.shareit.booking.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +24,7 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.storage.ItemStorage;
 
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.storage.UserStorage;
@@ -38,6 +42,7 @@ import static ru.practicum.shareit.booking.dto.BookingDtoMapper.toBooking;
 import static ru.practicum.shareit.booking.dto.BookingDtoMapper.toBookingDto;
 import static ru.practicum.shareit.exception.NotFoundException.*;
 import static ru.practicum.shareit.exception.ValidateException.*;
+import static ru.practicum.shareit.request.controller.ItemRequestController.DEFAULT_FIRST_PAGE;
 
 @Service
 @Slf4j
@@ -96,17 +101,19 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingResponseDto> getAllByBooker(Long userId, String state) throws NotFoundException {
+    public List<BookingResponseDto> getAllByBooker(Long userId, String state, Integer from, Integer size)
+                                                                                            throws NotFoundException {
         log.debug("/getAllByUser");
         userService.isExist(userId);
         final LocalDateTime curTime = LocalDateTime.now();
         List<Booking> bookings = Collections.emptyList();
         BookingState bookingState = toBookingState(state);
+        Pageable page = getPage(from, size);
 
         switch (bookingState) {
             case ALL:
                 log.debug("switch state - ALL");
-                bookings = bookingStorage.findAllByBooker_Id(userId, sortByIdDesc);
+                bookings = bookingStorage.findAllByBooker_Id(userId, page, sortByIdDesc);
                 break;
             case CURRENT:
                 log.debug("switch state - CURRENT");
@@ -175,6 +182,11 @@ public class BookingServiceImpl implements BookingService {
     public void isExist(Long bookingId) throws NotFoundException {
         log.debug("/isExist");
         if (!bookingStorage.existsById(bookingId)) throw new NotFoundException(BOOKING_NOT_FOUND);
+    }
+
+    private Pageable getPage(Integer from, Integer size) {
+        int firstPage = from != 0 ? from / size : Integer.parseInt(DEFAULT_FIRST_PAGE);
+        return PageRequest.of(firstPage, size);
     }
 
     private void annotationValidate(BindingResult br) throws ValidateException {
