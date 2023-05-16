@@ -6,6 +6,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,6 +49,7 @@ import static ru.practicum.shareit.exception.ValidateException.ITEM_NOT_HAVE_BOO
 import static ru.practicum.shareit.item.dto.CommentDtoMapper.toComment;
 import static ru.practicum.shareit.item.dto.CommentDtoMapper.toCommentDto;
 import static ru.practicum.shareit.item.dto.ItemDtoMapper.*;
+import static ru.practicum.shareit.request.controller.ItemRequestController.DEFAULT_FIRST_PAGE;
 
 @Service
 @RequiredArgsConstructor
@@ -112,15 +117,15 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDtoWithBooking> getByOwner(Long ownerId) throws NotFoundException {
+    public List<ItemDtoWithBooking> getByOwner(Long ownerId, Integer from, Integer size) throws NotFoundException {
         log.debug("/getByOwner");
         userService.isExist(ownerId);
-        List<Item> items = itemStorage.findByOwnerId(ownerId);
+        Page<Item> items = itemStorage.findByOwnerId(ownerId, getPage(from, size, Sort.unsorted()));
         List<Booking> bookings = bookingStorage.findByItem_Owner_Id(ownerId);
         LocalDateTime currentTime = LocalDateTime.now();
         Map<Long, Booking> lastBookings = getLastBookings(bookings, currentTime);
         Map<Long, Booking> nextBookings = getNextBookings(bookings, currentTime);
-        Map<Long, List<CommentDto>> commentDtos = getComments(items);
+        Map<Long, List<CommentDto>> commentDtos = getComments(items.toList());
         List<ItemDtoWithBooking> result = new ArrayList<>();
         items.forEach(item -> {
             ItemDtoWithBooking itemDto = toItemDtoWithBooking(item,
@@ -133,10 +138,11 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> search(String text) {
+    public List<ItemDto> search(String text, Integer from, Integer size) {
         log.debug("/search");
         if (text.isBlank()) return Collections.emptyList();
-        return itemStorage.findByNameContainsIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(text, text)
+        return itemStorage.findByNameContainsIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(
+                                                                    text, text, getPage(from, size, Sort.unsorted()))
                 .stream()
                 .map(ItemDtoMapper::toItemDto)
                 .collect(Collectors.toList());
@@ -184,6 +190,11 @@ public class ItemServiceImpl implements ItemService {
         ItemRequest request = requestStorage.getReferenceById(requestId);
         log.debug("РЕКВЕСТ ИЗ БАЗЫ" + request);
         return request;
+    }
+
+    private Pageable getPage(Integer from, Integer size, Sort sort) {
+        int firstPage = from != 0 ? from / size : Integer.parseInt(DEFAULT_FIRST_PAGE);
+        return PageRequest.of(firstPage, size, sort);
     }
 
     private Item setNewFields(Item existedItem, Item itemWithUpdate) {

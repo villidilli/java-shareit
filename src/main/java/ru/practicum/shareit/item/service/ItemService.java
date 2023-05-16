@@ -15,9 +15,9 @@ public interface ItemService {
 
     ItemDtoWithBooking get(Long itemId, Long ownerId);
 
-    List<ItemDtoWithBooking> getByOwner(Long ownerId);
+    List<ItemDtoWithBooking> getByOwner(Long ownerId, Integer from, Integer size);
 
-    List<ItemDto> search(String text);
+    List<ItemDto> search(String text, Integer from, Integer size);
 
     void isExist(Long itemId);
 

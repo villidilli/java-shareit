@@ -63,14 +63,20 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDtoWithBooking> getByOwner(@RequestHeader(name = PARAM_USER_ID) Long ownerId) {
+    public List<ItemDtoWithBooking> getByOwner(
+                            @RequestHeader(name = PARAM_USER_ID) Long ownerId,
+                            @RequestParam(value = FIRST_PAGE, defaultValue = DEFAULT_FIRST_PAGE) @Min(0) Integer from,
+                            @RequestParam(value = SIZE_VIEW, defaultValue = DEFAULT_SIZE_VIEW) @Min(1) Integer size) {
         log.debug("/getByOwner");
-        return itemService.getByOwner(ownerId);
+        return itemService.getByOwner(ownerId, from, size);
     }
 
     @GetMapping("/search")
-    public List<ItemDto> search(@RequestParam String text) {
+    public List<ItemDto> search(
+                            @RequestParam String text,
+                            @RequestParam(value = FIRST_PAGE, defaultValue = DEFAULT_FIRST_PAGE) @Min(0) Integer from,
+                            @RequestParam(value = SIZE_VIEW, defaultValue = DEFAULT_SIZE_VIEW) @Min(1) Integer size) {
         log.debug("/search");
-        return itemService.search(text);
+        return itemService.search(text, from, size);
     }
 }
