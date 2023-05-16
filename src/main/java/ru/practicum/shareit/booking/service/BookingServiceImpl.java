@@ -106,73 +106,77 @@ public class BookingServiceImpl implements BookingService {
         log.debug("/getAllByUser");
         userService.isExist(userId);
         final LocalDateTime curTime = LocalDateTime.now();
-        List<Booking> bookings = Collections.emptyList();
+        Page<Booking> bookings = Page.empty();
         BookingState bookingState = toBookingState(state);
-        Pageable page = getPage(from, size);
+        Pageable pageSortDesc = getPage(from, size, sortByIdDesc);
+        Pageable pageSortAsc = getPage(from, size, sortByIdAsc);
 
         switch (bookingState) {
             case ALL:
                 log.debug("switch state - ALL");
-                bookings = bookingStorage.findAllByBooker_Id(userId, page, sortByIdDesc);
+                bookings = bookingStorage.findAllByBooker_Id(userId, pageSortDesc);
                 break;
             case CURRENT:
                 log.debug("switch state - CURRENT");
                 bookings = bookingStorage.findAllByBooker_IdAndStartIsBeforeAndEndIsAfter(
-                                                                            userId, curTime, curTime, sortByIdAsc);
+                                                                        userId, curTime, curTime, pageSortAsc);
                 break;
             case PAST:
                 log.debug("switch state - PAST");
-                bookings = bookingStorage.findAllByBooker_idAndEndIsBefore(userId, curTime, sortByIdDesc);
+                bookings = bookingStorage.findAllByBooker_idAndEndIsBefore(userId, curTime, pageSortDesc);
                 break;
             case FUTURE:
                 log.debug("switch state - FUTURE");
-                bookings = bookingStorage.findAllByBooker_idAndStartIsAfter(userId, curTime, sortByIdDesc);
+                bookings = bookingStorage.findAllByBooker_idAndStartIsAfter(userId, curTime, pageSortDesc);
                 break;
             case WAITING:
                 log.debug("switch status - WAITING");
-                bookings = bookingStorage.findAllByBooker_IdAndStatusIs(userId, WAITING, sortByIdDesc);
+                bookings = bookingStorage.findAllByBooker_IdAndStatusIs(userId, WAITING, pageSortDesc);
                 break;
             case REJECTED:
                 log.debug("switch status - REJECTED");
-                bookings = bookingStorage.findAllByBooker_IdAndStatusIs(userId, REJECTED, sortByIdDesc);
+                bookings = bookingStorage.findAllByBooker_IdAndStatusIs(userId, REJECTED, pageSortDesc);
                 break;
         }
         return bookings.stream().map(BookingDtoMapper::toBookingDto).collect(Collectors.toList());
     }
 
     @Override
-    public List<BookingResponseDto> getAllByOwner(Long userId, String state) throws NotFoundException {
+    public List<BookingResponseDto> getAllByOwner(Long userId, String state, Integer from, Integer size)
+                                                                                            throws NotFoundException {
         log.debug("/getAllByOwner");
         userService.isExist(userId);
         final LocalDateTime curTime = LocalDateTime.now();
-        List<Booking> bookings = Collections.emptyList();
+        Page<Booking> bookings = Page.empty();
         BookingState bookingState = toBookingState(state);
+        Pageable pageSortDesc = getPage(from, size, sortByIdDesc);
+        Pageable pageSortAsc = getPage(from, size, sortByIdAsc);
 
         switch (bookingState) {
             case ALL:
                 log.debug("switch state - ALL");
-                bookings = bookingStorage.findAllByItem_Owner_Id(userId, sortByIdDesc);
+                bookings = bookingStorage.findAllByItem_Owner_Id(userId, pageSortDesc);
                 break;
             case CURRENT:
                 log.debug("switch state - CURRENT");
                 bookings = bookingStorage.findAllByItem_Owner_IdAndStartIsBeforeAndEndIsAfter(
-                                                                    userId, curTime, curTime, sortByIdAsc);
+                                                                    userId, curTime, curTime, pageSortAsc);
                 break;
             case PAST:
                 log.debug("switch state - PAST");
-                bookings = bookingStorage.findAllByItem_Owner_IdAndEndIsBefore(userId, curTime, sortByIdDesc);
+                bookings = bookingStorage.findAllByItem_Owner_IdAndEndIsBefore(userId, curTime, pageSortDesc);
                 break;
             case FUTURE:
                 log.debug("switch state - FUTURE");
-                bookings = bookingStorage.findAllByItem_Owner_IdAndStartIsAfter(userId, curTime, sortByIdDesc);
+                bookings = bookingStorage.findAllByItem_Owner_IdAndStartIsAfter(userId, curTime, pageSortDesc);
                 break;
             case WAITING:
                 log.debug("switch status - WAITING");
-                bookings = bookingStorage.findAllByItem_Owner_IdAndStatusIs(userId, WAITING, sortByIdDesc);
+                bookings = bookingStorage.findAllByItem_Owner_IdAndStatusIs(userId, WAITING, pageSortDesc);
                 break;
             case REJECTED:
                 log.debug("switch status - REJECTED");
-                bookings = bookingStorage.findAllByItem_Owner_IdAndStatusIs(userId, REJECTED, sortByIdDesc);
+                bookings = bookingStorage.findAllByItem_Owner_IdAndStatusIs(userId, REJECTED, pageSortDesc);
                 break;
         }
         return bookings.stream().map(BookingDtoMapper::toBookingDto).collect(Collectors.toList());
@@ -184,9 +188,9 @@ public class BookingServiceImpl implements BookingService {
         if (!bookingStorage.existsById(bookingId)) throw new NotFoundException(BOOKING_NOT_FOUND);
     }
 
-    private Pageable getPage(Integer from, Integer size) {
+    private Pageable getPage(Integer from, Integer size, Sort sort) {
         int firstPage = from != 0 ? from / size : Integer.parseInt(DEFAULT_FIRST_PAGE);
-        return PageRequest.of(firstPage, size);
+        return PageRequest.of(firstPage, size, sort);
     }
 
     private void annotationValidate(BindingResult br) throws ValidateException {

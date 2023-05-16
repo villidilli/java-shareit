@@ -61,23 +61,23 @@ public class BookingController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<BookingResponseDto> getAllByBooker(@RequestHeader(name = PARAM_USER_ID) Long userId,
-                                                   @RequestParam(name = PARAM_NAME_BOOKING_STATE,
-                                                                 defaultValue = DEFAULT_BOOKING_STATE) String state,
-                                                   @RequestParam(value = FIRST_PAGE,
-                                                           defaultValue = DEFAULT_FIRST_PAGE) @Min(0) Integer from,
-                                                   @RequestParam(value = SIZE_VIEW,
-                                                           defaultValue = DEFAULT_SIZE_VIEW) @Min(1) Integer size) {
+    public List<BookingResponseDto> getAllByBooker(
+                    @RequestHeader(name = PARAM_USER_ID) Long userId,
+                    @RequestParam(name = PARAM_NAME_BOOKING_STATE, defaultValue = DEFAULT_BOOKING_STATE) String state,
+                    @RequestParam(value = FIRST_PAGE, defaultValue = DEFAULT_FIRST_PAGE) @Min(0) Integer from,
+                    @RequestParam(value = SIZE_VIEW, defaultValue = DEFAULT_SIZE_VIEW) @Min(1) Integer size) {
         log.debug("/getAllByBooker");
         return bookingService.getAllByBooker(userId, state, from, size);
     }
 
     @GetMapping("/owner")
     @ResponseStatus(HttpStatus.OK)
-    public List<BookingResponseDto> getAllByOwner(@RequestHeader(name = PARAM_USER_ID) Long userId,
-                                                  @RequestParam(name = PARAM_NAME_BOOKING_STATE,
-                                                                defaultValue = DEFAULT_BOOKING_STATE) String state) {
+    public List<BookingResponseDto> getAllByOwner(
+                    @RequestHeader(name = PARAM_USER_ID) Long userId,
+                    @RequestParam(name = PARAM_NAME_BOOKING_STATE, defaultValue = DEFAULT_BOOKING_STATE) String state,
+                    @RequestParam(value = FIRST_PAGE, defaultValue = DEFAULT_FIRST_PAGE) @Min(0) Integer from,
+                    @RequestParam(value = SIZE_VIEW, defaultValue = DEFAULT_SIZE_VIEW) @Min(1) Integer size) {
         log.debug("/getAllByOwner");
-        return bookingService.getAllByOwner(userId, state);
+        return bookingService.getAllByOwner(userId, state, from, size);
     }
 }
