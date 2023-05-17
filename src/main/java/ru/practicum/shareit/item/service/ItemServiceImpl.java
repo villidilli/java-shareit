@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -67,12 +68,11 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional
     @Override
-    public ItemDto create(ItemDto itemDto, Long ownerId, BindingResult br) throws ValidateException, NotFoundException {
+    public ItemDto create(ItemDto itemDto, BindingResult br, Long ownerId) throws ValidateException, NotFoundException {
         log.debug("/create");
         annotationValidate(br);
         userService.isExist(ownerId);
         ItemRequest request = getRequest(itemDto.getRequestId());
-        log.debug("РЕКВЕСТ " + request);
         User owner = userStorage.getReferenceById(ownerId);
         return toItemDto(itemStorage.save(toItem(itemDto, owner, request)));
     }
@@ -183,12 +183,9 @@ public class ItemServiceImpl implements ItemService {
     @Nullable
     private ItemRequest getRequest(Long requestId) {
         log.debug("/getRequest");
-        log.debug("ПРИШЛО ID" + requestId);
         if (requestId == null) return null;
-        log.debug("НУЛ НЕ СРАБОТАЛ");
         requestService.isExist(requestId);
         ItemRequest request = requestStorage.getReferenceById(requestId);
-        log.debug("РЕКВЕСТ ИЗ БАЗЫ" + request);
         return request;
     }
 
@@ -219,7 +216,9 @@ public class ItemServiceImpl implements ItemService {
 
     private Map<String, String> getFieldToUpdate(Item itemWithUpdate) {
         log.debug("/getFieldsToUpdate");
+        log.debug(itemWithUpdate + "item with update");
         Map<String, String> mapWithNullFields = objectMapper.convertValue(itemWithUpdate, Map.class);
+        log.debug(mapWithNullFields + "MAP NULL FIELDS");
         return mapWithNullFields.entrySet().stream()
                 .filter(entry -> entry.getValue() != null)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));

@@ -36,7 +36,8 @@ public class BookingController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public BookingResponseDto create(@Valid @RequestBody BookingRequestDto bookingIncomeDto, BindingResult br,
+    public BookingResponseDto create(@Valid @RequestBody BookingRequestDto bookingIncomeDto,
+                                     BindingResult br,
                                      @RequestHeader(name = PARAM_USER_ID) Long bookerId) {
         log.debug("/create");
         return bookingService.create(bookingIncomeDto, br, bookerId);

@@ -11,6 +11,7 @@ import java.util.List;
  * TODO Sprint add-controllers.
  */
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 @EqualsAndHashCode

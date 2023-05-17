@@ -36,11 +36,12 @@ public class ItemController {
                           BindingResult br,
                           @RequestHeader(name = PARAM_USER_ID) Long ownerId) {
         log.debug("/create");
-        return itemService.create(itemDto, ownerId, br);
+        return itemService.create(itemDto, br, ownerId);
     }
 
     @PostMapping("/{itemId}/comment")
-    public CommentDto createComment(@Valid @RequestBody CommentDto commentDto, BindingResult br,
+    public CommentDto createComment(@Valid @RequestBody CommentDto commentDto,
+                                    BindingResult br,
                                     @PathVariable Long itemId,
                                     @RequestHeader(PARAM_USER_ID) Long bookerId) {
         log.debug("/createComment");

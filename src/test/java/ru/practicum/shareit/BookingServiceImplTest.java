@@ -88,7 +88,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void createBookingWhenBooker1Item1ReturnId1() {
+    public void createBooking() {
         when(mockItemStorage.getReferenceById(anyLong())).thenReturn(item1);
         when(mockBookingStorage.save(any(Booking.class))).thenReturn(booking1);
         BookingResponseDto actualDto = bookingService.create(bookingReqDto1, br, 2L);
@@ -98,10 +98,11 @@ public class BookingServiceImplTest {
         assertEquals(actualDto.getStatus(), WAITING);
         assertEquals(actualDto.getStart(), date1);
         assertEquals(actualDto.getEnd(), date2);
+        verify(mockBookingStorage, times(1)).save(any(Booking.class));
     }
 
     @Test
-    public void createBookingWhenBookerNotFoundThrowException() {
+    public void createBookingBookerNotFound() {
         doThrow(new NotFoundException(USER_NOT_FOUND)).when(mockUserService).isExist(anyLong());
         NotFoundException actualException =
                 assertThrows(NotFoundException.class, () -> bookingService.create(bookingReqDto1, br, 1L));
@@ -109,7 +110,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void createBookingWhenItemNullThrowException() {
+    public void createBookingItemNotFound() {
         doThrow(new NotFoundException(ITEM_NOT_FOUND)).when(mockItemService).isExist(anyLong());
         NotFoundException actualException =
                 assertThrows(NotFoundException.class, () -> bookingService.create(bookingReqDto1, br, 1L));
@@ -117,7 +118,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void createBookingWhenBookerIdEqualsOwnerIdThrowException() {
+    public void createBookingBookerEqualsOwner() {
         item1.getOwner().setId(1L);
         when(mockItemStorage.getReferenceById(anyLong())).thenReturn(item1);
         NotFoundException actualException =
@@ -126,7 +127,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void createBookingWhenNotAvailableThrowException() {
+    public void createBookingItemNotAvailable() {
         doThrow(new ValidateException(ITEM_NOT_FOUND)).when(mockItemService).isItemAvailable(anyLong());
         ValidateException actualException =
                 assertThrows(ValidateException.class, () -> bookingService.create(bookingReqDto1, br, 2L));
@@ -134,23 +135,25 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void updateBookingWhenStatusTrueReturnApproved() {
+    public void updateBookingWhenStatusApproved() {
         when(mockBookingStorage.existsById(anyLong())).thenReturn(true);
         when(mockBookingStorage.getReferenceById(anyLong())).thenReturn(booking1);
         when(mockBookingStorage.save(any(Booking.class))).thenReturn(booking1);
         BookingResponseDto actualDto = bookingService.update(1L, 1L, "true");
         assertEquals(actualDto.getId(), 1L);
         assertEquals(actualDto.getStatus(), APPROVED);
+        verify(mockBookingStorage, times(1)).save(any(Booking.class));
     }
 
     @Test
-    public void updateBookingWhenStatusFalseReturnRejected() {
+    public void updateBookingWhenStatusRejected() {
         when(mockBookingStorage.existsById(anyLong())).thenReturn(true);
         when(mockBookingStorage.getReferenceById(anyLong())).thenReturn(booking1);
         when(mockBookingStorage.save(any(Booking.class))).thenReturn(booking1);
         BookingResponseDto actualDto = bookingService.update(1L, 1L, "false");
         assertEquals(actualDto.getId(), 1L);
         assertEquals(actualDto.getStatus(), REJECTED);
+        verify(mockBookingStorage, times(1)).save(any(Booking.class));
     }
 
     @Test
