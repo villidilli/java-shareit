@@ -206,7 +206,7 @@ public class BookingServiceImpl implements BookingService {
                 || endTime.equals(startTime)) throw new ValidateException(ENDTIME_BEFORE_STARTTIME);
     }
 
-    private void isBookerIsOwner(Long itemId, Long bookerId) throws NotFoundException {
+    public void isBookerIsOwner(Long itemId, Long bookerId) throws NotFoundException {
         log.debug("/isBookerIsOwner");
         Long itemOwnerId = itemStorage.getReferenceById(itemId).getOwner().getId();
         if (bookerId.equals(itemOwnerId)) throw new NotFoundException(BOOKER_IS_OWNER_ITEM);

@@ -4,6 +4,7 @@ import org.springframework.validation.BindingResult;
 
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
+import ru.practicum.shareit.exception.NotFoundException;
 
 import java.util.List;
 
@@ -13,6 +14,8 @@ public interface BookingService {
     BookingResponseDto update(Long bookingId, Long ownerId, String status);
 
     void isExist(Long bookingId);
+
+    void isBookerIsOwner(Long itemId, Long bookerId);
 
     BookingResponseDto getByUser(Long userId, Long bookingId);
 
