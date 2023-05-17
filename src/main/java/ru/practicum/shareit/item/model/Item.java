@@ -11,6 +11,7 @@ import javax.persistence.*;
  * TODO Sprint add-controllers.
  */
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 @EqualsAndHashCode
