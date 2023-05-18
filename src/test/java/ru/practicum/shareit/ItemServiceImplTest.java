@@ -1,9 +1,11 @@
 package ru.practicum.shareit;
 
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -13,6 +15,7 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.storage.BookingStorage;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDtoWithBooking;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.service.ItemServiceImpl;
@@ -52,10 +55,9 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.storage.UserStorage;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -96,12 +98,16 @@ public class ItemServiceImplTest {
     User owner1;
     User author1;
     ItemDto itemDto1;
+    ItemDto itemDtoUpdate;
     Comment comment;
     CommentDto commentDto;
     LocalDateTime date1;
+    LocalDateTime date2;
+    LocalDateTime dateNow;
     Item item1;
     BindingResult br;
     Map<String, String> map;
+    Booking booking1;
 
     @BeforeEach
     public void beforeEach() {
@@ -114,6 +120,8 @@ public class ItemServiceImplTest {
                                         mockRequestService,
                                         mockRequestStorage);
         date1 = LocalDateTime.of(2023, 5, 17, 0, 0);
+        date2 = LocalDateTime.of(2023, 5, 17, 6, 0);
+        dateNow = LocalDateTime.of(2023, 5, 18, 0, 0);
         owner1 = new User(1L, "user1 name", "user1@user.ru");
         author1 = new User(2L, "author1 name", "author1@author.ru");
         item1 = new Item(1L, owner1, "item1 name", "item1 desc", true, null);
@@ -125,8 +133,10 @@ public class ItemServiceImplTest {
                 true,
                 List.of(commentDto),
                 null);
+        itemDtoUpdate = new ItemDto();
+        itemDtoUpdate.setName("new name");
         br = new BindException(item1, null);
-        map = mockObjectMapper.convertValue(item1, Map.class);
+        booking1 = new Booking(1L, date1, date2, item1, author1, WAITING);
     }
 
     @Test
@@ -142,14 +152,71 @@ public class ItemServiceImplTest {
 
     @Test
     public void updateItem() {
-        itemDto1.setName("new Name");
         ObjectMapper objectMapper = new ObjectMapper();
         when(mockUserStorage.getReferenceById(anyLong())).thenReturn(owner1);
         when(mockItemStorage.findById(anyLong())).thenReturn(Optional.of(item1));
+        Map<String, String> mappp = objectMapper.convertValue(item1, Map.class);
+        when(mockObjectMapper.convertValue(any(Item.class), eq(Map.class))).thenReturn(mappp);
+        when(mockObjectMapper.convertValue(any(Map.class), eq(Item.class))).thenReturn(item1);
         when(mockItemStorage.save(any(Item.class))).thenReturn(item1);
         when(mockItemStorage.existsById(anyLong())).thenReturn(true);
-        ItemDto actualDto = itemService.update(item1.getId(), itemDto1, owner1.getId());
+        ItemDto actualDto = itemService.update(item1.getId(), itemDtoUpdate, owner1.getId());
         assertNotNull(actualDto);
         assertEquals(actualDto.getId(), item1.getId());
+        verify(mockItemStorage, times(1)).save(any(Item.class));
+    }
+
+    @Test
+    public void getByItemId() {
+        when(mockItemStorage.findById(anyLong())).thenReturn(Optional.of(item1));
+        when(mockItemStorage.existsById(anyLong())).thenReturn(true);
+        when(mockBookingStorage.findByItem_Owner_IdAndItem_Id(anyLong(), anyLong())).thenReturn(List.of(booking1));
+        ItemDtoWithBooking actualDto = itemService.get(item1.getId(), owner1.getId());
+        assertNotNull(actualDto);
+        assertEquals(item1.getId(), actualDto.getId());
+        assertNotNull(actualDto.getLastBooking());
+        assertEquals(booking1.getId(), actualDto.getLastBooking().getId());
+        assertNotNull(actualDto.getComments());
+        assertEquals(0, actualDto.getComments().size());
+    }
+
+    @Test
+    public void getByOwner() {
+        Page<Item> page = new PageImpl<>(List.of(item1));
+        when(mockItemStorage.findByOwnerId(owner1.getId(), PageRequest.of(0, 999))).thenReturn(page);
+        when(mockBookingStorage.findByItem_Owner_Id(anyLong())).thenReturn(List.of(booking1));
+        List<ItemDtoWithBooking> actualDto = itemService.getByOwner(owner1.getId(),
+                                                                    Integer.parseInt(DEFAULT_FIRST_PAGE),
+                                                                    Integer.parseInt(DEFAULT_SIZE_VIEW));
+        assertNotNull(actualDto);
+        assertEquals(1, actualDto.size());
+        assertEquals(item1.getId(), actualDto.get(0).getId());
+        assertNotNull(actualDto.get(0).getLastBooking());
+        assertEquals(booking1.getId(), actualDto.get(0).getLastBooking().getId());
+        assertNotNull(actualDto.get(0).getComments());
+    }
+
+    @Test
+    public void search() {
+        Page<Item> page = new PageImpl<>(List.of(item1));
+        when(mockItemStorage.findByNameContainsIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(
+                "item", "item", PageRequest.of(0, 999)))
+                .thenReturn(page);
+        List<ItemDto> actualDto = itemService.search("item",
+                                                     Integer.parseInt(DEFAULT_FIRST_PAGE),
+                                                     Integer.parseInt(DEFAULT_SIZE_VIEW));
+        assertNotNull(actualDto);
+        assertEquals(1, actualDto.size());
+        assertEquals(item1.getId(), actualDto.get(0).getId());
+        assertEquals(item1.getName(), actualDto.get(0).getName());
+    }
+
+    @Test
+    public void createComment() {
+        when(mockBookingStorage.countBookingsByBooker_IdAndItem_IdAndEndBefore(author1.getId(), item1.getId(), any())).thenReturn(1L);
+        when(mockItemStorage.existsById(item1.getId())).thenReturn(true);
+        when(mockItemStorage.findById(item1.getId())).thenReturn(Optional.of(item1));
+        CommentDto actualDto = itemService.createComment(commentDto, item1.getId(), author1.getId(), br);
+        assertNotNull(actualDto);
     }
 }

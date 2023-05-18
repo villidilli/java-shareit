@@ -173,7 +173,6 @@ public class ItemServiceImpl implements ItemService {
         if (itemStorage.findByIdAndAvailableIsTrue(itemId) == null) throw new ValidateException(ITEM_NOT_FOUND);
     }
 
-    @Override
     public void isOwnerOfItem(Long itemId, Long ownerId) throws NotFoundException {
         log.debug("/isOwnerOfItem");
         Long savedItemOwnerId = itemStorage.findById(itemId).get().getOwner().getId();
@@ -216,16 +215,14 @@ public class ItemServiceImpl implements ItemService {
 
     private Map<String, String> getFieldToUpdate(Item itemWithUpdate) {
         log.debug("/getFieldsToUpdate");
-        log.debug(itemWithUpdate + "item with update");
         Map<String, String> mapWithNullFields = objectMapper.convertValue(itemWithUpdate, Map.class);
-        log.debug(mapWithNullFields + "MAP NULL FIELDS");
         return mapWithNullFields.entrySet().stream()
                 .filter(entry -> entry.getValue() != null)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     private Map<Long, List<CommentDto>> getComments(List<Item> items) {
-        log.debug("/getCommentDtos");
+        log.debug("/getComments");
         List<Long> itemIds = items.stream().map(Item::getId).collect(Collectors.toList());
         List<Comment> allComments = commentStorage.findByItem_IdIn(itemIds);
         Map<Long, List<CommentDto>> result = new HashMap<>();
@@ -239,6 +236,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private Map<Long, Booking> getLastBookings(List<Booking> bookings, LocalDateTime currentTime) {
+        log.debug("/getLastBookings");
         Map<Long, Booking> lastBookings = new HashMap<>(); //key = itemId
         bookings.stream()
                 .filter(booking -> !booking.getStatus().equals(REJECTED))
@@ -252,6 +250,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private Map<Long, Booking> getNextBookings(List<Booking> bookings, LocalDateTime currentTime) {
+        log.debug("/getNextBookings");
         Map<Long, Booking> nextBooking = new HashMap<>(); //key = itemId
         bookings.stream()
                 .filter(booking -> !booking.getStatus().equals(REJECTED))
