@@ -34,7 +34,6 @@ public class ItemRequestDtoMapper {
 
     public static ItemRequestFullDto toItemRequestDtoWithItem(ItemRequest request, List<Item> items) {
         log.debug("/toItemRequestDtoWithItem");
-        log.debug("ПРИЛЕТЕЛИ ИТЕМЫ " + items);
         ItemRequestFullDto requestDto = new ItemRequestFullDto();
         requestDto.setId(request.getId());
         requestDto.setDescription(request.getDescription());
@@ -44,7 +43,6 @@ public class ItemRequestDtoMapper {
             itemShortDtos = items.stream()
                     .map(ItemRequestDtoMapper::toItemShortDto)
                     .collect(Collectors.toList());
-            log.debug("ИТЕМ САЙЗ = 0");
         }
         requestDto.setItems(itemShortDtos);
         return requestDto;
