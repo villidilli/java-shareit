@@ -25,6 +25,7 @@ import ru.practicum.shareit.user.model.User;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
@@ -32,7 +33,7 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static ru.practicum.shareit.exception.NotFoundException.ITEM_NOT_FOUND;
+import static ru.practicum.shareit.exception.NotFoundException.*;
 import static ru.practicum.shareit.item.controller.ItemController.PARAM_USER_ID;
 
 @WebMvcTest(controllers = ItemController.class)
@@ -70,6 +71,11 @@ public class ItemControllerTest {
         itemDto.setDescription("desc");
         itemDto.setComments(List.of(commentDto));
         itemDto.setAvailable(true);
+
+        itemDtoWithBooking = new ItemDtoWithBooking();
+        itemDtoWithBooking.setId(1L);
+        itemDtoWithBooking.setName("itemDtoWithBooking");
+        itemDtoWithBooking.setAvailable(true);
 
         br = new BindException(itemDto, null);
     }
@@ -186,5 +192,145 @@ public class ItemControllerTest {
                 .andExpect(jsonPath("$.id", is(expected.getId()), Long.class))
                 .andExpect(jsonPath("$.description", is(expected.getDescription())));
         verify(itemService,times(1)).update(any(), any(), any());
+    }
+
+    @SneakyThrows
+    @Test
+    public void updateItem_whenItemNotFound_thenNotFoundExceptionThrow() {
+        when(itemService.update(any(), any(), any())).thenThrow(new NotFoundException(ITEM_NOT_FOUND));
+
+        mockMvc.perform(MockMvcRequestBuilders.patch("/items/{itemId}", itemDto.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(itemDto))
+                        .header(PARAM_USER_ID, user.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .characterEncoding(StandardCharsets.UTF_8))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errorClass", containsStringIgnoringCase("NotFoundException")))
+                .andExpect(jsonPath("$.error", containsStringIgnoringCase("Item not found")));
+        verify(itemService,times(1)).update(any(), any(), any());
+    }
+
+    @SneakyThrows
+    @Test
+    public void updateItem_whenUserNotOwnerItem_thenNotFoundExceptionThrow() {
+        when(itemService.update(any(), any(), any())).thenThrow(new NotFoundException(OWNER_NOT_MATCH_ITEM));
+
+        mockMvc.perform(MockMvcRequestBuilders.patch("/items/{itemId}", itemDto.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(itemDto))
+                        .header(PARAM_USER_ID, user.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .characterEncoding(StandardCharsets.UTF_8))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errorClass", containsStringIgnoringCase("NotFoundException")))
+                .andExpect(jsonPath("$.error", containsStringIgnoringCase("Owner does not match")));
+        verify(itemService,times(1)).update(any(), any(), any());
+    }
+
+    @SneakyThrows
+    @Test
+    public void getById_thenReturnItem() {
+        when(itemService.get(any(), any())).thenReturn(itemDtoWithBooking);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/items/{itemId}", itemDto.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header(PARAM_USER_ID, user.getId())
+                    .accept(MediaType.APPLICATION_JSON)
+                    .characterEncoding(StandardCharsets.UTF_8))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name", is("itemDtoWithBooking")));
+        verify(itemService, times(1)).get(any(), any());
+    }
+
+    @SneakyThrows
+    @Test
+    public void getById_whenItemNotFound_thenNotFoundExceptionThrow() {
+        when(itemService.get(any(), any())).thenThrow(new NotFoundException(ITEM_NOT_FOUND));
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/items/{itemId}", itemDto.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header(PARAM_USER_ID, user.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .characterEncoding(StandardCharsets.UTF_8))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errorClass", containsStringIgnoringCase("NotFoundException")))
+                .andExpect(jsonPath("$.error", containsStringIgnoringCase("Item not found")));
+        verify(itemService, times(1)).get(any(), any());
+    }
+
+    @SneakyThrows
+    @Test
+    public void getById_whenUserIdNotInput_whenValidateExceptionThrow() {
+        mockMvc.perform(MockMvcRequestBuilders.get("/items/{itemId}", itemDto.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .characterEncoding(StandardCharsets.UTF_8))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorClass", containsStringIgnoringCase("ValidateException")))
+                .andExpect(jsonPath("$.error", containsStringIgnoringCase("X-Sharer-User-Id")));
+        verify(itemService, never()).get(any(), any());
+    }
+
+    @SneakyThrows
+    @Test
+    public void getByOwner_whenDefaultFromSize_thenReturnListItems() {
+        when(itemService.getByOwner(any(), any(), any())).thenReturn(List.of(itemDtoWithBooking));
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/items")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header(PARAM_USER_ID, user.getId())
+                    .accept(MediaType.APPLICATION_JSON)
+                    .characterEncoding(StandardCharsets.UTF_8))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()", is(1)))
+                .andExpect(jsonPath("$.[0].name", is(itemDtoWithBooking.getName())));
+        verify(itemService, times(1)).getByOwner(any(), any(), any());
+    }
+
+    @SneakyThrows
+    @Test
+    public void getByOwner_whenUserNotFound_thenNotFoundExceptionThrow() {
+        when(itemService.getByOwner(any(), any(), any())).thenThrow(new NotFoundException(USER_NOT_FOUND));
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/items")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header(PARAM_USER_ID, user.getId())
+                    .accept(MediaType.APPLICATION_JSON)
+                    .characterEncoding(StandardCharsets.UTF_8))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errorClass", containsStringIgnoringCase("NotFoundException")))
+                .andExpect(jsonPath("$.error", containsStringIgnoringCase("User not found")));
+        verify(itemService, times(1)).getByOwner(any(), any(), any());
+    }
+
+    @SneakyThrows
+    @Test
+    public void search_whenDefaultPage_thenReturnListItem() {
+        when(itemService.search(any(), any(), any())).thenReturn(List.of(itemDto));
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/items/search")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .param("text", "textForFind")
+                    .accept(MediaType.APPLICATION_JSON)
+                    .characterEncoding(StandardCharsets.UTF_8))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()", is(1)))
+                .andExpect(jsonPath("$.[0].name", is(itemDto.getName())));
+        verify(itemService, times(1)).search(any(), any(), any());
+    }
+
+    @SneakyThrows
+    @Test
+    public void search_whenTextBlank_thenReturnEmptyList() {
+        when(itemService.search(any(), any(), any())).thenReturn(Collections.emptyList());
+        mockMvc.perform(MockMvcRequestBuilders.get("/items/search")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("text", "")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .characterEncoding(StandardCharsets.UTF_8))
+                .andExpect(status().isOk());
+
+        verify(itemService, times(1)).search(any(), any(), any());
     }
 }
