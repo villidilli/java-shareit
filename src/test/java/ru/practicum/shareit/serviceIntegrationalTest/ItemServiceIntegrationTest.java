@@ -1,7 +1,6 @@
-package ru.practicum.shareit.ServiceIntegrationalTest;
+package ru.practicum.shareit.serviceIntegrationalTest;
 
 import lombok.RequiredArgsConstructor;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -82,7 +81,7 @@ public class ItemServiceIntegrationTest {
         CommentDto comment = new CommentDto(null, "text", savedUser1.getName(), LocalDateTime.now());
         CommentDto savedComment = itemService.createComment(comment, savedItem3.getId(), savedUser1.getId(), new BindException(comment, null));
 
-        List<ItemDtoWithBooking> actual = itemService.getByOwner(1L, 2, 1);
+        List<ItemDtoWithBooking> actual = itemService.getByOwner(savedOwner1.getId(), 2, 1);
         assertEquals(1, actual.size());
         ItemDtoWithBooking actualItem = actual.get(0);
         assertNotNull(savedItem3.getId());
