@@ -1,4 +1,4 @@
-package ru.practicum.shareit.ServiceTest;
+package ru.practicum.shareit.ServiceUnitTest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,7 +19,6 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.service.ItemServiceImpl;
 import ru.practicum.shareit.item.storage.CommentStorage;
 import ru.practicum.shareit.item.storage.ItemStorage;
-import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.service.ItemRequestService;
 import ru.practicum.shareit.request.storage.ItemRequestStorage;
 import ru.practicum.shareit.user.service.UserService;
