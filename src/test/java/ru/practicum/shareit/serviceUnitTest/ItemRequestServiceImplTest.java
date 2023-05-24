@@ -3,12 +3,15 @@ package ru.practicum.shareit.serviceUnitTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import org.springframework.data.domain.*;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
+
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.storage.ItemStorage;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
@@ -39,9 +42,6 @@ public class ItemRequestServiceImplTest {
     ItemStorage itemStorage;
     @Mock
     ItemRequestStorage requestStorage;
-    @Mock
-    ItemRequestServiceImpl mockRequestService;
-
     @InjectMocks
     ItemRequestServiceImpl requestService;
 
@@ -59,7 +59,7 @@ public class ItemRequestServiceImplTest {
                 new ItemRequestDto(1L, "desc", date1);
         br = new BindException(requestDto1, null);
         request = new ItemRequest(1L, "desc", user1, date1);
-    };
+    }
 
     @Test
     public void createRequest_thenReturnCreatedRequest() {

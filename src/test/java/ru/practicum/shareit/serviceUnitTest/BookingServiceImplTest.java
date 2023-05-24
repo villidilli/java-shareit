@@ -91,7 +91,9 @@ public class BookingServiceImplTest {
     public void createBooking() {
         when(mockItemStorage.getReferenceById(anyLong())).thenReturn(item1);
         when(mockBookingStorage.save(any(Booking.class))).thenReturn(booking1);
+
         BookingResponseDto actualDto = bookingService.create(bookingReqDto1, br, 2L);
+
         assertEquals(actualDto.getId(), 1L);
         assertEquals(actualDto.getItem().getId(), 1L);
         assertEquals(actualDto.getBooker().getId(), 2L);
@@ -104,16 +106,20 @@ public class BookingServiceImplTest {
     @Test
     public void createBookingBookerNotFound() {
         doThrow(new NotFoundException(USER_NOT_FOUND)).when(mockUserService).isExist(anyLong());
+
         NotFoundException actualException =
                 assertThrows(NotFoundException.class, () -> bookingService.create(bookingReqDto1, br, 1L));
+
         assertEquals(actualException.getMessage(), USER_NOT_FOUND);
     }
 
     @Test
     public void createBookingItemNotFound() {
         doThrow(new NotFoundException(ITEM_NOT_FOUND)).when(mockItemService).isExist(anyLong());
+
         NotFoundException actualException =
                 assertThrows(NotFoundException.class, () -> bookingService.create(bookingReqDto1, br, 1L));
+
         assertEquals(actualException.getMessage(), ITEM_NOT_FOUND);
     }
 
@@ -121,16 +127,20 @@ public class BookingServiceImplTest {
     public void createBookingBookerEqualsOwner() {
         item1.getOwner().setId(1L);
         when(mockItemStorage.getReferenceById(anyLong())).thenReturn(item1);
+
         NotFoundException actualException =
                 assertThrows(NotFoundException.class, () -> bookingService.create(bookingReqDto1, br, 1L));
+
         assertEquals(actualException.getMessage(), BOOKER_IS_OWNER_ITEM);
     }
 
     @Test
     public void createBookingItemNotAvailable() {
         doThrow(new ValidateException(ITEM_NOT_FOUND)).when(mockItemService).isItemAvailable(anyLong());
+
         ValidateException actualException =
                 assertThrows(ValidateException.class, () -> bookingService.create(bookingReqDto1, br, 2L));
+
         assertEquals(actualException.getMessage(), ITEM_NOT_FOUND);
     }
 
@@ -139,7 +149,9 @@ public class BookingServiceImplTest {
         when(mockBookingStorage.existsById(anyLong())).thenReturn(true);
         when(mockBookingStorage.getReferenceById(anyLong())).thenReturn(booking1);
         when(mockBookingStorage.save(any(Booking.class))).thenReturn(booking1);
+
         BookingResponseDto actualDto = bookingService.update(1L, 1L, "true");
+
         assertEquals(actualDto.getId(), 1L);
         assertEquals(actualDto.getStatus(), APPROVED);
         verify(mockBookingStorage, times(1)).save(any(Booking.class));
@@ -150,7 +162,9 @@ public class BookingServiceImplTest {
         when(mockBookingStorage.existsById(anyLong())).thenReturn(true);
         when(mockBookingStorage.getReferenceById(anyLong())).thenReturn(booking1);
         when(mockBookingStorage.save(any(Booking.class))).thenReturn(booking1);
+
         BookingResponseDto actualDto = bookingService.update(1L, 1L, "false");
+
         assertEquals(actualDto.getId(), 1L);
         assertEquals(actualDto.getStatus(), REJECTED);
         verify(mockBookingStorage, times(1)).save(any(Booking.class));
@@ -159,15 +173,15 @@ public class BookingServiceImplTest {
     @Test
     public void getAllByBookerStateAllReturnPageEmpty() {
         Page<Booking> pageFromDb = Page.empty();
-        when(mockBookingStorage.findAllByBooker_Id(anyLong(), any(Pageable.class)))
-                .thenReturn(pageFromDb);
+        when(mockBookingStorage.findAllByBooker_Id(anyLong(), any(Pageable.class))).thenReturn(pageFromDb);
+
         List<BookingResponseDto> actualDtos = bookingService.getAllByBooker(2L,
                 DEFAULT_BOOKING_STATE,
                 Integer.parseInt(DEFAULT_FIRST_PAGE),
                 Integer.parseInt(DEFAULT_SIZE_VIEW));
+
         assertEquals(actualDtos.size(), pageFromDb.getTotalElements());
-        verify(mockBookingStorage, times(1))
-                .findAllByBooker_Id(anyLong(), any(Pageable.class));
+        verify(mockBookingStorage, times(1)).findAllByBooker_Id(anyLong(), any(Pageable.class));
     }
 
     @Test
@@ -178,8 +192,10 @@ public class BookingServiceImplTest {
                                                                                 any(LocalDateTime.class),
                                                                                 any(Pageable.class)))
                 .thenReturn(pageFromDb);
+
         List<BookingResponseDto> actyalDtos =
                 bookingService.getAllByBooker(booker1.getId(), String.valueOf(CURRENT), 0, 5);
+
         assertEquals(actyalDtos.size(), pageFromDb.toList().size());
         assertEquals(actyalDtos.get(0).getId(), pageFromDb.toList().get(0).getId());
         verify(mockBookingStorage, times(1)).findAllByBooker_IdAndStartIsBeforeAndEndIsAfter(
@@ -196,10 +212,12 @@ public class BookingServiceImplTest {
                                                                 any(LocalDateTime.class),
                                                                 any(Pageable.class)))
                 .thenReturn(pageFromDb);
-        List<BookingResponseDto> actyalDtos =
+
+        List<BookingResponseDto> actualDtos =
                 bookingService.getAllByBooker(booker1.getId(), String.valueOf(PAST), 0, 5);
-        assertEquals(actyalDtos.size(), pageFromDb.toList().size());
-        assertEquals(actyalDtos.get(0).getId(), pageFromDb.toList().get(0).getId());
+
+        assertEquals(actualDtos.size(), pageFromDb.toList().size());
+        assertEquals(actualDtos.get(0).getId(), pageFromDb.toList().get(0).getId());
         verify(mockBookingStorage, times(1)).findAllByBooker_idAndEndIsBefore(
                                                                                             anyLong(),
                                                                                             any(LocalDateTime.class),
@@ -213,8 +231,10 @@ public class BookingServiceImplTest {
                                                                 any(LocalDateTime.class),
                                                                 any(Pageable.class)))
                 .thenReturn(pageFromDb);
+
         List<BookingResponseDto> actyalDtos =
                 bookingService.getAllByBooker(booker1.getId(), String.valueOf(FUTURE), 0, 5);
+
         assertEquals(actyalDtos.size(), pageFromDb.toList().size());
         assertEquals(actyalDtos.get(0).getId(), pageFromDb.toList().get(0).getId());
         verify(mockBookingStorage, times(1)).findAllByBooker_idAndStartIsAfter(
@@ -228,8 +248,10 @@ public class BookingServiceImplTest {
         Page<Booking> pageFromDb = new PageImpl<>(List.of(booking1));
         when(mockBookingStorage.findAllByBooker_IdAndStatusIs(anyLong(), any(BookingStatus.class), any(Pageable.class)))
                 .thenReturn(pageFromDb);
+
         List<BookingResponseDto> actyalDtos =
                 bookingService.getAllByBooker(booker1.getId(), String.valueOf(WAITING), 0, 5);
+
         assertEquals(actyalDtos.size(), pageFromDb.toList().size());
         assertEquals(actyalDtos.get(0).getId(), pageFromDb.toList().get(0).getId());
         verify(mockBookingStorage, times(1)).findAllByBooker_IdAndStatusIs(
@@ -243,8 +265,10 @@ public class BookingServiceImplTest {
         Page<Booking> pageFromDb = new PageImpl<>(List.of(booking1));
         when(mockBookingStorage.findAllByBooker_IdAndStatusIs(anyLong(), any(BookingStatus.class), any(Pageable.class)))
                 .thenReturn(pageFromDb);
+
         List<BookingResponseDto> actyalDtos =
                 bookingService.getAllByBooker(booker1.getId(), String.valueOf(REJECTED), 0, 5);
+
         assertEquals(actyalDtos.size(), pageFromDb.toList().size());
         assertEquals(actyalDtos.get(0).getId(), pageFromDb.toList().get(0).getId());
         verify(mockBookingStorage, times(1)).findAllByBooker_IdAndStatusIs(
@@ -258,10 +282,12 @@ public class BookingServiceImplTest {
         Page<Booking> pageFromDb = Page.empty();
         when(mockBookingStorage.findAllByItem_Owner_Id(anyLong(), any(Pageable.class)))
                 .thenReturn(pageFromDb);
+
         List<BookingResponseDto> actualDtos = bookingService.getAllByOwner(2L,
                                                                                 DEFAULT_BOOKING_STATE,
                                                                                 Integer.parseInt(DEFAULT_FIRST_PAGE),
                                                                                 Integer.parseInt(DEFAULT_SIZE_VIEW));
+
         assertEquals(actualDtos.size(), pageFromDb.getTotalElements());
         verify(mockBookingStorage, times(1))
                 .findAllByItem_Owner_Id(anyLong(), any(Pageable.class));
@@ -275,10 +301,12 @@ public class BookingServiceImplTest {
                                                                                     any(LocalDateTime.class),
                                                                                     any(Pageable.class)))
                 .thenReturn(pageFromDb);
-        List<BookingResponseDto> actyalDtos =
+
+        List<BookingResponseDto> actualDtos =
                 bookingService.getAllByOwner(booker1.getId(), String.valueOf(CURRENT), 0, 5);
-        assertEquals(actyalDtos.size(), pageFromDb.toList().size());
-        assertEquals(actyalDtos.get(0).getId(), pageFromDb.toList().get(0).getId());
+
+        assertEquals(actualDtos.size(), pageFromDb.toList().size());
+        assertEquals(actualDtos.get(0).getId(), pageFromDb.toList().get(0).getId());
         verify(mockBookingStorage, times(1))
                 .findAllByItem_Owner_IdAndStartIsBeforeAndEndIsAfter(anyLong(),
                                                                     any(LocalDateTime.class),
@@ -293,8 +321,10 @@ public class BookingServiceImplTest {
                                                                     any(LocalDateTime.class),
                                                                     any(Pageable.class)))
                 .thenReturn(pageFromDb);
+
         List<BookingResponseDto> actyalDtos =
                 bookingService.getAllByOwner(booker1.getId(), String.valueOf(PAST), 0, 5);
+
         assertEquals(actyalDtos.size(), pageFromDb.toList().size());
         assertEquals(actyalDtos.get(0).getId(), pageFromDb.toList().get(0).getId());
         verify(mockBookingStorage, times(1)).findAllByItem_Owner_IdAndEndIsBefore(
@@ -310,8 +340,10 @@ public class BookingServiceImplTest {
                                                                     any(LocalDateTime.class),
                                                                     any(Pageable.class)))
                 .thenReturn(pageFromDb);
+
         List<BookingResponseDto> actyalDtos =
                 bookingService.getAllByOwner(booker1.getId(), String.valueOf(FUTURE), 0, 5);
+
         assertEquals(actyalDtos.size(), pageFromDb.toList().size());
         assertEquals(actyalDtos.get(0).getId(), pageFromDb.toList().get(0).getId());
         verify(mockBookingStorage, times(1)).findAllByItem_Owner_IdAndStartIsAfter(
@@ -327,8 +359,10 @@ public class BookingServiceImplTest {
                                                                 any(BookingStatus.class),
                                                                 any(Pageable.class)))
                 .thenReturn(pageFromDb);
+
         List<BookingResponseDto> actyalDtos =
                 bookingService.getAllByOwner(booker1.getId(), String.valueOf(WAITING), 0, 5);
+
         assertEquals(actyalDtos.size(), pageFromDb.toList().size());
         assertEquals(actyalDtos.get(0).getId(), pageFromDb.toList().get(0).getId());
         verify(mockBookingStorage, times(1)).findAllByItem_Owner_IdAndStatusIs(
@@ -344,8 +378,10 @@ public class BookingServiceImplTest {
                                                                 any(BookingStatus.class),
                                                                 any(Pageable.class)))
                 .thenReturn(pageFromDb);
+
         List<BookingResponseDto> actyalDtos =
                 bookingService.getAllByOwner(booker1.getId(), String.valueOf(REJECTED), 0, 5);
+
         assertEquals(actyalDtos.size(), pageFromDb.toList().size());
         assertEquals(actyalDtos.get(0).getId(), pageFromDb.toList().get(0).getId());
         verify(mockBookingStorage, times(1)).findAllByItem_Owner_IdAndStatusIs(

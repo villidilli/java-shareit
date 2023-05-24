@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.Page;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
+
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.storage.ItemRequestStorage;
 import ru.practicum.shareit.user.model.User;
@@ -40,10 +42,12 @@ public class ItemRequestStorageTest {
     ItemRequest request2;
     ItemRequest request3;
     ItemRequest request4;
+
     ItemRequest savedRequest1;
     ItemRequest savedRequest2;
     ItemRequest savedRequest3;
     ItemRequest savedRequest4;
+
     Pageable page;
 
     @BeforeEach
@@ -66,6 +70,7 @@ public class ItemRequestStorageTest {
     @Test
     public void findByRequester_Id() {
         List<ItemRequest> actual = requestStorage.findByRequester_Id(savedRequester1.getId(), Sort.unsorted());
+
         assertNotNull(actual);
         assertEquals(3, actual.size());
         assertEquals(savedRequest1.getId(), actual.get(0).getId());
@@ -76,7 +81,9 @@ public class ItemRequestStorageTest {
     @Test
     public void findByRequester_IdNot() {
         page = PageRequest.of(2, 1);
+
         Page<ItemRequest> actual = requestStorage.findByRequester_IdNot(savedRequester2.getId(), page);
+
         assertNotNull(actual);
         assertEquals(1, actual.toList().size());
         assertEquals(savedRequest3.getId(), actual.toList().get(0).getId());
@@ -85,6 +92,7 @@ public class ItemRequestStorageTest {
     @Test
     public void findByIdIs() {
         ItemRequest actual = requestStorage.findByIdIs(savedRequest2.getId());
+
         assertNotNull(actual);
         assertEquals(savedRequest2.getId(), actual.getId());
         assertEquals(savedRequest2.getRequester().getId(), actual.getRequester().getId());

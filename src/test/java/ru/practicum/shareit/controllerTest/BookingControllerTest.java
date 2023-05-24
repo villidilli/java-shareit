@@ -5,7 +5,9 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -14,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
+
 import ru.practicum.shareit.booking.controller.BookingController;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
@@ -110,8 +113,10 @@ public class BookingControllerTest {
                         .accept(MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.errorClass", containsStringIgnoringCase("NotFoundException")))
-                .andExpect(jsonPath("$.error", containsStringIgnoringCase("User not found")));
+                .andExpect(jsonPath("$.errorClass",
+                        containsStringIgnoringCase("NotFoundException")))
+                .andExpect(jsonPath("$.error",
+                        containsStringIgnoringCase("User not found")));
         verify(bookingService, times(1)).create(any(), any(), any());
     }
 
@@ -124,8 +129,10 @@ public class BookingControllerTest {
                         .accept(MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errorClass", containsStringIgnoringCase("ValidateException")))
-                .andExpect(jsonPath("$.error", containsStringIgnoringCase("X-Sharer-User-Id")));
+                .andExpect(jsonPath("$.errorClass",
+                        containsStringIgnoringCase("ValidateException")))
+                .andExpect(jsonPath("$.error",
+                        containsStringIgnoringCase("X-Sharer-User-Id")));
         verify(bookingService, never()).create(any(), any(), any());
     }
 
@@ -159,8 +166,10 @@ public class BookingControllerTest {
                         .accept(MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.errorClass", containsStringIgnoringCase("NotFoundException")))
-                .andExpect(jsonPath("$.error", containsStringIgnoringCase("Booking not found")));
+                .andExpect(jsonPath("$.errorClass",
+                        containsStringIgnoringCase("NotFoundException")))
+                .andExpect(jsonPath("$.error",
+                        containsStringIgnoringCase("Booking not found")));
         verify(bookingService, times(1)).update(any(), any(), any());
     }
 
@@ -174,8 +183,10 @@ public class BookingControllerTest {
                         .accept(MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errorClass", containsStringIgnoringCase("ValidateException")))
-                .andExpect(jsonPath("$.error", containsStringIgnoringCase("X-Sharer-User-Id")));
+                .andExpect(jsonPath("$.errorClass",
+                        containsStringIgnoringCase("ValidateException")))
+                .andExpect(jsonPath("$.error",
+                        containsStringIgnoringCase("X-Sharer-User-Id")));
         verify(bookingService, never()).update(any(), any(), any());
     }
 
@@ -189,8 +200,10 @@ public class BookingControllerTest {
                         .accept(MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errorClass", containsStringIgnoringCase("ValidateException")))
-                .andExpect(jsonPath("$.error", containsStringIgnoringCase("Status")));
+                .andExpect(jsonPath("$.errorClass",
+                        containsStringIgnoringCase("ValidateException")))
+                .andExpect(jsonPath("$.error",
+                        containsStringIgnoringCase("Status")));
         verify(bookingService, never()).update(any(), any(), any());
     }
 
@@ -220,8 +233,10 @@ public class BookingControllerTest {
                         .accept(MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.errorClass", containsStringIgnoringCase("NotFoundException")))
-                .andExpect(jsonPath("$.error", containsStringIgnoringCase("Booking not found")));
+                .andExpect(jsonPath("$.errorClass",
+                        containsStringIgnoringCase("NotFoundException")))
+                .andExpect(jsonPath("$.error",
+                        containsStringIgnoringCase("Booking not found")));
         verify(bookingService, times(1)).getByUser(any(), any());
     }
 
@@ -233,8 +248,10 @@ public class BookingControllerTest {
                         .accept(MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errorClass", containsStringIgnoringCase("ValidateException")))
-                .andExpect(jsonPath("$.error", containsStringIgnoringCase("X-Sharer-User-Id")));
+                .andExpect(jsonPath("$.errorClass",
+                        containsStringIgnoringCase("ValidateException")))
+                .andExpect(jsonPath("$.error",
+                        containsStringIgnoringCase("X-Sharer-User-Id")));
         verify(bookingService, never()).getByUser(any(), any());
     }
 

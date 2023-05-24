@@ -5,7 +5,9 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -14,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
+
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.controller.UserController;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -53,6 +56,7 @@ public class UserControllerTest {
     @Test
     public void getUserById_thenReturnUser() {
         Long userID = 1L;
+
         when(userService.get(any(Long.class))).thenReturn(userDto);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/users/{userId}", userID))
@@ -93,7 +97,7 @@ public class UserControllerTest {
 
     @SneakyThrows
     @Test
-    public void upadateUser_thenReturnUser() {
+    public void updateUser_thenReturnUser() {
         UserDto expectedUser = new UserDto();
         expectedUser.setId(userDto.getId());
         expectedUser.setEmail(userDto.getEmail());

@@ -4,12 +4,14 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
+
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.ItemStorage;
 import ru.practicum.shareit.request.model.ItemRequest;
@@ -77,14 +79,14 @@ public class ItemStorageTest {
         savedItem1 = itemStorage.save(item1);
         savedItem2 = itemStorage.save(item2);
         savedItem3 = itemStorage.save(item3);
-
-
     }
 
     @Test
     public void findByOwnerId() {
         page = PageRequest.of(1, 1);
+
         Page<Item> actualPage = itemStorage.findByOwnerId(savedOwner1.getId(), page);
+
         assertNotNull(actualPage);
         List<Item> actualList = actualPage.toList();
         assertEquals(1, actualList.size());
@@ -94,9 +96,11 @@ public class ItemStorageTest {
     @Test
     public void findByNameContainsIgnoreCaseOrDescriptionContainingIgnoreCase () {
         page = PageRequest.of(0, 5);
+
         Page<Item> actualPage =
                 itemStorage.findByNameContainsIgnoreCaseOrDescriptionContainingIgnoreCase
                                                         ("item", "item", page);
+
         assertNotNull(actualPage);
         List<Item> actualList = actualPage.toList();
         assertEquals(2, actualList.size());
@@ -107,6 +111,7 @@ public class ItemStorageTest {
     @Test
     public void findByIdAndAvailableIsTrue() {
         Item actual = itemStorage.findByIdAndAvailableIsTrue(savedItem1.getId());
+
         assertNotNull(actual);
         assertEquals(savedItem1.getId(), actual.getId());
     }

@@ -6,18 +6,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindException;
+
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.booking.storage.BookingStorage;
+
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoWithBooking;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.storage.CommentStorage;
 import ru.practicum.shareit.item.storage.ItemStorage;
+
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.service.ItemRequestService;
+
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.storage.UserStorage;
@@ -60,11 +64,16 @@ public class ItemServiceIntegrationTest {
         ItemRequestDto request = new ItemRequestDto(null, "desc", LocalDateTime.now());
         ItemRequestDto savedRequest = requestService.create(request, new BindException(request, null), savedUser1.getId());
 
-        ItemDto item1 = new ItemDto(null, "item1", "desc", true, null, null);
-        ItemDto item2 = new ItemDto(null, "item2", "desc", false, null, null);
-        ItemDto item3 = new ItemDto(null, "item3", "desc", true, null, savedRequest.getId());
-        ItemDto item4 = new ItemDto(null, "item4", "desc", true, null, null);
-        ItemDto item5 = new ItemDto(null, "item5", "desc", true, null, null);
+        ItemDto item1 =
+                new ItemDto(null, "item1", "desc", true, null, null);
+        ItemDto item2 =
+                new ItemDto(null, "item2", "desc", false, null, null);
+        ItemDto item3 =
+                new ItemDto(null, "item3", "desc", true, null, savedRequest.getId());
+        ItemDto item4 =
+                new ItemDto(null, "item4", "desc", true, null, null);
+        ItemDto item5 =
+                new ItemDto(null, "item5", "desc", true, null, null);
 
         ItemDto savedItem1 = itemService.create(item1, new BindException(item1, null), savedOwner1.getId());
         ItemDto savedItem2 = itemService.create(item2, new BindException(item2, null), savedOwner1.getId());
@@ -72,16 +81,22 @@ public class ItemServiceIntegrationTest {
         ItemDto savedItem4 = itemService.create(item4, new BindException(item4, null), savedOwner1.getId());
         ItemDto savedItem5 = itemService.create(item5, new BindException(item5, null), savedOwner1.getId());
 
-        BookingRequestDto booking1 = new BookingRequestDto(savedItem3.getId(), LocalDateTime.now().minusHours(12), LocalDateTime.now().minusHours(1));
-        BookingRequestDto booking2 = new BookingRequestDto(savedItem3.getId(), LocalDateTime.now().plusMinutes(1), LocalDateTime.now().plusHours(1));
+        BookingRequestDto booking1 = new BookingRequestDto(
+                savedItem3.getId(), LocalDateTime.now().minusHours(12), LocalDateTime.now().minusHours(1));
+        BookingRequestDto booking2 = new BookingRequestDto(
+                savedItem3.getId(), LocalDateTime.now().plusMinutes(1), LocalDateTime.now().plusHours(1));
 
-        BookingResponseDto savedBooking1 = bookingService.create(booking1, new BindException(booking1, null), savedUser1.getId());
-        BookingResponseDto savedBooking2 = bookingService.create(booking2, new BindException(booking2, null), savedUser1.getId());
+        BookingResponseDto savedBooking1 = bookingService.create(
+                booking1, new BindException(booking1, null), savedUser1.getId());
+        BookingResponseDto savedBooking2 = bookingService.create(
+                booking2, new BindException(booking2, null), savedUser1.getId());
 
         CommentDto comment = new CommentDto(null, "text", savedUser1.getName(), LocalDateTime.now());
-        CommentDto savedComment = itemService.createComment(comment, savedItem3.getId(), savedUser1.getId(), new BindException(comment, null));
+        CommentDto savedComment = itemService.createComment(
+                comment, savedItem3.getId(), savedUser1.getId(), new BindException(comment, null));
 
         List<ItemDtoWithBooking> actual = itemService.getByOwner(savedOwner1.getId(), 2, 1);
+
         assertEquals(1, actual.size());
         ItemDtoWithBooking actualItem = actual.get(0);
         assertNotNull(savedItem3.getId());

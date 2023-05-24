@@ -7,7 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
@@ -72,7 +71,6 @@ public class CommentStorageTest {
     LocalDateTime now;
     LocalDateTime anyStart;
     LocalDateTime anyEnd;
-    Pageable page;
 
     @BeforeEach
     public void beforeEach() {
@@ -121,7 +119,9 @@ public class CommentStorageTest {
     @Test
     public void findByItem_IdIn() {
         List<Long> idsForSearch = List.of(savedItem2.getId(), savedItem1.getId());
+
         List<Comment> actual = commentStorage.findByItem_IdIn(idsForSearch);
+
         Assertions.assertNotNull(actual);
         Assertions.assertEquals(2, actual.size());
         Assertions.assertEquals(savedComment1.getId(), actual.get(0).getId());

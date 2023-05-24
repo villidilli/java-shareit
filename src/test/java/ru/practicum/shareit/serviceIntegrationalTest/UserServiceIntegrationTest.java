@@ -3,11 +3,13 @@ package ru.practicum.shareit.serviceIntegrationalTest;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
+
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -32,6 +34,7 @@ public class UserServiceIntegrationTest {
         userDto1 = new UserDto(null,"user1", "user1@email.ru");
         br = new BindException(userDto, null);
     }
+
     @Test
     public void getAllUsers_thenReturnListUsers() {
         userService.create(userDto, br);

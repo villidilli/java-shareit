@@ -1,9 +1,11 @@
 package ru.practicum.shareit.dtoTest;
 
 import org.junit.jupiter.api.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
+
 import ru.practicum.shareit.item.dto.CommentDto;
 
 import java.io.IOException;
@@ -17,9 +19,10 @@ public class CommentDtoTest {
 
     @Test
     public void jsonToDto() throws IOException {
-        String request = "{\"text\":\"comment\"}";
+        String body = "{\"text\":\"comment\"}";
 
-        CommentDto dto = json.parse(request).getObject();
+        CommentDto dto = json.parse(body).getObject();
+
         assertNotNull(dto);
         assertEquals("comment", dto.getText());
         assertNull(dto.getAuthorName());

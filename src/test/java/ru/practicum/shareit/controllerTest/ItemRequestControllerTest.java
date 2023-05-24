@@ -5,7 +5,9 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -15,6 +17,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
+
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.request.controller.ItemRequestController;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
@@ -55,11 +58,14 @@ public class ItemRequestControllerTest {
     @BeforeEach
     public void beforeEach() {
         userId = 1L;
+
         requestDto = new ItemRequestDto();
         requestDto.setId(1L);
         requestDto.setDescription("desc");
         requestDto.setCreated(LocalDateTime.now());
+
         br = new BindException(requestDto, null);
+
         requestFullDto = new ItemRequestFullDto();
         requestFullDto.setId(requestDto.getId());
         requestFullDto.setCreated(LocalDateTime.now());
@@ -98,7 +104,7 @@ public class ItemRequestControllerTest {
                     .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.error",
-                                                            containsStringIgnoringCase("user not found")));
+                        containsStringIgnoringCase("user not found")));
         verify(requestService, times(1))
                 .create(any(ItemRequestDto.class), any(BindingResult.class), anyLong());
     }
@@ -160,8 +166,10 @@ public class ItemRequestControllerTest {
                         .accept(MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errorClass", containsStringIgnoringCase("validateException")))
-                .andExpect(jsonPath("$.error", containsStringIgnoringCase("incorrectly")));
+                .andExpect(jsonPath("$.errorClass",
+                        containsStringIgnoringCase("validateException")))
+                .andExpect(jsonPath("$.error",
+                        containsStringIgnoringCase("incorrectly")));
         verify(requestService, never()).getAllNotOwn(anyLong(), anyInt(), anyInt());
     }
 
@@ -175,8 +183,10 @@ public class ItemRequestControllerTest {
                         .accept(MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errorClass", containsStringIgnoringCase("validateException")))
-                .andExpect(jsonPath("$.error", containsStringIgnoringCase("incorrectly")));
+                .andExpect(jsonPath("$.errorClass",
+                        containsStringIgnoringCase("validateException")))
+                .andExpect(jsonPath("$.error",
+                        containsStringIgnoringCase("incorrectly")));
         verify(requestService, never()).getAllNotOwn(anyLong(), anyInt(), anyInt());
     }
 
@@ -184,6 +194,7 @@ public class ItemRequestControllerTest {
     @Test
     public void getAllNotOwn_whenFromAndSizeNotInput_thenReturnListRequests() {
         when(requestService.getAllNotOwn(anyLong(), anyInt(), anyInt())).thenReturn(List.of(requestFullDto));
+
         mockMvc.perform(MockMvcRequestBuilders.get("/requests/all")
                         .header(PARAM_USER_ID, userId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -221,8 +232,10 @@ public class ItemRequestControllerTest {
                     .accept(MediaType.APPLICATION_JSON)
                     .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.errorClass", containsStringIgnoringCase("NotFoundException")))
-                .andExpect(jsonPath("$.error", containsStringIgnoringCase("User not found")));
+                .andExpect(jsonPath("$.errorClass",
+                        containsStringIgnoringCase("NotFoundException")))
+                .andExpect(jsonPath("$.error",
+                        containsStringIgnoringCase("User not found")));
         verify(requestService,times(1)).getById(anyLong(), anyLong());
     }
 
@@ -234,8 +247,10 @@ public class ItemRequestControllerTest {
                         .accept(MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errorClass", containsStringIgnoringCase("ValidateException")))
-                .andExpect(jsonPath("$.error", containsStringIgnoringCase("X-Sharer-User-Id")));
+                .andExpect(jsonPath("$.errorClass",
+                        containsStringIgnoringCase("ValidateException")))
+                .andExpect(jsonPath("$.error",
+                        containsStringIgnoringCase("X-Sharer-User-Id")));
         verify(requestService, never()).getById(anyLong(), anyLong());
     }
 }

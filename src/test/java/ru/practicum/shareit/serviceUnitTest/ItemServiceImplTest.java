@@ -4,10 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import org.springframework.validation.BindException;
+
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.storage.BookingStorage;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -65,18 +68,24 @@ public class ItemServiceImplTest {
     ItemRequestStorage requestStorage;
     @InjectMocks
     ItemServiceImpl itemService;
+
     User user1;
     User user2;
+
     ItemDto itemDto1;
     ItemDto itemDtoUpdate;
+
     Comment comment;
     CommentDto commentDto;
+
     LocalDateTime date1;
     LocalDateTime date2;
     LocalDateTime dateNow;
+
     Item item1;
+
     BindingResult br;
-    Map<String, String> map;
+
     Booking booking1;
 
     @BeforeEach
@@ -89,14 +98,19 @@ public class ItemServiceImplTest {
                 userStorage,
                 requestService,
                 requestStorage);
+
         date1 = LocalDateTime.of(2023, 5, 17, 0, 0);
         date2 = LocalDateTime.of(2023, 5, 17, 6, 0);
         dateNow = LocalDateTime.of(2023, 5, 18, 0, 0);
+
         user1 = new User(1L, "user1 name", "user1@user.ru");
         user2 = new User(2L, "author1 name", "author1@author.ru");
+
         item1 = new Item(1L, user1, "item1 name", "item1 desc", true, null);
+
         comment = new Comment(1L, "text", item1, user2, date1);
         commentDto = new CommentDto(1L, "text", user2.getName(), date1);
+
         itemDto1 = new ItemDto(1L,
                 "itemDto1",
                 "itemDto1 desc",
@@ -105,7 +119,9 @@ public class ItemServiceImplTest {
                 null);
         itemDtoUpdate = new ItemDto();
         itemDtoUpdate.setName("new name");
+
         br = new BindException(item1, null);
+
         booking1 = new Booking(1L, date1, date2, item1, user2, WAITING);
     }
 
@@ -113,7 +129,9 @@ public class ItemServiceImplTest {
     public void createItem_ReturnSavedItem() {
         when(userStorage.getReferenceById(anyLong())).thenReturn(user1);
         when(itemStorage.save(any(Item.class))).thenReturn(item1);
+
         ItemDto actualDto = itemService.create(itemDto1, br, 1L);
+
         assertNotNull(actualDto);
         assertEquals(actualDto.getId(), item1.getId());
         assertEquals(actualDto.getName(), item1.getName());
@@ -142,7 +160,9 @@ public class ItemServiceImplTest {
         when(this.objectMapper.convertValue(any(Map.class), eq(Item.class))).thenReturn(item1);
         when(itemStorage.save(any(Item.class))).thenReturn(item1);
         when(itemStorage.existsById(anyLong())).thenReturn(true);
+
         ItemDto actualDto = itemService.update(item1.getId(), itemDtoUpdate, user1.getId());
+
         assertNotNull(actualDto);
         assertEquals(actualDto.getId(), item1.getId());
         verify(itemStorage, times(1)).save(any(Item.class));
@@ -153,7 +173,9 @@ public class ItemServiceImplTest {
         when(itemStorage.findById(anyLong())).thenReturn(Optional.of(item1));
         when(itemStorage.existsById(anyLong())).thenReturn(true);
         when(bookingStorage.findByItem_Owner_IdAndItem_Id(anyLong(), anyLong())).thenReturn(List.of(booking1));
+
         ItemDtoWithBooking actualDto = itemService.get(item1.getId(), user1.getId());
+
         assertNotNull(actualDto);
         assertEquals(item1.getId(), actualDto.getId());
         assertNotNull(actualDto.getLastBooking());
@@ -168,6 +190,7 @@ public class ItemServiceImplTest {
         when(itemStorage.findByOwnerId(user1.getId(), PageRequest.of(0, 999))).thenReturn(page);
         when(bookingStorage.findByItem_Owner_Id(anyLong())).thenReturn(List.of(booking1));
         List<ItemDtoWithBooking> actualDto = itemService.getByOwner(user1.getId(),
+
                                                                     Integer.parseInt(DEFAULT_FIRST_PAGE),
                                                                     Integer.parseInt(DEFAULT_SIZE_VIEW));
         assertNotNull(actualDto);
@@ -184,9 +207,11 @@ public class ItemServiceImplTest {
         when(itemStorage.findByNameContainsIgnoreCaseOrDescriptionContainingIgnoreCase(
                 "item", "item", PageRequest.of(0, 999)))
                 .thenReturn(page);
+
         List<ItemDto> actualDto = itemService.search("item",
                                                      Integer.parseInt(DEFAULT_FIRST_PAGE),
                                                      Integer.parseInt(DEFAULT_SIZE_VIEW));
+
         assertNotNull(actualDto);
         assertEquals(1, actualDto.size());
         assertEquals(item1.getId(), actualDto.get(0).getId());

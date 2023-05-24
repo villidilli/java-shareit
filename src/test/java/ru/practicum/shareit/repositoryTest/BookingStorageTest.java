@@ -2,15 +2,16 @@ package ru.practicum.shareit.repositoryTest;
 
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
+
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.storage.BookingStorage;
@@ -113,7 +114,9 @@ public class BookingStorageTest {
     @Test
     public void findAllByItem_Owner_Id() {
         page = PageRequest.of(0, 2);
+
         Page<Booking> actualPage = bookingStorage.findAllByItem_Owner_Id(savedOwner1.getId(), page);
+
         assertNotNull(actualPage);
         List<Booking> actualList = actualPage.toList();
         assertEquals(2, actualList.size());
@@ -124,7 +127,9 @@ public class BookingStorageTest {
     @Test
     public void findAllByBooker_Id() {
         page = PageRequest.of(1, 2);
+
         Page<Booking> actualPage = bookingStorage.findAllByBooker_Id(savedBooker1.getId(), page);
+
         assertNotNull(actualPage);
         List<Booking> actualList = actualPage.toList();
         assertEquals(1, actualList.size());
@@ -134,7 +139,9 @@ public class BookingStorageTest {
     @Test
     public void findAllByBooker_idAndEndIsBefore() {
         page = PageRequest.of(0, 5);
+
         Page<Booking> actualPage = bookingStorage.findAllByBooker_idAndEndIsBefore(savedBooker1.getId(), now, page);
+
         assertNotNull(actualPage);
         List<Booking> actualList = actualPage.toList();
         assertEquals(1, actualList.size());
@@ -144,7 +151,9 @@ public class BookingStorageTest {
     @Test
     public void findAllByItem_Owner_IdAndEndIsBefore() {
         page = PageRequest.of(0, 5);
+
         Page<Booking> actualPage = bookingStorage.findAllByItem_Owner_IdAndEndIsBefore(savedOwner1.getId(), now, page);
+
         assertNotNull(actualPage);
         List<Booking> actualList = actualPage.toList();
         assertEquals(1, actualList.size());
@@ -154,7 +163,9 @@ public class BookingStorageTest {
     @Test
     public void findAllByBooker_idAndStartIsAfter() {
         page = PageRequest.of(0, 5);
+
         Page<Booking> actualPage = bookingStorage.findAllByBooker_idAndStartIsAfter(savedBooker1.getId(), now, page);
+
         assertNotNull(actualPage);
         List<Booking> actualList = actualPage.toList();
         assertEquals(1, actualList.size());
@@ -164,7 +175,9 @@ public class BookingStorageTest {
     @Test
     public void findAllByItem_Owner_IdAndStartIsAfter() {
         page = PageRequest.of(0, 5);
+
         Page<Booking> actualPage = bookingStorage.findAllByItem_Owner_IdAndStartIsAfter(savedOwner1.getId(), now, page);
+
         assertNotNull(actualPage);
         List<Booking> actualList = actualPage.toList();
         assertEquals(1, actualList.size());
@@ -174,7 +187,9 @@ public class BookingStorageTest {
     @Test
     public void findAllByBooker_IdAndStatusIs() {
         page = PageRequest.of(0, 5);
+
         Page<Booking> actualPage = bookingStorage.findAllByBooker_IdAndStatusIs(savedBooker1.getId(), WAITING, page);
+
         assertNotNull(actualPage);
         List<Booking> actualList = actualPage.toList();
         assertEquals(1, actualList.size());
@@ -184,7 +199,9 @@ public class BookingStorageTest {
     @Test
     public void findAllByItem_Owner_IdAndStatusIs() {
         page = PageRequest.of(0, 5);
-        Page<Booking> actualPage = bookingStorage.findAllByItem_Owner_IdAndStatusIs(savedOwner1.getId(), APPROVED, page);
+
+        Page<Booking> actualPage = bookingStorage.findAllByItem_Owner_IdAndStatusIs(
+                                                                                savedOwner1.getId(), APPROVED, page);
         assertNotNull(actualPage);
         List<Booking> actualList = actualPage.toList();
         assertEquals(1, actualList.size());
@@ -193,14 +210,17 @@ public class BookingStorageTest {
 
     @Test
     public void countBookingsByBooker_IdAndItem_IdAndEndBefore() {
-        Long actual = bookingStorage.countBookingsByBooker_IdAndItem_IdAndEndBefore(savedBooker1.getId(), savedItem1.getId(), startFut);
+        Long actual = bookingStorage.countBookingsByBooker_IdAndItem_IdAndEndBefore(
+                                                                savedBooker1.getId(), savedItem1.getId(), startFut);
         assertEquals(2L, actual);
     }
 
     @Test
     public void findAllByBooker_IdAndStartIsBeforeAndEndIsAfter() {
         page = PageRequest.of(0, 5);
-        Page<Booking> actualPage = bookingStorage.findAllByBooker_IdAndStartIsBeforeAndEndIsAfter(savedBooker1.getId(), endCur, startOld, page);
+
+        Page<Booking> actualPage = bookingStorage.findAllByBooker_IdAndStartIsBeforeAndEndIsAfter(
+                                                                        savedBooker1.getId(), endCur, startOld, page);
         assertNotNull(actualPage);
         List<Booking> actualList = actualPage.toList();
         assertEquals(2, actualList.size());
@@ -211,7 +231,10 @@ public class BookingStorageTest {
     @Test
     public void findAllByItem_Owner_IdAndStartIsBeforeAndEndIsAfter() {
         page = PageRequest.of(1, 1);
-        Page<Booking> actualPage = bookingStorage.findAllByItem_Owner_IdAndStartIsBeforeAndEndIsAfter(savedOwner1.getId(), endCur, startOld, page);
+
+        Page<Booking> actualPage = bookingStorage.findAllByItem_Owner_IdAndStartIsBeforeAndEndIsAfter(
+                                                                        savedOwner1.getId(), endCur, startOld, page);
+
         assertNotNull(actualPage);
         List<Booking> actualList = actualPage.toList();
         assertEquals(1, actualList.size());
@@ -221,6 +244,7 @@ public class BookingStorageTest {
     @Test
     public void findByItem_Owner_Id() {
         List<Booking> actualList = bookingStorage.findByItem_Owner_Id(savedOwner2.getId());
+
         assertNotNull(actualList);
         assertEquals(2, actualList.size());
         assertEquals(savedBooking4.getId(), actualList.get(0).getId());
@@ -230,6 +254,7 @@ public class BookingStorageTest {
     @Test
     public void findByItem_Owner_IdAndItem_Id() {
         List<Booking> actual = bookingStorage.findByItem_Owner_IdAndItem_Id(savedOwner2.getId(), savedItem2.getId());
+
         assertNotNull(actual);
         assertEquals(2, actual.size());
         assertEquals(booking4.getId(), actual.get(0).getId());

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindException;
+
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
@@ -39,12 +40,15 @@ public class ItemRequestServiceIntegrationTest {
         UserDto savedRequester = userService.create(requester, new BindException(requester, null));
 
         ItemRequestDto request = new ItemRequestDto(null, "desc", LocalDateTime.now());
-        ItemRequestDto savedRequest = requestService.create(request, new BindException(request, null), savedRequester.getId());
+        ItemRequestDto savedRequest =
+                requestService.create(request, new BindException(request, null), savedRequester.getId());
 
-        ItemDto item1 = new ItemDto(null, "item1", "desc", true, null, savedRequest.getId());
+        ItemDto item1 = new ItemDto(
+                null, "item1", "desc", true, null, savedRequest.getId());
         ItemDto savedItem1 = itemService.create(item1, new BindException(item1, null), savedOwner1.getId());
 
         List<ItemRequestFullDto> actualList = requestService.getAllOwn(savedRequester.getId());
+
         assertNotNull(actualList);
         assertEquals(1, actualList.size());
         assertEquals(savedRequest.getId(), actualList.get(0).getId());
