@@ -51,7 +51,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public ExceptionResponse exceptionHandler(DataIntegrityViolationException e) {
-        log.debug("/DataIntegrityVoilationHandler");
+        log.debug("/DataIntegrityViolationHandler");
         logException(HttpStatus.CONFLICT, e);
         return new ExceptionResponse(new FieldConflictException(e.getMessage()));
     }

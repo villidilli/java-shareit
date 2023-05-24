@@ -11,11 +11,8 @@ import java.util.List;
 public interface ItemStorage extends JpaRepository<Item, Long> {
     Page<Item> findByOwnerId(Long ownerId, Pageable page);
 
-//    Page<Item> findByNameContainsIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(
-//                                                        String textNameSearch, String textDescrSearch, Pageable page);
-
     Page<Item> findByNameContainsIgnoreCaseOrDescriptionContainingIgnoreCase(
-            String textNameSearch, String textDescrSearch, Pageable page);
+                                                        String textNameSearch, String textDescrSearch, Pageable page);
 
     Item findByIdAndAvailableIsTrue(Long itemId);
 

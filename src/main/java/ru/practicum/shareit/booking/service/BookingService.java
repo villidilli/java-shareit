@@ -4,7 +4,6 @@ import org.springframework.validation.BindingResult;
 
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
-import ru.practicum.shareit.exception.NotFoundException;
 
 import java.util.List;
 

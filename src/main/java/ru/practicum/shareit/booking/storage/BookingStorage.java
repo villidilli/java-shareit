@@ -32,10 +32,10 @@ public interface BookingStorage extends JpaRepository<Booking, Long> {
     Long countBookingsByBooker_IdAndItem_IdAndEndBefore(Long bookerId, Long itemId, LocalDateTime end);
 
     Page<Booking> findAllByBooker_IdAndStartIsBeforeAndEndIsAfter(
-                                    Long bookerId, LocalDateTime start, LocalDateTime end, Pageable page);
+                                        Long bookerId, LocalDateTime start, LocalDateTime end, Pageable page);
 
     Page<Booking> findAllByItem_Owner_IdAndStartIsBeforeAndEndIsAfter(
-                                    Long ownerId, LocalDateTime start, LocalDateTime end, Pageable page);
+                                        Long ownerId, LocalDateTime start, LocalDateTime end, Pageable page);
 
     List<Booking> findByItem_Owner_Id(Long ownerId);
 

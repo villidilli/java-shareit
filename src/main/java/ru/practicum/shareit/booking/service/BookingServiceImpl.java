@@ -2,45 +2,46 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
 
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-
 import org.springframework.validation.BindingResult;
 
-import ru.practicum.shareit.booking.model.*;
-import ru.practicum.shareit.booking.dto.*;
+import ru.practicum.shareit.booking.dto.BookingDtoMapper;
+import ru.practicum.shareit.booking.dto.BookingRequestDto;
+import ru.practicum.shareit.booking.dto.BookingResponseDto;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingState;
+import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.storage.BookingStorage;
 
-import ru.practicum.shareit.exception.*;
+import ru.practicum.shareit.exception.GlobalExceptionHandler;
+import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.ValidateException;
 
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.storage.ItemStorage;
 
-import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.storage.UserStorage;
 
 import java.sql.Timestamp;
-
 import java.time.LocalDateTime;
-
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ru.practicum.shareit.booking.model.BookingStatus.*;
 import static ru.practicum.shareit.booking.dto.BookingDtoMapper.toBooking;
 import static ru.practicum.shareit.booking.dto.BookingDtoMapper.toBookingDto;
-import static ru.practicum.shareit.exception.NotFoundException.*;
+import static ru.practicum.shareit.booking.model.BookingStatus.*;
+import static ru.practicum.shareit.exception.NotFoundException.BOOKER_IS_OWNER_ITEM;
+import static ru.practicum.shareit.exception.NotFoundException.BOOKING_NOT_FOUND;
 import static ru.practicum.shareit.exception.ValidateException.*;
 import static ru.practicum.shareit.request.controller.ItemRequestController.DEFAULT_FIRST_PAGE;
 
@@ -60,7 +61,7 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     @Override
     public BookingResponseDto create(BookingRequestDto bookingIncomeDto, BindingResult br, Long bookerId)
-                                                            throws ValidateException, NotFoundException {
+                                                                        throws ValidateException, NotFoundException {
         log.debug("/create");
         annotationValidate(br);
         customValidate(bookingIncomeDto);
@@ -103,7 +104,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<BookingResponseDto> getAllByBooker(Long userId, String state, Integer from, Integer size)
                                                                                             throws NotFoundException {
-        log.debug("/getAllByUser");
+        log.debug("/getAllByBooker");
         userService.isExist(userId);
         final LocalDateTime curTime = LocalDateTime.now();
         Page<Booking> bookings = Page.empty();

@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import ru.practicum.shareit.request.model.ItemRequest;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface ItemRequestStorage extends JpaRepository<ItemRequest, Long> {
     List<ItemRequest> findByRequester_Id(Long requesterId, Sort sort);

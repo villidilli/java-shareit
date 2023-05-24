@@ -2,7 +2,6 @@ package ru.practicum.shareit.item.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +23,10 @@ import ru.practicum.shareit.exception.GlobalExceptionHandler;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidateException;
 
-import ru.practicum.shareit.item.dto.*;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDtoMapper;
+import ru.practicum.shareit.item.dto.ItemDtoWithBooking;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.CommentStorage;
@@ -32,21 +35,20 @@ import ru.practicum.shareit.item.storage.ItemStorage;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.service.ItemRequestService;
 import ru.practicum.shareit.request.storage.ItemRequestStorage;
+
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.storage.UserStorage;
 
 import javax.annotation.Nullable;
-import javax.validation.constraints.Null;
 import java.time.LocalDateTime;
-
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.booking.model.BookingStatus.REJECTED;
-import static ru.practicum.shareit.exception.NotFoundException.*;
+import static ru.practicum.shareit.exception.NotFoundException.ITEM_NOT_FOUND;
+import static ru.practicum.shareit.exception.NotFoundException.OWNER_NOT_MATCH_ITEM;
 import static ru.practicum.shareit.exception.ValidateException.ITEM_NOT_HAVE_BOOKING_BY_USER;
-
 import static ru.practicum.shareit.item.dto.CommentDtoMapper.toComment;
 import static ru.practicum.shareit.item.dto.CommentDtoMapper.toCommentDto;
 import static ru.practicum.shareit.item.dto.ItemDtoMapper.*;
@@ -147,12 +149,11 @@ public class ItemServiceImpl implements ItemService {
                 .filter(Item::getAvailable)
                 .map(ItemDtoMapper::toItemDto)
                 .collect(Collectors.toList());
-//        return null;
     }
 
     @Override
     public CommentDto createComment(CommentDto commentDto, Long itemId, Long bookerId, BindingResult br)
-                                                            throws ValidateException, NotFoundException {
+                                                                        throws ValidateException, NotFoundException {
         log.debug("/createComment");
         annotationValidate(br);
         isExist(itemId);
@@ -186,11 +187,11 @@ public class ItemServiceImpl implements ItemService {
         log.debug("/getRequest");
         if (requestId == null) return null;
         requestService.isExist(requestId);
-        ItemRequest request = requestStorage.getReferenceById(requestId);
-        return request;
+        return requestStorage.getReferenceById(requestId);
     }
 
     private Pageable getPage(Integer from, Integer size, Sort sort) {
+        log.debug("/getPage");
         int firstPage = from != 0 ? from / size : Integer.parseInt(DEFAULT_FIRST_PAGE);
         return PageRequest.of(firstPage, size, sort);
     }

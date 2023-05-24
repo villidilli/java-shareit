@@ -51,19 +51,13 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     @Transactional
     public ItemRequestDto create(ItemRequestDto requestDto, BindingResult br, Long userId)
-                                                throws ValidateException, NotFoundException{
+                                                                        throws ValidateException, NotFoundException{
         log.debug("/create");
         userService.isExist(userId);
         annotationValidate(br);
         User requester = userStorage.getReferenceById(userId);
         ItemRequest savedRequest = requestStorage.save(toItemRequest(requestDto, requester));
         return toItemRequestDto(savedRequest);
-    }
-
-    @Override
-    public void isExist(Long requestId) throws NotFoundException {
-        log.debug("/isExist");
-        if (!requestStorage.existsById(requestId)) throw new NotFoundException(REQUEST_NOT_FOUND);
     }
 
     @Override
@@ -90,6 +84,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     public ItemRequestFullDto getById(Long requesterId, Long requestId) {
+        log.debug("/getById");
         isExist(requestId);
         userService.isExist(requesterId);
         ItemRequest request = requestStorage.findByIdIs(requestId);
@@ -97,7 +92,14 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         return toItemRequestDtoWithItem(request, requestIdItems.get(request.getId()));
     }
 
+    @Override
+    public void isExist(Long requestId) throws NotFoundException {
+        log.debug("/isExist");
+        if (!requestStorage.existsById(requestId)) throw new NotFoundException(REQUEST_NOT_FOUND);
+    }
+
     private Pageable getPage(Integer from, Integer size) {
+        log.debug("/getPage");
         int firstPage = from != 0 ? from / size : Integer.parseInt(DEFAULT_FIRST_PAGE);
         return PageRequest.of(firstPage, size, sortByCreatedDesc);
     }
