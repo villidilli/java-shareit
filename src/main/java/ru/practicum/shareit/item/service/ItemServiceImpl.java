@@ -141,11 +141,13 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemDto> search(String text, Integer from, Integer size) {
         log.debug("/search");
         if (text.isBlank()) return Collections.emptyList();
-        return itemStorage.findByNameContainsIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(
+        return itemStorage.findByNameContainsIgnoreCaseOrDescriptionContainingIgnoreCase(
                                                                     text, text, getPage(from, size, Sort.unsorted()))
                 .stream()
+                .filter(Item::getAvailable)
                 .map(ItemDtoMapper::toItemDto)
                 .collect(Collectors.toList());
+//        return null;
     }
 
     @Override

@@ -181,7 +181,7 @@ public class ItemServiceImplTest {
     @Test
     public void search() {
         Page<Item> page = new PageImpl<>(List.of(item1));
-        when(itemStorage.findByNameContainsIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(
+        when(itemStorage.findByNameContainsIgnoreCaseOrDescriptionContainingIgnoreCase(
                 "item", "item", PageRequest.of(0, 999)))
                 .thenReturn(page);
         List<ItemDto> actualDto = itemService.search("item",
