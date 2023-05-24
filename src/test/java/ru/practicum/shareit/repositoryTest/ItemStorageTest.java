@@ -94,12 +94,12 @@ public class ItemStorageTest {
     }
 
     @Test
-    public void findByNameContainsIgnoreCaseOrDescriptionContainingIgnoreCase () {
+    public void findByNameContainsIgnoreCaseOrDescriptionContainingIgnoreCase() {
         page = PageRequest.of(0, 5);
 
         Page<Item> actualPage =
-                itemStorage.findByNameContainsIgnoreCaseOrDescriptionContainingIgnoreCase
-                                                        ("item", "item", page);
+                itemStorage.findByNameContainsIgnoreCaseOrDescriptionContainingIgnoreCase(
+                                                                    "item", "item", page);
 
         assertNotNull(actualPage);
         List<Item> actualList = actualPage.toList();
