@@ -36,21 +36,21 @@ import static org.junit.jupiter.api.Assertions.*;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ItemServiceIntegrationTest {
     @Autowired
-    ItemService itemService;
+    private ItemService itemService;
     @Autowired
-    ItemStorage itemStorage;
+    private ItemStorage itemStorage;
     @Autowired
-    BookingStorage bookingStorage;
+    private BookingStorage bookingStorage;
     @Autowired
-    BookingService bookingService;
+    private BookingService bookingService;
     @Autowired
-    UserService userService;
+    private UserService userService;
     @Autowired
-    UserStorage userStorage;
+    private UserStorage userStorage;
     @Autowired
-    CommentStorage commentStorage;
+    private CommentStorage commentStorage;
     @Autowired
-    ItemRequestService requestService;
+    private ItemRequestService requestService;
 
     @Test
     public void getByOwner_thenReturnPageItems() {

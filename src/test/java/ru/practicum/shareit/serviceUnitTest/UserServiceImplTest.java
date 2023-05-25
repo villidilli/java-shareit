@@ -28,17 +28,17 @@ import static ru.practicum.shareit.exception.NotFoundException.USER_NOT_FOUND;
 @ExtendWith(MockitoExtension.class)
 public class UserServiceImplTest {
     @Mock
-    UserStorage userStorage;
+    private UserStorage userStorage;
     @Mock
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
     @InjectMocks
-    UserServiceImpl userService;
+    private UserServiceImpl userService;
     @Captor
-    ArgumentCaptor<Long> idCaptor;
+    private ArgumentCaptor<Long> idCaptor;
 
-    User user1;
-    BindingResult br;
-    UserDto userDto;
+    private User user1;
+    private BindingResult br;
+    private UserDto userDto;
 
     @BeforeEach
     public void beforeEach() {

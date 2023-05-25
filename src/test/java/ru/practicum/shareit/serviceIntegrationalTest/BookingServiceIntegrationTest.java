@@ -30,13 +30,13 @@ import static ru.practicum.shareit.booking.model.BookingStatus.REJECTED;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class BookingServiceIntegrationTest {
     @Autowired
-    UserService userService;
+    private UserService userService;
     @Autowired
-    BookingStorage bookingStorage;
+    private BookingStorage bookingStorage;
     @Autowired
-    ItemService itemService;
+    private ItemService itemService;
     @Autowired
-    BookingService bookingService;
+    private BookingService bookingService;
 
     @Test
     public void getAllByBooker() {

@@ -43,18 +43,18 @@ import static ru.practicum.shareit.item.controller.ItemController.PARAM_USER_ID;
 @ExtendWith(MockitoExtension.class)
 public class BookingControllerTest {
     @Autowired
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
     @Autowired
-    MockMvc mockMvc;
+    private MockMvc mockMvc;
     @MockBean
-    BookingService bookingService;
+    private BookingService bookingService;
 
-    BookingResponseDto responseDto;
-    User user;
-    BookingResponseDto.UserShortDto booker;
-    BindingResult br;
-    BookingRequestDto requestDto;
-    Item item;
+    private BookingResponseDto responseDto;
+    private User user;
+    private BookingResponseDto.UserShortDto booker;
+    private BindingResult br;
+    private BookingRequestDto requestDto;
+    private Item item;
 
     @BeforeEach
     public void beforeEach() {

@@ -82,13 +82,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ExceptionResponse exceptionHandler(Exception e) {
+    public ExceptionResponse exceptionHandler(Throwable e) {
         log.debug("/OtherExceptionHandler");
         logException(HttpStatus.INTERNAL_SERVER_ERROR, e);
         return new ExceptionResponse(e);
     }
 
-    private void logException(HttpStatus status, Exception exception) {
+    private void logException(HttpStatus status, Throwable exception) {
         log.debug("[" + exception.getClass().getSimpleName() + "] [" + status.value() + "]" + exception.getMessage());
     }
 }

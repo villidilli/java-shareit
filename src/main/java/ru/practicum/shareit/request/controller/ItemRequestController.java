@@ -2,19 +2,17 @@ package ru.practicum.shareit.request.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import ru.practicum.shareit.request.dto.ItemRequestFullDto;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
+import ru.practicum.shareit.request.dto.ItemRequestFullDto;
 import ru.practicum.shareit.request.service.ItemRequestService;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Min;
-
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 import static ru.practicum.shareit.item.controller.ItemController.PARAM_USER_ID;
@@ -50,11 +48,10 @@ public class ItemRequestController {
     }
 
     @GetMapping("/all")
-    public List<ItemRequestFullDto> getAllNotOwn(@RequestHeader(PARAM_USER_ID) Long requesterId,
-                                                 @RequestParam(value = FIRST_PAGE,
-                                                               defaultValue = DEFAULT_FIRST_PAGE) @Min(0) Integer from,
-                                                 @RequestParam(value = SIZE_VIEW,
-                                                               defaultValue = DEFAULT_SIZE_VIEW) @Min(1) Integer size) {
+    public List<ItemRequestFullDto> getAllNotOwn(
+            @RequestHeader(PARAM_USER_ID) Long requesterId,
+            @RequestParam(value = FIRST_PAGE, defaultValue = DEFAULT_FIRST_PAGE) @PositiveOrZero Integer from,
+            @RequestParam(value = SIZE_VIEW, defaultValue = DEFAULT_SIZE_VIEW) @Positive Integer size) {
         log.debug("getAllNotOwn");
         return requestService.getAllNotOwn(requesterId, from, size);
     }

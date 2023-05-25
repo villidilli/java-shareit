@@ -26,11 +26,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ItemRequestServiceIntegrationTest {
     @Autowired
-    ItemRequestService requestService;
+    private ItemRequestService requestService;
     @Autowired
-    UserService userService;
+    private UserService userService;
     @Autowired
-    ItemService itemService;
+    private ItemService itemService;
 
     @Test
     public void getAllOwn() {

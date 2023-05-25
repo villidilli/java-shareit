@@ -1,16 +1,11 @@
 package ru.practicum.shareit.item.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +34,7 @@ import ru.practicum.shareit.request.storage.ItemRequestStorage;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.storage.UserStorage;
+import ru.practicum.shareit.utils.PageConfig;
 
 import javax.annotation.Nullable;
 import java.time.LocalDateTime;
@@ -52,7 +48,6 @@ import static ru.practicum.shareit.exception.ValidateException.ITEM_NOT_HAVE_BOO
 import static ru.practicum.shareit.item.dto.CommentDtoMapper.toComment;
 import static ru.practicum.shareit.item.dto.CommentDtoMapper.toCommentDto;
 import static ru.practicum.shareit.item.dto.ItemDtoMapper.*;
-import static ru.practicum.shareit.request.controller.ItemRequestController.DEFAULT_FIRST_PAGE;
 
 @Service
 @RequiredArgsConstructor
@@ -122,7 +117,7 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemDtoWithBooking> getByOwner(Long ownerId, Integer from, Integer size) throws NotFoundException {
         log.debug("/getByOwner");
         userService.isExist(ownerId);
-        Page<Item> items = itemStorage.findByOwnerId(ownerId, getPage(from, size, Sort.unsorted()));
+        Page<Item> items = itemStorage.findByOwnerId(ownerId, new PageConfig(from, size, Sort.unsorted()));
         List<Booking> bookings = bookingStorage.findByItem_Owner_Id(ownerId);
         LocalDateTime currentTime = LocalDateTime.now();
         Map<Long, Booking> lastBookings = getLastBookings(bookings, currentTime);
@@ -144,7 +139,7 @@ public class ItemServiceImpl implements ItemService {
         log.debug("/search");
         if (text.isBlank()) return Collections.emptyList();
         return itemStorage.findByNameContainsIgnoreCaseOrDescriptionContainingIgnoreCase(
-                                                                    text, text, getPage(from, size, Sort.unsorted()))
+                                                            text, text, new PageConfig(from, size, Sort.unsorted()))
                 .stream()
                 .filter(Item::getAvailable)
                 .map(ItemDtoMapper::toItemDto)
@@ -188,12 +183,6 @@ public class ItemServiceImpl implements ItemService {
         if (requestId == null) return null;
         requestService.isExist(requestId);
         return requestStorage.getReferenceById(requestId);
-    }
-
-    private Pageable getPage(Integer from, Integer size, Sort sort) {
-        log.debug("/getPage");
-        int firstPage = from != 0 ? from / size : Integer.parseInt(DEFAULT_FIRST_PAGE);
-        return PageRequest.of(firstPage, size, sort);
     }
 
     private Item setNewFields(Item existedItem, Item itemWithUpdate) {

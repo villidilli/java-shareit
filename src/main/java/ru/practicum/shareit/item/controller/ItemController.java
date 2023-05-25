@@ -2,19 +2,17 @@ package ru.practicum.shareit.item.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoWithBooking;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Min;
-
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 import static ru.practicum.shareit.request.controller.ItemRequestController.*;
@@ -65,18 +63,18 @@ public class ItemController {
 
     @GetMapping
     public List<ItemDtoWithBooking> getByOwner(
-                            @RequestHeader(name = PARAM_USER_ID) Long ownerId,
-                            @RequestParam(value = FIRST_PAGE, defaultValue = DEFAULT_FIRST_PAGE) @Min(0) Integer from,
-                            @RequestParam(value = SIZE_VIEW, defaultValue = DEFAULT_SIZE_VIEW) @Min(1) Integer size) {
+            @RequestHeader(name = PARAM_USER_ID) Long ownerId,
+            @RequestParam(value = FIRST_PAGE, defaultValue = DEFAULT_FIRST_PAGE) @PositiveOrZero Integer from,
+            @RequestParam(value = SIZE_VIEW, defaultValue = DEFAULT_SIZE_VIEW) @Positive Integer size) {
         log.debug("/getByOwner");
         return itemService.getByOwner(ownerId, from, size);
     }
 
     @GetMapping("/search")
     public List<ItemDto> search(
-                            @RequestParam String text,
-                            @RequestParam(value = FIRST_PAGE, defaultValue = DEFAULT_FIRST_PAGE) @Min(0) Integer from,
-                            @RequestParam(value = SIZE_VIEW, defaultValue = DEFAULT_SIZE_VIEW) @Min(1) Integer size) {
+            @RequestParam String text,
+            @RequestParam(value = FIRST_PAGE, defaultValue = DEFAULT_FIRST_PAGE) @PositiveOrZero Integer from,
+            @RequestParam(value = SIZE_VIEW, defaultValue = DEFAULT_SIZE_VIEW) @Positive Integer size) {
         log.debug("/search");
         return itemService.search(text, from, size);
     }

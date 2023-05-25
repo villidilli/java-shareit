@@ -2,11 +2,8 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +28,7 @@ import ru.practicum.shareit.item.storage.ItemStorage;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.storage.UserStorage;
+import ru.practicum.shareit.utils.PageConfig;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -43,20 +41,19 @@ import static ru.practicum.shareit.booking.model.BookingStatus.*;
 import static ru.practicum.shareit.exception.NotFoundException.BOOKER_IS_OWNER_ITEM;
 import static ru.practicum.shareit.exception.NotFoundException.BOOKING_NOT_FOUND;
 import static ru.practicum.shareit.exception.ValidateException.*;
-import static ru.practicum.shareit.request.controller.ItemRequestController.DEFAULT_FIRST_PAGE;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
 public class BookingServiceImpl implements BookingService {
+    private static final Sort sortByIdDesc = Sort.by("id").descending();
+    private static final Sort sortByIdAsc = Sort.by("id").ascending();
     private final BookingStorage bookingStorage;
     private final UserService userService;
     private final ItemService itemService;
     private final UserStorage userStorage;
     private final ItemStorage itemStorage;
-    private final Sort sortByIdDesc = Sort.by("id").descending();
-    private final Sort sortByIdAsc = Sort.by("id").ascending();
 
     @Transactional
     @Override
@@ -107,10 +104,10 @@ public class BookingServiceImpl implements BookingService {
         log.debug("/getAllByBooker");
         userService.isExist(userId);
         final LocalDateTime curTime = LocalDateTime.now();
-        Page<Booking> bookings = Page.empty();
+        org.springframework.data.domain.Page<Booking> bookings = org.springframework.data.domain.Page.empty();
         BookingState bookingState = toBookingState(state);
-        Pageable pageSortDesc = getPage(from, size, sortByIdDesc);
-        Pageable pageSortAsc = getPage(from, size, sortByIdAsc);
+        final Pageable pageSortDesc = new PageConfig(from, size, sortByIdDesc);
+        final Pageable pageSortAsc = new PageConfig(from, size, sortByIdAsc);
 
         switch (bookingState) {
             case ALL:
@@ -148,10 +145,10 @@ public class BookingServiceImpl implements BookingService {
         log.debug("/getAllByOwner");
         userService.isExist(userId);
         final LocalDateTime curTime = LocalDateTime.now();
-        Page<Booking> bookings = Page.empty();
+        org.springframework.data.domain.Page<Booking> bookings = org.springframework.data.domain.Page.empty();
         BookingState bookingState = toBookingState(state);
-        Pageable pageSortDesc = getPage(from, size, sortByIdDesc);
-        Pageable pageSortAsc = getPage(from, size, sortByIdAsc);
+        final Pageable pageSortDesc = new PageConfig(from, size, sortByIdDesc);
+        final Pageable pageSortAsc = new PageConfig(from, size, sortByIdAsc);
 
         switch (bookingState) {
             case ALL:
@@ -187,11 +184,6 @@ public class BookingServiceImpl implements BookingService {
     public void isExist(Long bookingId) throws NotFoundException {
         log.debug("/isExist");
         if (!bookingStorage.existsById(bookingId)) throw new NotFoundException(BOOKING_NOT_FOUND);
-    }
-
-    private Pageable getPage(Integer from, Integer size, Sort sort) {
-        int firstPage = from != 0 ? from / size : Integer.parseInt(DEFAULT_FIRST_PAGE);
-        return PageRequest.of(firstPage, size, sort);
     }
 
     private void annotationValidate(BindingResult br) throws ValidateException {

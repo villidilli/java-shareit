@@ -42,17 +42,17 @@ import static ru.practicum.shareit.item.controller.ItemController.PARAM_USER_ID;
 @ExtendWith(MockitoExtension.class)
 public class ItemControllerTest {
     @Autowired
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
     @Autowired
-    MockMvc mockMvc;
+    private MockMvc mockMvc;
     @MockBean
-    ItemService itemService;
+    private ItemService itemService;
 
-    ItemDto itemDto;
-    CommentDto commentDto;
-    ItemDtoWithBooking itemDtoWithBooking;
-    BindingResult br;
-    User user;
+    private ItemDto itemDto;
+    private CommentDto commentDto;
+    private ItemDtoWithBooking itemDtoWithBooking;
+    private BindingResult br;
+    private User user;
 
     @BeforeEach
     public void beforeEach() {

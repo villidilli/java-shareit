@@ -2,10 +2,7 @@ package ru.practicum.shareit.request.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -18,14 +15,16 @@ import ru.practicum.shareit.exception.ValidateException;
 
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.ItemStorage;
-import ru.practicum.shareit.request.dto.ItemRequestFullDto;
+
 import ru.practicum.shareit.request.dto.ItemRequestDto;
+import ru.practicum.shareit.request.dto.ItemRequestFullDto;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.storage.ItemRequestStorage;
 
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.storage.UserStorage;
+import ru.practicum.shareit.utils.PageConfig;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,7 +33,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.exception.NotFoundException.REQUEST_NOT_FOUND;
-import static ru.practicum.shareit.request.controller.ItemRequestController.DEFAULT_FIRST_PAGE;
 import static ru.practicum.shareit.request.dto.ItemRequestDtoMapper.*;
 
 @Service
@@ -42,11 +40,11 @@ import static ru.practicum.shareit.request.dto.ItemRequestDtoMapper.*;
 @RequiredArgsConstructor
 @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
 public class ItemRequestServiceImpl implements ItemRequestService {
+    private static final Sort sortByCreatedDesc = Sort.by("created").descending();
     private final UserService userService;
     private final UserStorage userStorage;
     private final ItemStorage itemStorage;
     private final ItemRequestStorage requestStorage;
-    private final Sort sortByCreatedDesc = Sort.by("created").descending();
 
     @Override
     @Transactional
@@ -64,7 +62,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     public List<ItemRequestFullDto> getAllOwn(Long requesterId) {
         log.debug("/getAllOwn");
         userService.isExist(requesterId);
-        List<ItemRequest> requests = requestStorage.findByRequester_Id(requesterId, sortByCreatedDesc); // получили реквесты юзера
+        List<ItemRequest> requests = requestStorage.findByRequester_Id(requesterId, sortByCreatedDesc);
         Map<Long, List<Item>> requestIdItems = getRequestItems(requests);
         List<ItemRequestFullDto> result = new ArrayList<>();
         requests.forEach(request -> result.add(toItemRequestDtoWithItem(request, requestIdItems.get(request.getId()))));
@@ -75,7 +73,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     public List<ItemRequestFullDto> getAllNotOwn(Long requesterId, Integer from, Integer size) {
         log.debug("/getAllNotOwn");
         userService.isExist(requesterId);
-        Page<ItemRequest> requests = requestStorage.findByRequester_IdNot(requesterId, getPage(from, size));
+        Page<ItemRequest> requests =
+                requestStorage.findByRequester_IdNot(requesterId, new PageConfig(from, size, sortByCreatedDesc));
         Map<Long, List<Item>> requestIdItems = getRequestItems(requests.toList());
         List<ItemRequestFullDto> result = new ArrayList<>();
         requests.forEach(request -> result.add(toItemRequestDtoWithItem(request, requestIdItems.get(request.getId()))));
@@ -96,12 +95,6 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     public void isExist(Long requestId) throws NotFoundException {
         log.debug("/isExist");
         if (!requestStorage.existsById(requestId)) throw new NotFoundException(REQUEST_NOT_FOUND);
-    }
-
-    private Pageable getPage(Integer from, Integer size) {
-        log.debug("/getPage");
-        int firstPage = from != 0 ? from / size : Integer.parseInt(DEFAULT_FIRST_PAGE);
-        return PageRequest.of(firstPage, size, sortByCreatedDesc);
     }
 
     private Map<Long, List<Item>> getRequestItems(List<ItemRequest> requests) {

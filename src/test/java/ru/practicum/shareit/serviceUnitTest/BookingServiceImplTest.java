@@ -51,24 +51,25 @@ import static ru.practicum.shareit.request.controller.ItemRequestController.DEFA
 public class BookingServiceImplTest {
 
     @Mock
-    BookingStorage mockBookingStorage;
+    private BookingStorage mockBookingStorage;
     @Mock
-    UserService mockUserService;
+    private UserService mockUserService;
     @Mock
-    ItemService mockItemService;
+    private ItemService mockItemService;
     @Mock
-    UserStorage mockUserStorage;
+    private UserStorage mockUserStorage;
     @Mock
-    ItemStorage mockItemStorage;
+    private ItemStorage mockItemStorage;
     @Mock
-    BindingResult br;
-    BookingService bookingService;
+    private BindingResult br;
 
-    BookingRequestDto bookingReqDto1;
-    User booker1;
-    User owner1;
-    Item item1;
-    Booking booking1;
+    private BookingService bookingService;
+
+    private BookingRequestDto bookingReqDto1;
+    private User booker1;
+    private User owner1;
+    private Item item1;
+    private Booking booking1;
 
     LocalDateTime date1 = LocalDateTime.of(2023, 5, 10, 0,0);
     LocalDateTime date2 = LocalDateTime.of(2023, 5, 20, 0, 0);

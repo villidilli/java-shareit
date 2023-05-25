@@ -44,16 +44,16 @@ import static ru.practicum.shareit.request.controller.ItemRequestController.SIZE
 @ExtendWith(MockitoExtension.class)
 public class ItemRequestControllerTest {
     @Autowired
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
     @Autowired
-    MockMvc mockMvc;
+    private MockMvc mockMvc;
     @MockBean
-    ItemRequestService requestService;
+    private ItemRequestService requestService;
 
-    ItemRequestDto requestDto;
-    BindingResult br;
-    Long userId;
-    ItemRequestFullDto requestFullDto;
+    private ItemRequestDto requestDto;
+    private BindingResult br;
+    private Long userId;
+    private ItemRequestFullDto requestFullDto;
 
     @BeforeEach
     public void beforeEach() {

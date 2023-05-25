@@ -22,6 +22,7 @@ import ru.practicum.shareit.request.storage.ItemRequestStorage;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.storage.UserStorage;
+import ru.practicum.shareit.utils.PageConfig;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -35,21 +36,21 @@ import static ru.practicum.shareit.exception.NotFoundException.USER_NOT_FOUND;
 @ExtendWith(MockitoExtension.class)
 public class ItemRequestServiceImplTest {
     @Mock
-    UserService userService;
+    private UserService userService;
     @Mock
-    UserStorage userStorage;
+    private UserStorage userStorage;
     @Mock
-    ItemStorage itemStorage;
+    private ItemStorage itemStorage;
     @Mock
-    ItemRequestStorage requestStorage;
+    private ItemRequestStorage requestStorage;
     @InjectMocks
-    ItemRequestServiceImpl requestService;
+    private ItemRequestServiceImpl requestService;
 
-    ItemRequestDto requestDto1;
-    LocalDateTime date1;
-    BindingResult br;
-    User user1;
-    ItemRequest request;
+    private ItemRequestDto requestDto1;
+    private LocalDateTime date1;
+    private BindingResult br;
+    private User user1;
+    private ItemRequest request;
 
     @BeforeEach
     public void beforeEach() {
@@ -132,8 +133,7 @@ public class ItemRequestServiceImplTest {
 
     @Test
     public void getAllOwn_whenRequestNotCreated_thenReturnEmptyList() {
-        Pageable page = PageRequest.of(0, 999, Sort.by("created").descending());
-        when(requestStorage.findByRequester_IdNot(user1.getId(), page))
+        when(requestStorage.findByRequester_IdNot(anyLong(), any(PageConfig.class)))
                 .thenReturn(Page.empty());
 
         List<ItemRequestFullDto> actual =
@@ -147,7 +147,8 @@ public class ItemRequestServiceImplTest {
     public void getAllOwn_whenRequestFound_thenReturnListRequests() {
         List<ItemRequest> expected = List.of(request);
         Pageable page = PageRequest.of(1, 1, Sort.by("created").descending());
-        when(requestStorage.findByRequester_IdNot(user1.getId(), page))
+
+        when(requestStorage.findByRequester_IdNot(anyLong(), any(PageConfig.class)))
                 .thenReturn(new PageImpl<>(expected));
 
         List<ItemRequestFullDto> actual = requestService.getAllNotOwn(user1.getId(), 1, 1);

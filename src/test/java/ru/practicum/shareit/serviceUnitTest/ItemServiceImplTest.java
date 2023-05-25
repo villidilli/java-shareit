@@ -4,13 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.validation.BindException;
-
+import org.springframework.validation.BindingResult;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.storage.BookingStorage;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -19,30 +19,26 @@ import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoWithBooking;
 import ru.practicum.shareit.item.model.Comment;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemServiceImpl;
 import ru.practicum.shareit.item.storage.CommentStorage;
 import ru.practicum.shareit.item.storage.ItemStorage;
 import ru.practicum.shareit.request.service.ItemRequestService;
 import ru.practicum.shareit.request.storage.ItemRequestStorage;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.storage.UserStorage;
-
-import org.springframework.data.domain.*;
-import org.springframework.validation.BindingResult;
-
-import ru.practicum.shareit.item.model.Item;
-
-import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.utils.PageConfig;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
-
 import static ru.practicum.shareit.booking.model.BookingStatus.WAITING;
 import static ru.practicum.shareit.exception.NotFoundException.USER_NOT_FOUND;
 import static ru.practicum.shareit.request.controller.ItemRequestController.DEFAULT_FIRST_PAGE;
@@ -187,12 +183,13 @@ public class ItemServiceImplTest {
     @Test
     public void getByOwner() {
         Page<Item> page = new PageImpl<>(List.of(item1));
-        when(itemStorage.findByOwnerId(user1.getId(), PageRequest.of(0, 999))).thenReturn(page);
-        when(bookingStorage.findByItem_Owner_Id(anyLong())).thenReturn(List.of(booking1));
-        List<ItemDtoWithBooking> actualDto = itemService.getByOwner(user1.getId(),
 
-                                                                    Integer.parseInt(DEFAULT_FIRST_PAGE),
-                                                                    Integer.parseInt(DEFAULT_SIZE_VIEW));
+        when(itemStorage.findByOwnerId(anyLong(), any(PageConfig.class))).thenReturn(page);
+        when(bookingStorage.findByItem_Owner_Id(anyLong())).thenReturn(List.of(booking1));
+
+        List<ItemDtoWithBooking> actualDto = itemService.getByOwner(user1.getId(),
+                                                                    0,
+                                                                    999);
         assertNotNull(actualDto);
         assertEquals(1, actualDto.size());
         assertEquals(item1.getId(), actualDto.get(0).getId());
@@ -204,8 +201,8 @@ public class ItemServiceImplTest {
     @Test
     public void search() {
         Page<Item> page = new PageImpl<>(List.of(item1));
-        when(itemStorage.findByNameContainsIgnoreCaseOrDescriptionContainingIgnoreCase(
-                "item", "item", PageRequest.of(0, 999)))
+
+        when(itemStorage.findByNameContainsIgnoreCaseOrDescriptionContainingIgnoreCase(any(), any(), any()))
                 .thenReturn(page);
 
         List<ItemDto> actualDto = itemService.search("item",

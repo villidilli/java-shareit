@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @JsonTest
 public class UserDtoTest {
     @Autowired
-    JacksonTester<UserDto> json;
+    private JacksonTester<UserDto> json;
 
     @Test
     public void jsonToDto() throws IOException {

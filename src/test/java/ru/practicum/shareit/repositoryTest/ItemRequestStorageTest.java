@@ -29,26 +29,26 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ItemRequestStorageTest {
     @Autowired
-    UserStorage userStorage;
+    private UserStorage userStorage;
     @Autowired
-    ItemRequestStorage requestStorage;
+    private ItemRequestStorage requestStorage;
 
-    User requester1;
-    User requester2;
-    User savedRequester1;
-    User savedRequester2;
+    private User requester1;
+    private User requester2;
+    private User savedRequester1;
+    private User savedRequester2;
 
-    ItemRequest request1;
-    ItemRequest request2;
-    ItemRequest request3;
-    ItemRequest request4;
+    private ItemRequest request1;
+    private ItemRequest request2;
+    private ItemRequest request3;
+    private ItemRequest request4;
 
-    ItemRequest savedRequest1;
-    ItemRequest savedRequest2;
-    ItemRequest savedRequest3;
-    ItemRequest savedRequest4;
+    private ItemRequest savedRequest1;
+    private ItemRequest savedRequest2;
+    private ItemRequest savedRequest3;
+    private ItemRequest savedRequest4;
 
-    Pageable page;
+    private Pageable page;
 
     @BeforeEach
     public void beforeEach() {

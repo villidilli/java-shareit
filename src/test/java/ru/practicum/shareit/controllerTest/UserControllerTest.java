@@ -37,14 +37,14 @@ import static ru.practicum.shareit.exception.NotFoundException.USER_NOT_FOUND;
 @ExtendWith(MockitoExtension.class)
 public class UserControllerTest {
     @Autowired
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
     @Autowired
-    MockMvc mockMvc;
+    private MockMvc mockMvc;
     @MockBean
-    UserService userService;
+    private UserService userService;
 
-    UserDto userDto;
-    BindingResult br;
+    private UserDto userDto;
+    private BindingResult br;
 
     @BeforeEach
     public void beforeEach() {

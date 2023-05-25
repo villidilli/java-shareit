@@ -23,10 +23,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class UserServiceIntegrationTest {
     @Autowired
-    UserService userService;
-    UserDto userDto;
-    UserDto userDto1;
-    BindingResult br;
+    private UserService userService;
+
+    private UserDto userDto;
+    private UserDto userDto1;
+    private BindingResult br;
 
     @BeforeEach
     public void beforeEach() {

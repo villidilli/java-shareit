@@ -28,49 +28,49 @@ import static ru.practicum.shareit.booking.model.BookingStatus.WAITING;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class CommentStorageTest {
     @Autowired
-    CommentStorage commentStorage;
+    private CommentStorage commentStorage;
     @Autowired
-    BookingStorage bookingStorage;
+    private BookingStorage bookingStorage;
     @Autowired
-    UserStorage userStorage;
+    private UserStorage userStorage;
     @Autowired
-    ItemStorage itemStorage;
+    private ItemStorage itemStorage;
 
-    User owner1;
-    User savedOwner1;
-    User owner2;
-    User savedOwner2;
-    User booker1;
-    User savedBooker1;
-    User booker2;
-    User savedBooker2;
-    Item item1;
-    Item savedItem1;
-    Item item2;
-    Item savedItem2;
-    Booking booking1;
-    Booking savedBooking1;
-    Booking booking2;
-    Booking savedBooking2;
-    Booking booking3;
-    Booking savedBooking3;
-    Booking booking4;
-    Booking savedBooking4;
-    Booking booking5;
-    Booking savedBooking5;
-    Comment comment1;
-    Comment savedComment1;
-    Comment comment2;
-    Comment savedComment2;
-    LocalDateTime startOld;
-    LocalDateTime endOld;
-    LocalDateTime startCur;
-    LocalDateTime endCur;
-    LocalDateTime startFut;
-    LocalDateTime endFut;
-    LocalDateTime now;
-    LocalDateTime anyStart;
-    LocalDateTime anyEnd;
+    private User owner1;
+    private User savedOwner1;
+    private User owner2;
+    private User savedOwner2;
+    private User booker1;
+    private User savedBooker1;
+    private User booker2;
+    private User savedBooker2;
+    private Item item1;
+    private Item savedItem1;
+    private Item item2;
+    private Item savedItem2;
+    private Booking booking1;
+    private Booking savedBooking1;
+    private Booking booking2;
+    private Booking savedBooking2;
+    private Booking booking3;
+    private Booking savedBooking3;
+    private Booking booking4;
+    private Booking savedBooking4;
+    private Booking booking5;
+    private Booking savedBooking5;
+    private Comment comment1;
+    private Comment savedComment1;
+    private Comment comment2;
+    private Comment savedComment2;
+    private LocalDateTime startOld;
+    private LocalDateTime endOld;
+    private LocalDateTime startCur;
+    private LocalDateTime endCur;
+    private LocalDateTime startFut;
+    private LocalDateTime endFut;
+    private LocalDateTime now;
+    private LocalDateTime anyStart;
+    private LocalDateTime anyEnd;
 
     @BeforeEach
     public void beforeEach() {
