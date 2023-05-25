@@ -10,6 +10,6 @@ public class PageConfig extends PageRequest {
     }
 
     private static int getFirstPage(int from, int size) {
-        return from != 0 ? from/size : 0;
+        return from != 0 ? from / size : 0;
     }
 }
