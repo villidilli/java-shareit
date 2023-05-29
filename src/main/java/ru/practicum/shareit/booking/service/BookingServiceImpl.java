@@ -2,13 +2,13 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
-
 import ru.practicum.shareit.booking.dto.BookingDtoMapper;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
@@ -16,15 +16,12 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.storage.BookingStorage;
-
 import ru.practicum.shareit.exception.GlobalExceptionHandler;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidateException;
-
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.storage.ItemStorage;
-
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.storage.UserStorage;
@@ -35,6 +32,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.springframework.data.domain.Page.empty;
 import static ru.practicum.shareit.booking.dto.BookingDtoMapper.toBooking;
 import static ru.practicum.shareit.booking.dto.BookingDtoMapper.toBookingDto;
 import static ru.practicum.shareit.booking.model.BookingStatus.*;
@@ -104,7 +102,7 @@ public class BookingServiceImpl implements BookingService {
         log.debug("/getAllByBooker");
         userService.isExist(userId);
         final LocalDateTime curTime = LocalDateTime.now();
-        org.springframework.data.domain.Page<Booking> bookings = org.springframework.data.domain.Page.empty();
+        Page<Booking> bookings = empty();
         BookingState bookingState = toBookingState(state);
         final Pageable pageSortDesc = new PageConfig(from, size, sortByIdDesc);
         final Pageable pageSortAsc = new PageConfig(from, size, sortByIdAsc);
@@ -145,7 +143,7 @@ public class BookingServiceImpl implements BookingService {
         log.debug("/getAllByOwner");
         userService.isExist(userId);
         final LocalDateTime curTime = LocalDateTime.now();
-        org.springframework.data.domain.Page<Booking> bookings = org.springframework.data.domain.Page.empty();
+        org.springframework.data.domain.Page<Booking> bookings = empty();
         BookingState bookingState = toBookingState(state);
         final Pageable pageSortDesc = new PageConfig(from, size, sortByIdDesc);
         final Pageable pageSortAsc = new PageConfig(from, size, sortByIdAsc);

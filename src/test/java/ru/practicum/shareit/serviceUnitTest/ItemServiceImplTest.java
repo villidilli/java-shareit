@@ -47,42 +47,42 @@ import static ru.practicum.shareit.request.controller.ItemRequestController.DEFA
 @ExtendWith(MockitoExtension.class)
 public class ItemServiceImplTest {
     @Mock
-    ItemStorage itemStorage;
+    private ItemStorage itemStorage;
     @Mock
-    UserService userService;
+    private UserService userService;
     @Mock
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
     @Mock
-    BookingStorage bookingStorage;
+    private BookingStorage bookingStorage;
     @Mock
-    CommentStorage commentStorage;
+    private CommentStorage commentStorage;
     @Mock
-    UserStorage userStorage;
+    private UserStorage userStorage;
     @Mock
-    ItemRequestService requestService;
+    private ItemRequestService requestService;
     @Mock
-    ItemRequestStorage requestStorage;
+    private ItemRequestStorage requestStorage;
     @InjectMocks
-    ItemServiceImpl itemService;
+    private ItemServiceImpl itemService;
 
-    User user1;
-    User user2;
+    private User user1;
+    private User user2;
 
-    ItemDto itemDto1;
-    ItemDto itemDtoUpdate;
+    private ItemDto itemDto1;
+    private ItemDto itemDtoUpdate;
 
-    Comment comment;
-    CommentDto commentDto;
+    private Comment comment;
+    private CommentDto commentDto;
 
-    LocalDateTime date1;
-    LocalDateTime date2;
-    LocalDateTime dateNow;
+    private LocalDateTime date1;
+    private LocalDateTime date2;
+    private LocalDateTime dateNow;
 
-    Item item1;
+    private Item item1;
 
-    BindingResult br;
+    private BindingResult br;
 
-    Booking booking1;
+    private Booking booking1;
 
     @BeforeEach
     public void beforeEach() {
