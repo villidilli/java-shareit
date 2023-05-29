@@ -9,15 +9,15 @@ import ru.practicum.shareit.item.dto.ItemDtoWithBooking;
 import java.util.List;
 
 public interface ItemService {
-    ItemDto create(ItemDto itemDto, Long ownerId, BindingResult br);
+    ItemDto create(ItemDto itemDto, BindingResult br, Long ownerId);
 
     ItemDto update(Long itemId, ItemDto item, Long ownerID);
 
     ItemDtoWithBooking get(Long itemId, Long ownerId);
 
-    List<ItemDtoWithBooking> getByOwner(Long ownerId);
+    List<ItemDtoWithBooking> getByOwner(Long ownerId, Integer from, Integer size);
 
-    List<ItemDto> search(String text);
+    List<ItemDto> search(String text, Integer from, Integer size);
 
     void isExist(Long itemId);
 

@@ -2,41 +2,42 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-
 import org.springframework.validation.BindingResult;
-
-import ru.practicum.shareit.booking.model.*;
-import ru.practicum.shareit.booking.dto.*;
+import ru.practicum.shareit.booking.dto.BookingDtoMapper;
+import ru.practicum.shareit.booking.dto.BookingRequestDto;
+import ru.practicum.shareit.booking.dto.BookingResponseDto;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingState;
+import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.storage.BookingStorage;
-
-import ru.practicum.shareit.exception.*;
-
+import ru.practicum.shareit.exception.GlobalExceptionHandler;
+import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.ValidateException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.storage.ItemStorage;
-
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.storage.UserStorage;
+import ru.practicum.shareit.utils.PageConfig;
 
 import java.sql.Timestamp;
-
 import java.time.LocalDateTime;
-
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ru.practicum.shareit.booking.model.BookingStatus.*;
+import static org.springframework.data.domain.Page.empty;
 import static ru.practicum.shareit.booking.dto.BookingDtoMapper.toBooking;
 import static ru.practicum.shareit.booking.dto.BookingDtoMapper.toBookingDto;
-import static ru.practicum.shareit.exception.NotFoundException.*;
+import static ru.practicum.shareit.booking.model.BookingStatus.*;
+import static ru.practicum.shareit.exception.NotFoundException.BOOKER_IS_OWNER_ITEM;
+import static ru.practicum.shareit.exception.NotFoundException.BOOKING_NOT_FOUND;
 import static ru.practicum.shareit.exception.ValidateException.*;
 
 @Service
@@ -44,18 +45,18 @@ import static ru.practicum.shareit.exception.ValidateException.*;
 @RequiredArgsConstructor
 @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
 public class BookingServiceImpl implements BookingService {
+    private static final Sort sortByIdDesc = Sort.by("id").descending();
+    private static final Sort sortByIdAsc = Sort.by("id").ascending();
     private final BookingStorage bookingStorage;
     private final UserService userService;
     private final ItemService itemService;
     private final UserStorage userStorage;
     private final ItemStorage itemStorage;
-    private final Sort sortByIdDesc = Sort.by("id").descending();
-    private final Sort sortByIdAsc = Sort.by("id").ascending();
 
     @Transactional
     @Override
     public BookingResponseDto create(BookingRequestDto bookingIncomeDto, BindingResult br, Long bookerId)
-                                                            throws ValidateException, NotFoundException {
+                                                                        throws ValidateException, NotFoundException {
         log.debug("/create");
         annotationValidate(br);
         customValidate(bookingIncomeDto);
@@ -96,76 +97,82 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingResponseDto> getAllByBooker(Long userId, String state) throws NotFoundException {
-        log.debug("/getAllByUser");
+    public List<BookingResponseDto> getAllByBooker(Long userId, String state, Integer from, Integer size)
+                                                                                            throws NotFoundException {
+        log.debug("/getAllByBooker");
         userService.isExist(userId);
         final LocalDateTime curTime = LocalDateTime.now();
-        List<Booking> bookings = Collections.emptyList();
+        Page<Booking> bookings = empty();
         BookingState bookingState = toBookingState(state);
+        final Pageable pageSortDesc = new PageConfig(from, size, sortByIdDesc);
+        final Pageable pageSortAsc = new PageConfig(from, size, sortByIdAsc);
 
         switch (bookingState) {
             case ALL:
                 log.debug("switch state - ALL");
-                bookings = bookingStorage.findAllByBooker_Id(userId, sortByIdDesc);
+                bookings = bookingStorage.findAllByBooker_Id(userId, pageSortDesc);
                 break;
             case CURRENT:
                 log.debug("switch state - CURRENT");
                 bookings = bookingStorage.findAllByBooker_IdAndStartIsBeforeAndEndIsAfter(
-                                                                            userId, curTime, curTime, sortByIdAsc);
+                                                                        userId, curTime, curTime, pageSortAsc);
                 break;
             case PAST:
                 log.debug("switch state - PAST");
-                bookings = bookingStorage.findAllByBooker_idAndEndIsBefore(userId, curTime, sortByIdDesc);
+                bookings = bookingStorage.findAllByBooker_idAndEndIsBefore(userId, curTime, pageSortDesc);
                 break;
             case FUTURE:
                 log.debug("switch state - FUTURE");
-                bookings = bookingStorage.findAllByBooker_idAndStartIsAfter(userId, curTime, sortByIdDesc);
+                bookings = bookingStorage.findAllByBooker_idAndStartIsAfter(userId, curTime, pageSortDesc);
                 break;
             case WAITING:
                 log.debug("switch status - WAITING");
-                bookings = bookingStorage.findAllByBooker_IdAndStatusIs(userId, WAITING, sortByIdDesc);
+                bookings = bookingStorage.findAllByBooker_IdAndStatusIs(userId, WAITING, pageSortDesc);
                 break;
             case REJECTED:
                 log.debug("switch status - REJECTED");
-                bookings = bookingStorage.findAllByBooker_IdAndStatusIs(userId, REJECTED, sortByIdDesc);
+                bookings = bookingStorage.findAllByBooker_IdAndStatusIs(userId, REJECTED, pageSortDesc);
                 break;
         }
         return bookings.stream().map(BookingDtoMapper::toBookingDto).collect(Collectors.toList());
     }
 
     @Override
-    public List<BookingResponseDto> getAllByOwner(Long userId, String state) throws NotFoundException {
+    public List<BookingResponseDto> getAllByOwner(Long userId, String state, Integer from, Integer size)
+                                                                                            throws NotFoundException {
         log.debug("/getAllByOwner");
         userService.isExist(userId);
         final LocalDateTime curTime = LocalDateTime.now();
-        List<Booking> bookings = Collections.emptyList();
+        org.springframework.data.domain.Page<Booking> bookings = empty();
         BookingState bookingState = toBookingState(state);
+        final Pageable pageSortDesc = new PageConfig(from, size, sortByIdDesc);
+        final Pageable pageSortAsc = new PageConfig(from, size, sortByIdAsc);
 
         switch (bookingState) {
             case ALL:
                 log.debug("switch state - ALL");
-                bookings = bookingStorage.findAllByItem_Owner_Id(userId, sortByIdDesc);
+                bookings = bookingStorage.findAllByItem_Owner_Id(userId, pageSortDesc);
                 break;
             case CURRENT:
                 log.debug("switch state - CURRENT");
                 bookings = bookingStorage.findAllByItem_Owner_IdAndStartIsBeforeAndEndIsAfter(
-                                                                    userId, curTime, curTime, sortByIdAsc);
+                                                                    userId, curTime, curTime, pageSortAsc);
                 break;
             case PAST:
                 log.debug("switch state - PAST");
-                bookings = bookingStorage.findAllByItem_Owner_IdAndEndIsBefore(userId, curTime, sortByIdDesc);
+                bookings = bookingStorage.findAllByItem_Owner_IdAndEndIsBefore(userId, curTime, pageSortDesc);
                 break;
             case FUTURE:
                 log.debug("switch state - FUTURE");
-                bookings = bookingStorage.findAllByItem_Owner_IdAndStartIsAfter(userId, curTime, sortByIdDesc);
+                bookings = bookingStorage.findAllByItem_Owner_IdAndStartIsAfter(userId, curTime, pageSortDesc);
                 break;
             case WAITING:
                 log.debug("switch status - WAITING");
-                bookings = bookingStorage.findAllByItem_Owner_IdAndStatusIs(userId, WAITING, sortByIdDesc);
+                bookings = bookingStorage.findAllByItem_Owner_IdAndStatusIs(userId, WAITING, pageSortDesc);
                 break;
             case REJECTED:
                 log.debug("switch status - REJECTED");
-                bookings = bookingStorage.findAllByItem_Owner_IdAndStatusIs(userId, REJECTED, sortByIdDesc);
+                bookings = bookingStorage.findAllByItem_Owner_IdAndStatusIs(userId, REJECTED, pageSortDesc);
                 break;
         }
         return bookings.stream().map(BookingDtoMapper::toBookingDto).collect(Collectors.toList());
@@ -190,7 +197,7 @@ public class BookingServiceImpl implements BookingService {
                 || endTime.equals(startTime)) throw new ValidateException(ENDTIME_BEFORE_STARTTIME);
     }
 
-    private void isBookerIsOwner(Long itemId, Long bookerId) throws NotFoundException {
+    public void isBookerIsOwner(Long itemId, Long bookerId) throws NotFoundException {
         log.debug("/isBookerIsOwner");
         Long itemOwnerId = itemStorage.getReferenceById(itemId).getOwner().getId();
         if (bookerId.equals(itemOwnerId)) throw new NotFoundException(BOOKER_IS_OWNER_ITEM);

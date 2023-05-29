@@ -1,5 +1,7 @@
 package ru.practicum.shareit.item.storage;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import ru.practicum.shareit.item.model.Item;
@@ -7,10 +9,12 @@ import ru.practicum.shareit.item.model.Item;
 import java.util.List;
 
 public interface ItemStorage extends JpaRepository<Item, Long> {
-    List<Item> findByOwnerId(Long ownerId);
+    Page<Item> findByOwnerId(Long ownerId, Pageable page);
 
-    List<Item> findByNameContainsIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(
-                                                                        String textNameSearch, String textDescrSearch);
+    Page<Item> findByNameContainsIgnoreCaseOrDescriptionContainingIgnoreCase(
+                                                        String textNameSearch, String textDescrSearch, Pageable page);
 
     Item findByIdAndAvailableIsTrue(Long itemId);
+
+    List<Item> findByRequest_IdIn(List<Long> requestIds);
 }

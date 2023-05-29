@@ -14,7 +14,7 @@ public class ExceptionResponse {
     protected String error;
     protected Timestamp timestamp;
 
-    public ExceptionResponse(Exception exception) {
+    public ExceptionResponse(Throwable exception) {
         this.error = exception.getMessage();
         this.errorClass = exception.getClass().getSimpleName();
         this.timestamp = new Timestamp(System.currentTimeMillis());

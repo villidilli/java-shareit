@@ -14,9 +14,11 @@ public interface BookingService {
 
     void isExist(Long bookingId);
 
+    void isBookerIsOwner(Long itemId, Long bookerId);
+
     BookingResponseDto getByUser(Long userId, Long bookingId);
 
-    List<BookingResponseDto> getAllByBooker(Long bookerId, String state);
+    List<BookingResponseDto> getAllByBooker(Long bookerId, String state, Integer from, Integer size);
 
-    List<BookingResponseDto> getAllByOwner(Long userId, String state);
+    List<BookingResponseDto> getAllByOwner(Long userId, String state, Integer from, Integer size);
 }

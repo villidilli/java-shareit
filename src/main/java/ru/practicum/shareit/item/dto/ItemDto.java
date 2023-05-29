@@ -11,6 +11,7 @@ import java.util.List;
  * TODO Sprint add-controllers.
  */
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 @EqualsAndHashCode
@@ -24,4 +25,5 @@ public class ItemDto {
     @NotNull(message = "Available must not be null")
     private Boolean available;
     private List<CommentDto> comments;
+    private Long requestId;
 }

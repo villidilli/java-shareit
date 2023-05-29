@@ -1,11 +1,11 @@
 package ru.practicum.shareit.item.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,25 +18,33 @@ import ru.practicum.shareit.exception.GlobalExceptionHandler;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidateException;
 
-import ru.practicum.shareit.item.dto.*;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDtoMapper;
+import ru.practicum.shareit.item.dto.ItemDtoWithBooking;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.CommentStorage;
 import ru.practicum.shareit.item.storage.ItemStorage;
 
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.service.ItemRequestService;
+import ru.practicum.shareit.request.storage.ItemRequestStorage;
+
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.storage.UserStorage;
+import ru.practicum.shareit.utils.PageConfig;
 
+import javax.annotation.Nullable;
 import java.time.LocalDateTime;
-
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.booking.model.BookingStatus.REJECTED;
-import static ru.practicum.shareit.exception.NotFoundException.*;
+import static ru.practicum.shareit.exception.NotFoundException.ITEM_NOT_FOUND;
+import static ru.practicum.shareit.exception.NotFoundException.OWNER_NOT_MATCH_ITEM;
 import static ru.practicum.shareit.exception.ValidateException.ITEM_NOT_HAVE_BOOKING_BY_USER;
-
 import static ru.practicum.shareit.item.dto.CommentDtoMapper.toComment;
 import static ru.practicum.shareit.item.dto.CommentDtoMapper.toCommentDto;
 import static ru.practicum.shareit.item.dto.ItemDtoMapper.*;
@@ -52,15 +60,18 @@ public class ItemServiceImpl implements ItemService {
     private final BookingStorage bookingStorage;
     private final CommentStorage commentStorage;
     private final UserStorage userStorage;
+    private final ItemRequestService requestService;
+    private final ItemRequestStorage requestStorage;
 
     @Transactional
     @Override
-    public ItemDto create(ItemDto itemDto, Long ownerId, BindingResult br) throws ValidateException, NotFoundException {
+    public ItemDto create(ItemDto itemDto, BindingResult br, Long ownerId) throws ValidateException, NotFoundException {
         log.debug("/create");
         annotationValidate(br);
         userService.isExist(ownerId);
+        ItemRequest request = getRequest(itemDto.getRequestId());
         User owner = userStorage.getReferenceById(ownerId);
-        return toItemDto(itemStorage.save(toItem(itemDto, owner)));
+        return toItemDto(itemStorage.save(toItem(itemDto, owner, request)));
     }
 
     @Transactional
@@ -72,8 +83,9 @@ public class ItemServiceImpl implements ItemService {
         userService.isExist(ownerId);
         isOwnerOfItem(itemId, ownerId);
         User owner = userStorage.getReferenceById(ownerId);
+        ItemRequest request = getRequest(itemDto.getRequestId());
         Item existedItem = itemStorage.findById(itemId).get();
-        Item itemWithUpdate = toItem(itemDto, owner);
+        Item itemWithUpdate = toItem(itemDto, owner, request);
         Item updatedItem = setNewFields(existedItem, itemWithUpdate);
         return toItemDto(itemStorage.save(updatedItem));
     }
@@ -102,15 +114,15 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDtoWithBooking> getByOwner(Long ownerId) throws NotFoundException {
+    public List<ItemDtoWithBooking> getByOwner(Long ownerId, Integer from, Integer size) throws NotFoundException {
         log.debug("/getByOwner");
         userService.isExist(ownerId);
-        List<Item> items = itemStorage.findByOwnerId(ownerId);
+        Page<Item> items = itemStorage.findByOwnerId(ownerId, new PageConfig(from, size, Sort.unsorted()));
         List<Booking> bookings = bookingStorage.findByItem_Owner_Id(ownerId);
         LocalDateTime currentTime = LocalDateTime.now();
         Map<Long, Booking> lastBookings = getLastBookings(bookings, currentTime);
         Map<Long, Booking> nextBookings = getNextBookings(bookings, currentTime);
-        Map<Long, List<CommentDto>> commentDtos = getComments(items);
+        Map<Long, List<CommentDto>> commentDtos = getComments(items.toList());
         List<ItemDtoWithBooking> result = new ArrayList<>();
         items.forEach(item -> {
             ItemDtoWithBooking itemDto = toItemDtoWithBooking(item,
@@ -123,18 +135,20 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> search(String text) {
+    public List<ItemDto> search(String text, Integer from, Integer size) {
         log.debug("/search");
         if (text.isBlank()) return Collections.emptyList();
-        return itemStorage.findByNameContainsIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(text, text)
+        return itemStorage.findByNameContainsIgnoreCaseOrDescriptionContainingIgnoreCase(
+                                                            text, text, new PageConfig(from, size, Sort.unsorted()))
                 .stream()
+                .filter(Item::getAvailable)
                 .map(ItemDtoMapper::toItemDto)
                 .collect(Collectors.toList());
     }
 
     @Override
     public CommentDto createComment(CommentDto commentDto, Long itemId, Long bookerId, BindingResult br)
-                                                            throws ValidateException, NotFoundException {
+                                                                        throws ValidateException, NotFoundException {
         log.debug("/createComment");
         annotationValidate(br);
         isExist(itemId);
@@ -157,11 +171,18 @@ public class ItemServiceImpl implements ItemService {
         if (itemStorage.findByIdAndAvailableIsTrue(itemId) == null) throw new ValidateException(ITEM_NOT_FOUND);
     }
 
-    @Override
     public void isOwnerOfItem(Long itemId, Long ownerId) throws NotFoundException {
         log.debug("/isOwnerOfItem");
         Long savedItemOwnerId = itemStorage.findById(itemId).get().getOwner().getId();
         if (!Objects.equals(savedItemOwnerId, ownerId)) throw new NotFoundException(OWNER_NOT_MATCH_ITEM);
+    }
+
+    @Nullable
+    private ItemRequest getRequest(Long requestId) {
+        log.debug("/getRequest");
+        if (requestId == null) return null;
+        requestService.isExist(requestId);
+        return requestStorage.getReferenceById(requestId);
     }
 
     private Item setNewFields(Item existedItem, Item itemWithUpdate) {
@@ -193,7 +214,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private Map<Long, List<CommentDto>> getComments(List<Item> items) {
-        log.debug("/getCommentDtos");
+        log.debug("/getComments");
         List<Long> itemIds = items.stream().map(Item::getId).collect(Collectors.toList());
         List<Comment> allComments = commentStorage.findByItem_IdIn(itemIds);
         Map<Long, List<CommentDto>> result = new HashMap<>();
@@ -207,6 +228,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private Map<Long, Booking> getLastBookings(List<Booking> bookings, LocalDateTime currentTime) {
+        log.debug("/getLastBookings");
         Map<Long, Booking> lastBookings = new HashMap<>(); //key = itemId
         bookings.stream()
                 .filter(booking -> !booking.getStatus().equals(REJECTED))
@@ -220,6 +242,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private Map<Long, Booking> getNextBookings(List<Booking> bookings, LocalDateTime currentTime) {
+        log.debug("/getNextBookings");
         Map<Long, Booking> nextBooking = new HashMap<>(); //key = itemId
         bookings.stream()
                 .filter(booking -> !booking.getStatus().equals(REJECTED))

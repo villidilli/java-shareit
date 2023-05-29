@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -25,16 +26,6 @@ public class ItemDtoMapper {
         return itemDtoBook;
     }
 
-    public static ItemDtoWithBooking toItemDtoWithBooking(Item item) {
-        log.debug("/toItemDtoWithBooking");
-        ItemDtoWithBooking itemDtoBook = new ItemDtoWithBooking();
-        itemDtoBook.setId(item.getId());
-        itemDtoBook.setName(item.getName());
-        itemDtoBook.setDescription(item.getDescription());
-        itemDtoBook.setAvailable(item.getAvailable());
-        return itemDtoBook;
-    }
-
     public static ItemDto toItemDto(Item item) {
         log.debug("/toItemDto");
         ItemDto itemDto = new ItemDto();
@@ -42,10 +33,11 @@ public class ItemDtoMapper {
         itemDto.setName(item.getName());
         itemDto.setDescription(item.getDescription());
         itemDto.setAvailable(item.getAvailable());
+        if (item.getRequest() != null) itemDto.setRequestId(item.getRequest().getId());
         return itemDto;
     }
 
-    public static Item toItem(ItemDto itemDto, User owner) {
+    public static Item toItem(ItemDto itemDto, User owner, ItemRequest request) {
         log.debug("/toItem");
         Item item = new Item();
         item.setId(itemDto.getId());
@@ -53,6 +45,7 @@ public class ItemDtoMapper {
         item.setDescription(itemDto.getDescription());
         item.setAvailable(itemDto.getAvailable());
         item.setOwner(owner);
+        item.setRequest(request);
         return item;
     }
 }

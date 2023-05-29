@@ -3,8 +3,8 @@ package ru.practicum.shareit.request.dto;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * TODO Sprint add-item-requests.
@@ -14,10 +14,22 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @ToString
-public class ItemRequestDto {
+public class ItemRequestFullDto {
     private Long id;
-    @NotBlank(message = "Description must not be blank or empty")
     private String description;
     @DateTimeFormat(pattern = "YYYY-MM-DD HH:mm:ss")
     private LocalDateTime created = LocalDateTime.now();
+    private List<ItemShortDto> items;
+
+    @AllArgsConstructor
+    @Getter
+    @Setter
+    @ToString
+    public static class ItemShortDto {
+        private Long id;
+        private String name;
+        private String description;
+        private Boolean available;
+        private Long requestId;
+    }
 }

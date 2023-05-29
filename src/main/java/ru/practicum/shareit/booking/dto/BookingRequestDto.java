@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
  * TODO Sprint add-bookings.
  */
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 @ToString
