@@ -47,8 +47,6 @@ import static ru.practicum.shareit.exception.ValidateException.*;
 @RequiredArgsConstructor
 @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
 public class BookingServiceImpl implements BookingService {
-//    private static final Sort sortByIdDesc = Sort.by("id").descending();
-//    private static final Sort sortByIdAsc = Sort.by("id").ascending();
     private final BookingStorage bookingStorage;
     private final UserService userService;
     private final ItemService itemService;
@@ -57,11 +55,10 @@ public class BookingServiceImpl implements BookingService {
 
     @Transactional
     @Override
-    public BookingResponseDto create(BookingRequestDto bookingIncomeDto, BindingResult br, Long bookerId)
+    public BookingResponseDto create(BookingRequestDto bookingIncomeDto, Long bookerId)
                                                                         throws ValidateException, NotFoundException {
         log.debug("/create");
-        annotationValidate(br);
-        customValidate(bookingIncomeDto);
+//        customValidate(bookingIncomeDto);
         userService.isExist(bookerId);
         itemService.isExist(bookingIncomeDto.getItemId());
         itemService.isItemAvailable(bookingIncomeDto.getItemId());
@@ -186,18 +183,13 @@ public class BookingServiceImpl implements BookingService {
         if (!bookingStorage.existsById(bookingId)) throw new NotFoundException(BOOKING_NOT_FOUND);
     }
 
-    private void annotationValidate(BindingResult br) throws ValidateException {
-        log.debug("/annotationValidate");
-        if (br.hasErrors()) throw new ValidateException(GlobalExceptionHandler.bindingResultToString(br));
-    }
-
-    private void customValidate(BookingRequestDto bookingIncomeDto) throws ValidateException {
-        log.debug("/customValidate");
-        Timestamp startTime = Timestamp.valueOf(bookingIncomeDto.getStart());
-        Timestamp endTime = Timestamp.valueOf(bookingIncomeDto.getEnd());
-        if (endTime.before(startTime)
-                || endTime.equals(startTime)) throw new ValidateException(ENDTIME_BEFORE_STARTTIME);
-    }
+//    private void customValidate(BookingRequestDto bookingIncomeDto) throws ValidateException {
+//        log.debug("/customValidate");
+//        Timestamp startTime = Timestamp.valueOf(bookingIncomeDto.getStart());
+//        Timestamp endTime = Timestamp.valueOf(bookingIncomeDto.getEnd());
+//        if (endTime.before(startTime)
+//                || endTime.equals(startTime)) throw new ValidateException(ENDTIME_BEFORE_STARTTIME);
+//    }
 
     public void isBookerIsOwner(Long itemId, Long bookerId) throws NotFoundException {
         log.debug("/isBookerIsOwner");

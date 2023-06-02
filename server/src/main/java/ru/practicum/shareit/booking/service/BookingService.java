@@ -8,7 +8,7 @@ import ru.practicum.shareit.booking.dto.BookingResponseDto;
 import java.util.List;
 
 public interface BookingService {
-    BookingResponseDto create(BookingRequestDto bookingIncomeDto, BindingResult br, Long bookerId);
+    BookingResponseDto create(BookingRequestDto bookingIncomeDto, Long bookerId);
 
     BookingResponseDto update(Long bookingId, Long ownerId, String status);
 

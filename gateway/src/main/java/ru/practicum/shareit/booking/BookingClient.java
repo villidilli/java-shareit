@@ -88,11 +88,6 @@ public class BookingClient extends BaseClient {
 
     private void annotationValidate(BindingResult br) throws ValidateException {
         log.debug("[GATEWAY]/annotationValidate");
-//        if (br.hasErrors()) {
-//            return ResponseEntity
-//                    .status(HttpStatus.BAD_REQUEST)
-//                    .body(new ValidateException(GlobalExceptionHandler.bindingResultToString(br)));
-//        }
         if (br.hasErrors()) throw new ValidateException(GlobalExceptionHandler.bindingResultToString(br));
     }
 
