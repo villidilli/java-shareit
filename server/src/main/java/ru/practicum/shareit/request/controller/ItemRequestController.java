@@ -40,8 +40,8 @@ public class ItemRequestController {
     @GetMapping("/all")
     public List<ItemRequestFullDto> getAllNotOwn(
             @RequestHeader(PARAM_USER_ID) Long requesterId,
-            @RequestParam(value = FIRST_PAGE, defaultValue = DEFAULT_FIRST_PAGE) @PositiveOrZero Integer from,
-            @RequestParam(value = SIZE_VIEW, defaultValue = DEFAULT_SIZE_VIEW) @Positive Integer size) {
+            @RequestParam(value = FIRST_PAGE, defaultValue = DEFAULT_FIRST_PAGE) Integer from,
+            @RequestParam(value = SIZE_VIEW, defaultValue = DEFAULT_SIZE_VIEW) Integer size) {
         log.debug("getAllNotOwn");
         return requestService.getAllNotOwn(requesterId, from, size);
     }

@@ -66,9 +66,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional
     @Override
-    public ItemDto create(ItemDto itemDto, BindingResult br, Long ownerId) throws ValidateException, NotFoundException {
+    public ItemDto create(ItemDto itemDto, Long ownerId) throws ValidateException, NotFoundException {
         log.debug("/create");
-        annotationValidate(br);
         userService.isExist(ownerId);
         ItemRequest request = getRequest(itemDto.getRequestId());
         User owner = userStorage.getReferenceById(ownerId);
@@ -149,10 +148,9 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional
     @Override
-    public CommentDto createComment(CommentDto commentDto, Long itemId, Long bookerId, BindingResult br)
+    public CommentDto createComment(CommentDto commentDto, Long itemId, Long bookerId)
                                                                         throws ValidateException, NotFoundException {
         log.debug("/createComment");
-        annotationValidate(br);
         isExist(itemId);
         userService.isExist(bookerId);
         isUserBookedItem(itemId, bookerId);
@@ -200,11 +198,6 @@ public class ItemServiceImpl implements ItemService {
         Long numCompletedBookingsByUser =
                 bookingStorage.countBookingsByBooker_IdAndItem_IdAndEndBefore(bookerId, itemId, LocalDateTime.now());
         if (numCompletedBookingsByUser == 0) throw new ValidateException(ITEM_NOT_HAVE_BOOKING_BY_USER);
-    }
-
-    private void annotationValidate(BindingResult br) {
-        log.debug("/annotationValidate");
-        if (br.hasErrors()) throw new ValidateException(GlobalExceptionHandler.bindingResultToString(br));
     }
 
     private Map<String, String> getFieldToUpdate(Item itemWithUpdate) {

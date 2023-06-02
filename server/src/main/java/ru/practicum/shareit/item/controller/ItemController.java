@@ -30,26 +30,23 @@ public class ItemController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ItemDto create(@Valid @RequestBody ItemDto itemDto,
-                          BindingResult br,
-                          @RequestHeader(name = PARAM_USER_ID) Long ownerId) {
+    public ItemDto create(@RequestBody ItemDto itemDto, @RequestHeader(PARAM_USER_ID) Long ownerId) {
         log.debug("/create");
-        return itemService.create(itemDto, br, ownerId);
+        return itemService.create(itemDto, ownerId);
     }
 
     @PostMapping("/{itemId}/comment")
-    public CommentDto createComment(@Valid @RequestBody CommentDto commentDto,
-                                    BindingResult br,
+    public CommentDto createComment(@RequestBody CommentDto commentDto,
                                     @PathVariable Long itemId,
                                     @RequestHeader(PARAM_USER_ID) Long bookerId) {
         log.debug("/createComment");
-        return itemService.createComment(commentDto, itemId, bookerId, br);
+        return itemService.createComment(commentDto, itemId, bookerId);
     }
 
     @PatchMapping("/{itemId}")
     public ItemDto update(@PathVariable Long itemId,
                           @RequestBody ItemDto itemDto,
-                          @RequestHeader(name = PARAM_USER_ID) Long ownerId) {
+                          @RequestHeader(PARAM_USER_ID) Long ownerId) {
         log.debug("/update");
         return itemService.update(itemId, itemDto, ownerId);
     }
@@ -64,8 +61,8 @@ public class ItemController {
     @GetMapping
     public List<ItemDtoWithBooking> getByOwner(
             @RequestHeader(name = PARAM_USER_ID) Long ownerId,
-            @RequestParam(value = FIRST_PAGE, defaultValue = DEFAULT_FIRST_PAGE) @PositiveOrZero Integer from,
-            @RequestParam(value = SIZE_VIEW, defaultValue = DEFAULT_SIZE_VIEW) @Positive Integer size) {
+            @RequestParam(value = FIRST_PAGE, defaultValue = DEFAULT_FIRST_PAGE) Integer from,
+            @RequestParam(value = SIZE_VIEW, defaultValue = DEFAULT_SIZE_VIEW) Integer size) {
         log.debug("/getByOwner");
         return itemService.getByOwner(ownerId, from, size);
     }
@@ -73,8 +70,8 @@ public class ItemController {
     @GetMapping("/search")
     public List<ItemDto> search(
             @RequestParam String text,
-            @RequestParam(value = FIRST_PAGE, defaultValue = DEFAULT_FIRST_PAGE) @PositiveOrZero Integer from,
-            @RequestParam(value = SIZE_VIEW, defaultValue = DEFAULT_SIZE_VIEW) @Positive Integer size) {
+            @RequestParam(value = FIRST_PAGE, defaultValue = DEFAULT_FIRST_PAGE) Integer from,
+            @RequestParam(value = SIZE_VIEW, defaultValue = DEFAULT_SIZE_VIEW) Integer size) {
         log.debug("/search");
         return itemService.search(text, from, size);
     }
