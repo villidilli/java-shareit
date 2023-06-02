@@ -7,7 +7,7 @@ import ru.practicum.shareit.request.dto.ItemRequestDto;
 import java.util.List;
 
 public interface ItemRequestService {
-    ItemRequestDto create(ItemRequestDto requestDto, BindingResult br, Long userId);
+    ItemRequestDto create(ItemRequestDto requestDto, Long userId);
 
     void isExist(Long requestId);
 

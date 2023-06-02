@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static ru.practicum.shareit.Constant.sortByCreatedDesc;
 import static ru.practicum.shareit.exception.NotFoundException.REQUEST_NOT_FOUND;
 import static ru.practicum.shareit.request.dto.ItemRequestDtoMapper.*;
 
@@ -40,7 +41,6 @@ import static ru.practicum.shareit.request.dto.ItemRequestDtoMapper.*;
 @RequiredArgsConstructor
 @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
 public class ItemRequestServiceImpl implements ItemRequestService {
-    private static final Sort sortByCreatedDesc = Sort.by("created").descending();
     private final UserService userService;
     private final UserStorage userStorage;
     private final ItemStorage itemStorage;
@@ -48,11 +48,9 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     @Transactional
-    public ItemRequestDto create(ItemRequestDto requestDto, BindingResult br, Long userId)
-                                                                        throws ValidateException, NotFoundException {
+    public ItemRequestDto create(ItemRequestDto requestDto, Long userId) throws ValidateException, NotFoundException {
         log.debug("/create");
         userService.isExist(userId);
-        annotationValidate(br);
         User requester = userStorage.getReferenceById(userId);
         ItemRequest savedRequest = requestStorage.save(toItemRequest(requestDto, requester));
         return toItemRequestDto(savedRequest);
@@ -109,10 +107,5 @@ public class ItemRequestServiceImpl implements ItemRequestService {
             result.put(item.getRequest().getId(), currentRequestItems);
         });
         return result;
-    }
-
-    private void annotationValidate(BindingResult br) throws ValidateException {
-        log.debug("/annotationValidate");
-        if (br.hasErrors()) throw new ValidateException(GlobalExceptionHandler.bindingResultToString(br));
     }
 }
