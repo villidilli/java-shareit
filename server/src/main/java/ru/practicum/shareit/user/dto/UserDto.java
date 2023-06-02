@@ -14,7 +14,5 @@ import javax.validation.constraints.NotBlank;
 public class UserDto {
     private Long id;
     private String name;
-//    @Email(message = "invalid email")
-//    @NotBlank(message = "Email must not be null or blank")
     private String email;
 }

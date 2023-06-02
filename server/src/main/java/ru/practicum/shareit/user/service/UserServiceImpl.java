@@ -34,10 +34,9 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public UserDto create(UserDto userDto, BindingResult br) throws ValidateException, NotFoundException {
+    public UserDto create(UserDto userDto) throws ValidateException, NotFoundException {
         log.debug("/create");
         User user = toUser(userDto);
-        annotationValidate(br);
         return toUserDto(userStorage.save(user));
     }
 
@@ -86,11 +85,6 @@ public class UserServiceImpl implements UserService {
         Map<String, String> fieldsToUpdate = getFieldsToUpdate(userWithUpdate);
         existedUserMap.putAll(fieldsToUpdate);
         return objectMapper.convertValue(existedUserMap, User.class);
-    }
-
-    private void annotationValidate(BindingResult br) throws ValidateException {
-        log.debug("/annotationValidate");
-        if (br.hasErrors()) throw new ValidateException(GlobalExceptionHandler.bindingResultToString(br));
     }
 
     private Map<String, String> getFieldsToUpdate(User user) {

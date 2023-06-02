@@ -15,7 +15,7 @@ import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
-import static ru.practicum.shareit.item.controller.ItemController.PARAM_USER_ID;
+import static ru.practicum.shareit.Constant.PARAM_USER_ID;
 
 /**
  * TODO Sprint add-item-requests.
