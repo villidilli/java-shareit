@@ -59,22 +59,22 @@ public class BookingClient extends BaseClient {
         log.debug("[GATEWAY]/getAllByBooker");
         toBookingState(state);
         parameters = Map.of(
-//                "state", state,
+                "state", state,
                 "from", from,
                 "size", size
         );
-        return get("?state=" + state, userId, parameters);
+        return get("?state={state}&from={from}&size={size}", userId, parameters);
     }
 
     public ResponseEntity<Object> getAllByOwner(long userId, String state, int from, int size) {
         log.debug("[GATEWAY]/getAllByOwner");
         toBookingState(state);
         parameters = Map.of(
-//                "state", state,
+                "state", state,
                 "from", from,
                 "size", size
         );
-        return get("/owner?state=" + state, userId, parameters);
+        return get("/owner?state={state}&from={from}&size={size}", userId, parameters);
     }
 
     private void customValidate(BookingRequestDto bookingIncomeDto) throws ValidateException {

@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @ToString
+@EqualsAndHashCode
 public class CommentDto {
     private Long id;
 //    @NotBlank(message = "Text not be empty")

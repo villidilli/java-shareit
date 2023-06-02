@@ -147,6 +147,7 @@ public class ItemServiceImpl implements ItemService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     @Override
     public CommentDto createComment(CommentDto commentDto, Long itemId, Long bookerId, BindingResult br)
                                                                         throws ValidateException, NotFoundException {
