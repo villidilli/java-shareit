@@ -57,7 +57,7 @@ public class BookingClient extends BaseClient {
 
     public ResponseEntity<Object> getAllByBooker(long userId, String state, int from, int size) {
         log.debug("[GATEWAY]/getAllByBooker");
-        toBookingState(state);
+        checkBookingState(state);
         parameters = Map.of(
                 "state", state,
                 "from", from,
@@ -68,7 +68,7 @@ public class BookingClient extends BaseClient {
 
     public ResponseEntity<Object> getAllByOwner(long userId, String state, int from, int size) {
         log.debug("[GATEWAY]/getAllByOwner");
-        toBookingState(state);
+        checkBookingState(state);
         parameters = Map.of(
                 "state", state,
                 "from", from,
@@ -91,10 +91,10 @@ public class BookingClient extends BaseClient {
         if (br.hasErrors()) throw new ValidateException(GlobalExceptionHandler.bindingResultToString(br));
     }
 
-    private BookingState toBookingState(String state) throws ValidateException {
+    private void checkBookingState(String state) throws ValidateException {
         log.debug("/toBookingState");
         try {
-            return BookingState.valueOf(state.toUpperCase());
+            BookingState.valueOf(state.toUpperCase());
         } catch (IllegalArgumentException e) {
             throw new ValidateException(STATE_INCORRECT_INPUT + state);
         }
