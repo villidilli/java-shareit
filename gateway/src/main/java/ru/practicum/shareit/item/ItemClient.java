@@ -61,7 +61,7 @@ public class ItemClient extends BaseClient {
                 "from", from,
                 "size", size
         );
-        return get("", ownerId, parameters);
+        return get("?from={from}&size={size}", ownerId, parameters);
     }
 
     public ResponseEntity<Object> search(long userId, String text, int from, int size) {
@@ -71,7 +71,7 @@ public class ItemClient extends BaseClient {
                 "from", from,
                 "size", size
         );
-        return get("/search?text={text}", userId, parameters);
+        return get("/search?text={text}&from={from}&size={size}", userId, parameters);
     }
 
     private void annotationValidate(BindingResult br) {

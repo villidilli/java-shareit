@@ -4,11 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.BindingResult;
+
 import ru.practicum.shareit.booking.dto.BookingDtoMapper;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
@@ -16,18 +15,20 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.storage.BookingStorage;
-import ru.practicum.shareit.exception.GlobalExceptionHandler;
+
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidateException;
+
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.storage.ItemStorage;
+
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.storage.UserStorage;
+
 import ru.practicum.shareit.utils.PageConfig;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -55,17 +56,16 @@ public class BookingServiceImpl implements BookingService {
 
     @Transactional
     @Override
-    public BookingResponseDto create(BookingRequestDto bookingIncomeDto, Long bookerId)
+    public BookingResponseDto create(BookingRequestDto requestDto, Long bookerId)
                                                                         throws ValidateException, NotFoundException {
         log.debug("/create");
-//        customValidate(bookingIncomeDto);
         userService.isExist(bookerId);
-        itemService.isExist(bookingIncomeDto.getItemId());
-        itemService.isItemAvailable(bookingIncomeDto.getItemId());
-        isBookerIsOwner(bookingIncomeDto.getItemId(), bookerId);
+        itemService.isExist(requestDto.getItemId());
+        itemService.isItemAvailable(requestDto.getItemId());
+        isBookerIsOwner(requestDto.getItemId(), bookerId);
         User booker = userStorage.getReferenceById(bookerId);
-        Item item = itemStorage.getReferenceById(bookingIncomeDto.getItemId());
-        Booking savedBooking = bookingStorage.save(toBooking(bookingIncomeDto, booker, item, WAITING));
+        Item item = itemStorage.getReferenceById(requestDto.getItemId());
+        Booking savedBooking = bookingStorage.save(toBooking(requestDto, booker, item, WAITING));
         return toBookingDto(savedBooking);
     }
 
@@ -101,10 +101,11 @@ public class BookingServiceImpl implements BookingService {
         log.debug("/getAllByBooker");
         userService.isExist(userId);
         final LocalDateTime curTime = LocalDateTime.now();
-        Page<Booking> bookings = empty();
-        BookingState bookingState = BookingState.valueOf(state);
         final Pageable pageSortDesc = new PageConfig(from, size, sortByIdDesc);
         final Pageable pageSortAsc = new PageConfig(from, size, sortByIdAsc);
+
+        Page<Booking> bookings = empty();
+        BookingState bookingState = BookingState.valueOf(state);
 
         switch (bookingState) {
             case ALL:
@@ -142,7 +143,7 @@ public class BookingServiceImpl implements BookingService {
         log.debug("/getAllByOwner");
         userService.isExist(userId);
         final LocalDateTime curTime = LocalDateTime.now();
-        org.springframework.data.domain.Page<Booking> bookings = empty();
+        Page<Booking> bookings = empty();
         BookingState bookingState = BookingState.valueOf(state);
         final Pageable pageSortDesc = new PageConfig(from, size, sortByIdDesc);
         final Pageable pageSortAsc = new PageConfig(from, size, sortByIdAsc);
@@ -183,14 +184,6 @@ public class BookingServiceImpl implements BookingService {
         if (!bookingStorage.existsById(bookingId)) throw new NotFoundException(BOOKING_NOT_FOUND);
     }
 
-//    private void customValidate(BookingRequestDto bookingIncomeDto) throws ValidateException {
-//        log.debug("/customValidate");
-//        Timestamp startTime = Timestamp.valueOf(bookingIncomeDto.getStart());
-//        Timestamp endTime = Timestamp.valueOf(bookingIncomeDto.getEnd());
-//        if (endTime.before(startTime)
-//                || endTime.equals(startTime)) throw new ValidateException(ENDTIME_BEFORE_STARTTIME);
-//    }
-
     public void isBookerIsOwner(Long itemId, Long bookerId) throws NotFoundException {
         log.debug("/isBookerIsOwner");
         Long itemOwnerId = itemStorage.getReferenceById(itemId).getOwner().getId();
@@ -210,13 +203,4 @@ public class BookingServiceImpl implements BookingService {
             throw new NotFoundException(USER_NOT_RELATED_FOR_BOOKING);
         }
     }
-
-//    private BookingState toBookingState(String state) throws ValidateException {
-//        log.debug("/toBookingState");
-//        try {
-//            return BookingState.valueOf(state.toUpperCase());
-//        } catch (IllegalArgumentException e) {
-//            throw new ValidateException(STATE_INCORRECT_INPUT + state);
-//        }
-//    }
 }

@@ -10,7 +10,7 @@ import org.springframework.validation.BindException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
-import ru.practicum.shareit.request.dto.ItemRequestFullDto;
+import ru.practicum.shareit.request.dto.ItemResponseDto;
 import ru.practicum.shareit.request.service.ItemRequestService;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
@@ -47,7 +47,7 @@ public class ItemRequestServiceIntegrationTest {
                 null, "item1", "desc", true, null, savedRequest.getId());
         ItemDto savedItem1 = itemService.create(item1, new BindException(item1, null), savedOwner1.getId());
 
-        List<ItemRequestFullDto> actualList = requestService.getAllOwn(savedRequester.getId());
+        List<ItemResponseDto> actualList = requestService.getAllOwn(savedRequester.getId());
 
         assertNotNull(actualList);
         assertEquals(1, actualList.size());

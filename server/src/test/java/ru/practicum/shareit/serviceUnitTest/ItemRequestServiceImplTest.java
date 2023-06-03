@@ -15,7 +15,7 @@ import org.springframework.validation.BindingResult;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.storage.ItemStorage;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
-import ru.practicum.shareit.request.dto.ItemRequestFullDto;
+import ru.practicum.shareit.request.dto.ItemResponseDto;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.service.ItemRequestServiceImpl;
 import ru.practicum.shareit.request.storage.ItemRequestStorage;
@@ -88,7 +88,7 @@ public class ItemRequestServiceImplTest {
 
     @Test
     public void getAllOwn_whenRequestsNotCreated_thenReturnEmptyList() {
-        List<ItemRequestFullDto> actual = requestService.getAllOwn(user1.getId());
+        List<ItemResponseDto> actual = requestService.getAllOwn(user1.getId());
 
         assertTrue(actual.isEmpty());
     }
@@ -99,7 +99,7 @@ public class ItemRequestServiceImplTest {
         when(requestStorage.findByRequester_Id(user1.getId(),
                 Sort.by("created").descending())).thenReturn(expectedList);
 
-        List<ItemRequestFullDto> actual = requestService.getAllOwn(user1.getId());
+        List<ItemResponseDto> actual = requestService.getAllOwn(user1.getId());
 
         assertNotNull(actual);
         assertEquals(expectedList.size(), actual.size());
@@ -136,7 +136,7 @@ public class ItemRequestServiceImplTest {
         when(requestStorage.findByRequester_IdNot(anyLong(), any(PageConfig.class)))
                 .thenReturn(Page.empty());
 
-        List<ItemRequestFullDto> actual =
+        List<ItemResponseDto> actual =
                 requestService.getAllNotOwn(user1.getId(), 0, 999);
 
         assertNotNull(actual);
@@ -151,7 +151,7 @@ public class ItemRequestServiceImplTest {
         when(requestStorage.findByRequester_IdNot(anyLong(), any(PageConfig.class)))
                 .thenReturn(new PageImpl<>(expected));
 
-        List<ItemRequestFullDto> actual = requestService.getAllNotOwn(user1.getId(), 1, 1);
+        List<ItemResponseDto> actual = requestService.getAllNotOwn(user1.getId(), 1, 1);
 
         assertNotNull(actual);
         assertEquals(expected.size(), actual.size());
@@ -188,7 +188,7 @@ public class ItemRequestServiceImplTest {
         when(requestStorage.existsById(anyLong())).thenReturn(true);
         when(requestStorage.findByIdIs(request.getId())).thenReturn(request);
 
-        ItemRequestFullDto actual = requestService.getById(user1.getId(), request.getId());
+        ItemResponseDto actual = requestService.getById(user1.getId(), request.getId());
 
         assertNotNull(actual);
         assertEquals(request.getId(), actual.getId());

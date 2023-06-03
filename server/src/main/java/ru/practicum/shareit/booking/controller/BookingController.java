@@ -2,26 +2,18 @@ package ru.practicum.shareit.booking.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
 import ru.practicum.shareit.booking.service.BookingService;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 import static ru.practicum.shareit.Constant.*;
-//import static ru.practicum.shareit.item.controller.ItemController.PARAM_USER_ID;
-import static ru.practicum.shareit.request.controller.ItemRequestController.*;
 
-/**
- * TODO Sprint add-bookings.
- */
 @RestController
 @RequestMapping(path = "/bookings")
 @Slf4j
@@ -48,7 +40,8 @@ public class BookingController {
 
     @GetMapping("/{bookingId}")
     @ResponseStatus(HttpStatus.OK)
-    public BookingResponseDto getByUser(@RequestHeader(PARAM_USER_ID) Long userId, @PathVariable Long bookingId) {
+    public BookingResponseDto getByUser(@RequestHeader(PARAM_USER_ID) Long userId,
+                                        @PathVariable Long bookingId) {
         log.debug("/getByUser");
         return bookingService.getByUser(userId, bookingId);
     }

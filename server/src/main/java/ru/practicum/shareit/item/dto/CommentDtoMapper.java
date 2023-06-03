@@ -8,8 +8,6 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
-import java.time.LocalDateTime;
-
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Slf4j
 public class CommentDtoMapper {
@@ -20,7 +18,6 @@ public class CommentDtoMapper {
         comment.setItem(item);
         comment.setAuthor(author);
         comment.setCreated(commentDto.getCreated());
-//        comment.setCreated(LocalDateTime.now());
         return comment;
     }
 

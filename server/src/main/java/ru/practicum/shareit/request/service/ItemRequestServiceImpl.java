@@ -3,13 +3,10 @@ package ru.practicum.shareit.request.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.BindingResult;
 
-import ru.practicum.shareit.exception.GlobalExceptionHandler;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidateException;
 
@@ -17,7 +14,7 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.ItemStorage;
 
 import ru.practicum.shareit.request.dto.ItemRequestDto;
-import ru.practicum.shareit.request.dto.ItemRequestFullDto;
+import ru.practicum.shareit.request.dto.ItemResponseDto;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.storage.ItemRequestStorage;
 
@@ -57,30 +54,30 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     @Override
-    public List<ItemRequestFullDto> getAllOwn(Long requesterId) {
+    public List<ItemResponseDto> getAllOwn(Long requesterId) {
         log.debug("/getAllOwn");
         userService.isExist(requesterId);
         List<ItemRequest> requests = requestStorage.findByRequester_Id(requesterId, sortByCreatedDesc);
         Map<Long, List<Item>> requestIdItems = getRequestItems(requests);
-        List<ItemRequestFullDto> result = new ArrayList<>();
+        List<ItemResponseDto> result = new ArrayList<>();
         requests.forEach(request -> result.add(toItemRequestDtoWithItem(request, requestIdItems.get(request.getId()))));
         return result;
     }
 
     @Override
-    public List<ItemRequestFullDto> getAllNotOwn(Long requesterId, Integer from, Integer size) {
+    public List<ItemResponseDto> getAllNotOwn(Long requesterId, Integer from, Integer size) {
         log.debug("/getAllNotOwn");
         userService.isExist(requesterId);
         Page<ItemRequest> requests =
                 requestStorage.findByRequester_IdNot(requesterId, new PageConfig(from, size, sortByCreatedDesc));
         Map<Long, List<Item>> requestIdItems = getRequestItems(requests.toList());
-        List<ItemRequestFullDto> result = new ArrayList<>();
+        List<ItemResponseDto> result = new ArrayList<>();
         requests.forEach(request -> result.add(toItemRequestDtoWithItem(request, requestIdItems.get(request.getId()))));
         return result;
     }
 
     @Override
-    public ItemRequestFullDto getById(Long requesterId, Long requestId) {
+    public ItemResponseDto getById(Long requesterId, Long requestId) {
         log.debug("/getById");
         isExist(requestId);
         userService.isExist(requesterId);

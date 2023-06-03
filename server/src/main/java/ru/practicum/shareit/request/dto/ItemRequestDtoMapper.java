@@ -33,13 +33,13 @@ public class ItemRequestDtoMapper {
         return requestDto;
     }
 
-    public static ItemRequestFullDto toItemRequestDtoWithItem(ItemRequest request, List<Item> items) {
+    public static ItemResponseDto toItemRequestDtoWithItem(ItemRequest request, List<Item> items) {
         log.debug("/toItemRequestDtoWithItem");
-        ItemRequestFullDto requestDto = new ItemRequestFullDto();
+        ItemResponseDto requestDto = new ItemResponseDto();
         requestDto.setId(request.getId());
         requestDto.setDescription(request.getDescription());
         requestDto.setCreated(request.getCreated());
-        List<ItemRequestFullDto.ItemShortDto> itemShortDtos = new ArrayList<>();
+        List<ItemResponseDto.ItemShortDto> itemShortDtos = new ArrayList<>();
         if (items != null) {
             itemShortDtos = items.stream()
                     .map(ItemRequestDtoMapper::toItemShortDto)
@@ -49,9 +49,9 @@ public class ItemRequestDtoMapper {
         return requestDto;
     }
 
-    public static ItemRequestFullDto.ItemShortDto toItemShortDto(Item item) {
+    public static ItemResponseDto.ItemShortDto toItemShortDto(Item item) {
         log.debug("/toItemShortDto");
-        return new ItemRequestFullDto.ItemShortDto(item.getId(),
+        return new ItemResponseDto.ItemShortDto(item.getId(),
                 item.getName(), item.getDescription(), item.getAvailable(), item.getRequest().getId());
     }
 }
