@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +16,7 @@ import javax.validation.constraints.PositiveOrZero;
 
 import static ru.practicum.shareit.Constant.*;
 
-@RestController
+@Controller
 @RequestMapping(path = "/bookings")
 @Slf4j
 @RequiredArgsConstructor
@@ -33,7 +34,6 @@ public class BookingController {
     }
 
     @PatchMapping("/{bookingId}")
-    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Object> update(@RequestHeader(name = PARAM_USER_ID) Long ownerId,
                                          @PathVariable Long bookingId,
                                          @RequestParam(name = PARAM_APPROVED) String status) {
@@ -42,7 +42,6 @@ public class BookingController {
     }
 
     @GetMapping("/{bookingId}")
-    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Object> getByUser(@RequestHeader(name = PARAM_USER_ID) Long userId,
                                         @PathVariable Long bookingId) {
         log.debug("[GATEWAY]/getByUser");
@@ -50,7 +49,6 @@ public class BookingController {
     }
 
     @GetMapping
-    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Object> getAllByBooker(
                     @RequestHeader(name = PARAM_USER_ID) Long userId,
                     @RequestParam(name = PARAM_NAME_BOOKING_STATE, defaultValue = DEFAULT_BOOKING_STATE) String state,
@@ -61,7 +59,6 @@ public class BookingController {
     }
 
     @GetMapping("/owner")
-    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Object> getAllByOwner(
                     @RequestHeader(name = PARAM_USER_ID) Long userId,
                     @RequestParam(name = PARAM_NAME_BOOKING_STATE, defaultValue = DEFAULT_BOOKING_STATE) String state,

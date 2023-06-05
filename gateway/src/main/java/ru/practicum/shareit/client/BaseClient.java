@@ -21,7 +21,6 @@ public class BaseClient {
                                                           @Nullable T body) {
         // создается объект-запрос (хедер + боди)
         HttpEntity<T> requestEntity = new HttpEntity<>(body, defaultHeaders(userId));
-
         // получил ответ от сервера. Exchange возвращает ResponseEntity со вложенным объектом
         ResponseEntity<Object> shareitServerResponse;
         try {
@@ -33,7 +32,6 @@ public class BaseClient {
         } catch (HttpStatusCodeException e) {
             return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsByteArray());
         }
-
         //готовим ответ шлюза для пользователя
         return prepareGatewayResponse(shareitServerResponse);
     }
@@ -58,10 +56,6 @@ public class BaseClient {
         }
         return headers;
     }
-
-
-
-
 
     protected ResponseEntity<Object> get(String path, Long userId, @Nullable Map<String, Object> parameters) {
         return makeAndSendRequest(HttpMethod.GET, path, userId, parameters, null);
@@ -94,11 +88,6 @@ public class BaseClient {
         return makeAndSendRequest(HttpMethod.DELETE, path, userId, parameters, null);
     }
 
-
-
-
-
-
     protected ResponseEntity<Object> get(String path) {
         return get(path, null, null);
     }
@@ -106,7 +95,6 @@ public class BaseClient {
     protected ResponseEntity<Object> get(String path, long userId) {
         return get(path, userId, null);
     }
-
 
     protected <T> ResponseEntity<Object> post(String path, T body) {
         return post(path, null, null, body);
@@ -116,11 +104,9 @@ public class BaseClient {
         return post(path, userId, null, body);
     }
 
-
     protected <T> ResponseEntity<Object> put(String path, long userId, T body) {
         return put(path, userId, null, body);
     }
-
 
     protected <T> ResponseEntity<Object> patch(String path, T body) {
         return patch(path, null, null, body);

@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -15,9 +17,10 @@ import javax.validation.constraints.PositiveOrZero;
 
 import static ru.practicum.shareit.Constant.*;
 
-@RestController
+@Controller
 @RequiredArgsConstructor
 @Slf4j
+@Validated
 @RequestMapping("/items")
 public class ItemController {
     public static final String PARAM_USER_ID = "X-Sharer-User-Id";

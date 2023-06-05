@@ -30,7 +30,6 @@ public class BookingController {
     }
 
     @PatchMapping("/{bookingId}")
-    @ResponseStatus(HttpStatus.OK)
     public BookingResponseDto update(@RequestHeader(PARAM_USER_ID) Long ownerId,
                                      @PathVariable Long bookingId,
                                      @RequestParam(PARAM_APPROVED) String status) {
@@ -39,7 +38,6 @@ public class BookingController {
     }
 
     @GetMapping("/{bookingId}")
-    @ResponseStatus(HttpStatus.OK)
     public BookingResponseDto getByUser(@RequestHeader(PARAM_USER_ID) Long userId,
                                         @PathVariable Long bookingId) {
         log.debug("/getByUser");
@@ -47,7 +45,6 @@ public class BookingController {
     }
 
     @GetMapping
-    @ResponseStatus(HttpStatus.OK)
     public List<BookingResponseDto> getAllByBooker(@RequestHeader(PARAM_USER_ID) Long userId,
                                                    @RequestParam(PARAM_NAME_BOOKING_STATE) String state,
                                                    @RequestParam(FIRST_PAGE) Integer from,
@@ -57,7 +54,6 @@ public class BookingController {
     }
 
     @GetMapping("/owner")
-    @ResponseStatus(HttpStatus.OK)
     public List<BookingResponseDto> getAllByOwner(@RequestHeader(PARAM_USER_ID) Long userId,
                                                   @RequestParam(PARAM_NAME_BOOKING_STATE) String state,
                                                   @RequestParam(FIRST_PAGE) Integer from,

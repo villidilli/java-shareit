@@ -46,7 +46,6 @@ public class BookingClient extends BaseClient {
 
     public ResponseEntity<Object> update(long ownerId, long bookingId, String status) {
         log.debug("[GATEWAY]/update");
-//        parameters = Map.of("status", status);
         return patch("/" + bookingId + "?approved=" + status, ownerId); //parameters
     }
 
