@@ -44,12 +44,10 @@ public class UserControllerTest {
     private UserService userService;
 
     private UserDto userDto;
-    private BindingResult br;
 
     @BeforeEach
     public void beforeEach() {
         userDto = new UserDto(1L, "name", "user@user.ru");
-        br = new BindException(userDto, null);
     }
 
     @SneakyThrows
