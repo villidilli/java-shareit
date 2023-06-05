@@ -2,10 +2,7 @@ package ru.practicum.shareit.exception;
 
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -14,23 +11,12 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.validation.ConstraintViolationException;
-import java.util.List;
 
 import static ru.practicum.shareit.exception.ValidateException.*;
 
 @RestControllerAdvice("ru.practicum.shareit")
 @Slf4j
 public class GlobalExceptionHandler {
-
-    public static String bindingResultToString(BindingResult br) {
-        StringBuilder sb = new StringBuilder();
-        List<FieldError> errors = br.getFieldErrors();
-        for (FieldError error : errors) {
-            sb.append("[" + error.getField() + "] -> [");
-            sb.append(error.getDefaultMessage() + "]");
-        }
-        return sb.toString();
-    }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -46,14 +32,6 @@ public class GlobalExceptionHandler {
         log.debug("/NotFoundExceptionHandler");
         logException(HttpStatus.NOT_FOUND, e);
         return new ExceptionResponse(e);
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ExceptionResponse exceptionHandler(DataIntegrityViolationException e) {
-        log.debug("/DataIntegrityViolationHandler");
-        logException(HttpStatus.CONFLICT, e);
-        return new ExceptionResponse(new FieldConflictException(e.getMessage()));
     }
 
     @ExceptionHandler
