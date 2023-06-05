@@ -1,0 +1,36 @@
+version: '3.8'
+services:
+  gateway:
+    build: gateway
+    container_name: gateway
+    ports:
+      - "8080:8080"
+      - "5006:5006"
+    depends_on:
+      - server
+    environment:
+      - SHAREIT_SERVER_URL=http://server:9090
+      - JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5006
+      - TZ:Europe/Moscow
+
+  server:
+    build: server
+    container_name: server
+    ports:
+      - "9090:9090"
+      - "5005:5005"
+    depends_on:
+      - db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/shareit
+      - JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+      - TZ:Europe/Moscow
+  db:
+    image: postgres:13.7-alpine
+    container_name: db
+    ports:
+      - "6541:5432"
+    environment:
+      - POSTGRES_DB=shareit
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
