@@ -39,14 +39,6 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ExceptionResponse exceptionHandler(NotFoundException e) {
-        log.debug("/NotFoundExceptionHandler");
-        logException(HttpStatus.NOT_FOUND, e);
-        return new ExceptionResponse(e);
-    }
-
-    @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public ExceptionResponse exceptionHandler(DataIntegrityViolationException e) {
         log.debug("/DataIntegrityViolationHandler");
