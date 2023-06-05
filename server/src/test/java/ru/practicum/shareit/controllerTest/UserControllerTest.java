@@ -83,7 +83,7 @@ public class UserControllerTest {
     @SneakyThrows
     @Test
     public void createUser_thenReturnUser() {
-        when(userService.create(any(UserDto.class), any(BindingResult.class))).thenReturn(userDto);
+        when(userService.create(any(UserDto.class))).thenReturn(userDto);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -92,7 +92,7 @@ public class UserControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", is(userDto.getId()), Long.class))
                 .andExpect(jsonPath("$.email", is(userDto.getEmail())));
-        verify(userService, times(1)).create(any(UserDto.class), any());
+        verify(userService, times(1)).create(any(UserDto.class));
     }
 
     @SneakyThrows

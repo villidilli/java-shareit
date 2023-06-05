@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindException;
-import org.springframework.validation.BindingResult;
 
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
@@ -27,19 +26,17 @@ public class UserServiceIntegrationTest {
 
     private UserDto userDto;
     private UserDto userDto1;
-    private BindingResult br;
 
     @BeforeEach
     public void beforeEach() {
         userDto = new UserDto(null,"user", "user@email.ru");
         userDto1 = new UserDto(null,"user1", "user1@email.ru");
-        br = new BindException(userDto, null);
     }
 
     @Test
     public void getAllUsers_thenReturnListUsers() {
-        userService.create(userDto, br);
-        userService.create(userDto1, br);
+        userService.create(userDto);
+        userService.create(userDto1);
         List<UserDto> expectedList = List.of(userDto, userDto1);
 
         List<UserDto> actualList = userService.getAll();

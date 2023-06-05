@@ -5,13 +5,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.BindException;
 
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.service.BookingService;
-import ru.practicum.shareit.booking.storage.BookingStorage;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -32,8 +30,6 @@ public class BookingServiceIntegrationTest {
     @Autowired
     private UserService userService;
     @Autowired
-    private BookingStorage bookingStorage;
-    @Autowired
     private ItemService itemService;
     @Autowired
     private BookingService bookingService;
@@ -42,12 +38,12 @@ public class BookingServiceIntegrationTest {
     public void getAllByBooker() {
         UserDto owner1 = new UserDto(null, "owner1", "owner@email.ru");
         UserDto user1 = new UserDto(null, "user1", "user1@email.ru");
-        UserDto savedOwner1 = userService.create(owner1, new BindException(owner1, null));
-        UserDto savedUser1 = userService.create(user1, new BindException(user1, null));
+        UserDto savedOwner1 = userService.create(owner1);
+        UserDto savedUser1 = userService.create(user1);
 
         ItemDto item1 = new ItemDto(
                 null, "item1", "desc", true, null, null);
-        ItemDto savedItem1 = itemService.create(item1, new BindException(item1, null), savedOwner1.getId());
+        ItemDto savedItem1 = itemService.create(item1, savedOwner1.getId());
 
         LocalDateTime startOld = LocalDateTime.of(2022, 1, 1, 0, 0);
         LocalDateTime endOld = LocalDateTime.of(2022, 6, 6, 0, 0);
@@ -59,12 +55,9 @@ public class BookingServiceIntegrationTest {
         BookingRequestDto booking1 = new BookingRequestDto(savedItem1.getId(), startOld, endOld);
         BookingRequestDto booking2 = new BookingRequestDto(savedItem1.getId(), startCur, endCur);
         BookingRequestDto booking3 = new BookingRequestDto(savedItem1.getId(), startFut, endFut);
-        BookingResponseDto savedBooking1 =
-                bookingService.create(booking1, new BindException(booking1, null), savedUser1.getId());
-        BookingResponseDto savedBooking2 =
-                bookingService.create(booking2, new BindException(booking2, null), savedUser1.getId());
-        BookingResponseDto savedBooking3 =
-                bookingService.create(booking3, new BindException(booking3, null), savedUser1.getId());
+        BookingResponseDto savedBooking1 = bookingService.create(booking1, savedUser1.getId());
+        BookingResponseDto savedBooking2 = bookingService.create(booking2, savedUser1.getId());
+        BookingResponseDto savedBooking3 = bookingService.create(booking3, savedUser1.getId());
 
         bookingService.update(savedBooking2.getId(), savedOwner1.getId(), String.valueOf(true));
         bookingService.update(savedBooking3.getId(), savedOwner1.getId(), String.valueOf(false));

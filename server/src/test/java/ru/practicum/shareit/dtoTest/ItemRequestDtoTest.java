@@ -26,6 +26,5 @@ public class ItemRequestDtoTest {
         assertNotNull(dto);
         assertEquals("desc", dto.getDescription());
         assertNull(dto.getId());
-        assertNotNull(dto.getCreated());
     }
 }

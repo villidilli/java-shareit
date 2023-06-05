@@ -51,7 +51,7 @@ public class UserServiceImplTest {
     public void createUser_thenReturnSavedUser() {
         when(userStorage.save(any(User.class))).thenReturn(user1);
 
-        UserDto actual = userService.create(userDto, br);
+        UserDto actual = userService.create(userDto);
 
         assertNotNull(actual);
         assertEquals(user1.getId(), actual.getId());
