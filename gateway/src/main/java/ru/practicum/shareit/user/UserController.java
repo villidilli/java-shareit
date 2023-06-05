@@ -38,6 +38,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{userId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long userId) {
         log.debug("[GATEWAY]/delete");
         client.delete(userId);
