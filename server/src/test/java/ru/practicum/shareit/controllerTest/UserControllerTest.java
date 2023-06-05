@@ -138,7 +138,7 @@ public class UserControllerTest {
                     .content(objectMapper.writeValueAsString(userDto))
                     .accept(MediaType.APPLICATION_JSON)
                     .characterEncoding(StandardCharsets.UTF_8))
-                .andExpect(status().isOk())
+                .andExpect(status().isNoContent())
                 .andExpect(jsonPath("$.id").doesNotHaveJsonPath());
         verify(userService, times(1)).delete(anyLong());
     }
